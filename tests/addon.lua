@@ -1,4 +1,5 @@
 local F = {}
+unpack=unpack or table.unpack
 local frames = {}
 local function object()
   local o = {scripts={},shown=true}
@@ -7,6 +8,7 @@ local function object()
     if key=="Show" then return function(s) s.shown=true end end
     if key=="Hide" then return function(s) s.shown=false end end
     if key=="IsShown" then return function(s) return s.shown end end
+    if key=="SetShown" then return function(s,value)s.shown=value end end
     if key=="SetText" then return function(s,text) assert(type(text)=="string" or type(text)=="number");s.text=text end end
     if key=="GetWidth" or key=="GetHeight" then return function()return 500 end end
     if key=="GetFrameLevel" then return function() return 1 end end
@@ -29,7 +31,7 @@ C_QuestLog={IsOnQuest=function()return false end,IsComplete=function()return fal
 C_Item={GetItemCount=function()return 0 end}
 Enum={}
 local function load(name) assert(loadfile('ForeverWaylaid/'..name..'.lua'))('ForeverWaylaid',F) end
-for _,name in ipairs({'Catalog','Prices','Core','Pricing','Routing','Tracking','Tooltips','UI','Map'}) do load(name) end
+for _,name in ipairs({'Catalog','Prices','Core','Pricing','Style','Geometry','Routing','Tracking','Tooltips','UI','Map','Navigator'}) do load(name) end
 F.events.scripts.OnEvent(nil,'ADDON_LOADED','ForeverWaylaid')
 F.events.scripts.OnEvent(nil,'PLAYER_LOGIN')
 for _,tab in ipairs({'Crates','Writs','Route','Settings'}) do F.tab=tab;F.Render() end
@@ -121,3 +123,46 @@ WorldMapFrame.GetMapID=function()return 1454 end
 C_Map.GetMapPosFromWorldPos=function(_,v,map)return map,v end
 F.InstallMap();local overlay=frames[#frames];overlay.scripts.OnUpdate(nil,2)
 print('PASS: known/unknown flight filtering, directed routes, populated route UI and map overlay')
+
+local G=F.Geometry
+local x,y,u,v=G.Rect(-10,50,110,50,0,0,100,100)
+assert(x==0 and y==50 and u==100 and v==50)
+assert(G.Rect(-10,-10,-2,-2,0,0,100,100)==nil)
+x,y,u,v=G.Circle(-20,0,20,0,10);assert(x==-10 and u==10 and y==0 and v==0)
+assert(G.Circle(-20,20,20,20,10)==nil)
+local center=p(0,0)
+assert(math.abs(G.Bearing(center,p(100,0),0))<0.001)
+assert(math.abs(G.Bearing(center,p(0,-100),0)+math.pi/2)<0.001)
+x,y=G.Relative(center,p(0,100),math.pi/2);assert(math.abs(x)<0.001 and y>99)
+F.tab='Crates';F.onlyOwned=false;F.searchText='peacebloom';F.tierIndex=1
+local entries=F.LedgerEntries();assert(#entries==1 and entries[1].item.id==248682)
+F.searchText='';F.tierIndex=2;entries=F.LedgerEntries();for _,entry in ipairs(entries)do assert(entry.item.tier=='Apprentice')end
+F.tab='Route';F.UpdateGuidance();assert(F.guidance and F.guidance.stop.questID==first.questId)
+F.window:Hide();F.UpdateNavigator();assert(F.compass:IsShown())
+F.char.navExpanded=true;F.UpdateNavigator();assert(F.compass.map:IsShown())
+F.db.settings.navigator=false;F.UpdateNavigator();assert(not F.compass:IsShown())
+print('PASS: circle/rectangle clipping, cardinal bearings, rotated minimap, material search, tiers, independent compass')
+
+-- The compass must guide to departure, keep the arrival while airborne,
+-- and then guide to the customer even with the ledger closed.
+local oldPlayer=F.Route.Player
+local player=p(-100);player.mapID=1454;player.x=0.5;player.y=0.5
+F.Route.Player=function()return player end
+local customer=p(7100);customer.mapID=1454;customer.x=0.7;customer.y=0.5
+local stop={questID=first.questId,writ=first,point=customer,ready=true,npc='Test Customer'}
+F.char.flights=flights;F.db.settings.flights=true;F.char.navQuest=first.questId
+F.active={stop};F.route={};UnitOnTaxi=function()return false end
+F.UpdateGuidance();assert(F.guidance.target==flights.nodes.a and F.guidance.action=='Go to flight master')
+player.wx=0;F.UpdateGuidance();assert(F.guidance.action:find('Take flight',1,true))
+UnitOnTaxi=function()return true end;player.wx=4000
+F.UpdateGuidance();assert(F.guidance.target==flights.nodes.b and F.guidance.action=='In flight')
+UnitOnTaxi=function()return false end;player.wx=7000
+F.UpdateGuidance();assert(F.guidance.target==customer and F.guidance.action=='Deliver to customer')
+F.Route.Player=oldPlayer
+Minimap=object();Minimap.GetZoom=function()return 0 end
+C_Minimap={GetViewRadius=function()return 200 end}
+GetCVar=function()return '0' end
+F.BuildNavigator();F.DrawMinimap();assert(F.minimapButton and F.minimapOverlay)
+F.minimapButton.scripts.OnClick(nil,'LeftButton');assert(F.window:IsShown())
+F.db.settings.navigator=true;F.minimapButton.scripts.OnClick(nil,'RightButton');assert(not F.compass:IsShown())
+print('PASS: departure/in-flight/customer guidance, minimap overlay and launcher controls')

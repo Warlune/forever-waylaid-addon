@@ -1,31 +1,34 @@
-# Forever Waylaid — v0.1.0 preview
+# Forever Waylaid — v0.2.0 preview
 
-A Classic-style crate and writ companion for **WoW Forever beta**, initially targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. This first version needs testing in the actual Forever client; automated checks use a simulated WoW API.
+A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.1.0.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.2.0.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
-3. Start WoW, enable **Forever Waylaid**, and enter `/fwl`.
+3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, choose PvP, Normal, or RP to match your realm. The faction comes from your character. No market is guessed automatically.
 
 The folder includes an AHledger snapshot. Its actual observation date appears in the window. Empty RP markets remain unpriced until a scan is available. Auctionator, Auctioneer and TomTom are optional and are not bundled.
 
 ## What is in this version
 
-- Native Blizzard dialog borders, buttons, fonts, gold text, and tooltips.
+- A merchant's field ledger with native Classic borders, red buttons, gold headings, item portraits, and parchment detail pages.
+- Search crates and writs by name or material; filter crate tiers or owned cargo; sort by value, fill cost, or name. Inspect required materials, bag counts, observed auction stock, price source/age, favor, reputation, and purchase totals.
 - All 30 crates and 150 writs from the existing [Forever Waylaid Ledger](https://warlune.github.io/forever-waylaid-ledger/).
 - Tooltips with configurable **cheapest fill**, **include crate purchase price**, and **all material fill costs**. Known low-stock options cannot win cheapest-fill selection. Prices are estimates: quantity is total observed stock, not a guarantee that every unit can be bought at the minimum price.
 - Personal Auctionator full/incremental scans captured while this addon is enabled at recognized faction capitals. Neutral and unidentified auction houses are excluded. Older Auctionator history is not relabeled as a fresh scan.
 - Auctioneer Advanced's home-faction scan image, read when the auction house closes or when you click **Read personal prices**. Versions lacking that API are ignored safely.
 - Price selection per item: the newest dated observation wins; AHledger wins ties. Missing AHledger items can use personal prices. Newer AHledger observations supersede older personal prices after the next import and `/reload`.
 - Accepted writ tracking, material progress, automatic completed-quest waypoints when exposed by the client, and manual destination pins.
-- Numbered deliveries on Blizzard's world map: gold travel legs, blue flight legs. Click a route row to navigate. Optional TomTom waypoint support.
+- Numbered deliveries and flight-master pins on Blizzard's world map: gold travel legs and blue flight legs. Select a delivery and click **Track delivery** or **Show on map**. Optional TomTom waypoint support.
+- A movable **Courier's Compass** that stays available when the ledger and main map close: direction arrow, distance, current writ, recipient information, and destination coordinates. Its down-arrow button unfolds a small map using the game's actual map artwork.
+- Route lines on the native minimap, clipped to its circular edge and adjusted for zoom and rotating-map settings. The compass guides to a flight master, keeps the arrival target during flight, then points toward the customer.
 - Flight points and directed routes learned by opening flight masters. Unlearned routes are not invented. Visit order is optimized for up to nine located stops, with a nearest-next estimate for larger sets.
 
 ## AHledger updates
 
-WoW addons cannot fetch web APIs directly. The companion tool runs **outside WoW** using Node.js 22 or newer. It downloads public prices only: no token, account details, or scan upload is needed.
+**The helper is optional.** Use bundled AHledger prices and your own supported scans without running anything else. WoW addons cannot fetch web APIs directly, so automatic web refreshes require the companion tool **outside WoW**, using Node.js 22 or newer. It downloads public prices only: no token, account details, or scan upload is needed.
 
 From this repository, run:
 
@@ -48,10 +51,14 @@ The updater honors longer server cache lifetimes, validates market and timestamp
 
 Accept writs normally; they appear in the Writs and Route tabs. Open each flight master you want the planner to learn. The planner cannot retrieve a complete historical flight network from a newly installed addon.
 
+Left-click the minimap crate bubble to open the ledger; right-click it to toggle the compass. Drag the bubble around the minimap edge or drag the compass by its frame. `/fwl compass` toggles the compass and `/fwl reset` restores its position. Map overlays and the compass have separate switches in Settings.
+
+Recipient information comes from the quest's directions, a named manual pin, or an NPC learned when opening that writ's completion dialog. Learned names are reused only when the current destination matches. Unknown NPC names are shown as unknown rather than guessed.
+
 Before a writ is ready, the game's quest pointer may lead to materials rather than the customer. Such quests remain visible with material progress; their delivery location is not guessed. Once ready, the addon uses the client-provided waypoint or quest POI. If a destination is missing, or you know it early, use:
 
 ```text
-/fwl pin QUEST_ID MAP_ID X Y
+/fwl pin QUEST_ID MAP_ID X Y [NPC name]
 /fwl unpin QUEST_ID
 ```
 
@@ -68,7 +75,7 @@ pnpm check
 node tools/build-catalog.mjs
 ```
 
-The Lua suite loads the addon and renders every panel against a simulated API. It tests cost arithmetic, market isolation, scan timestamps, directed flights, unknown destinations, and route ordering against brute-force permutations. Node tests cover AHledger parsing, cache limits, and failed/older download retention. CI also runs the Lua suite with Lua 5.1. These checks do not establish in-game compatibility.
+The Lua suite loads the addon and renders every panel against a simulated API. It tests cost arithmetic, market isolation, scan timestamps, directed flights, unknown destinations, and route ordering against brute-force permutations. It also checks route clipping, cardinal bearings, rotating minimap coordinates, material filtering, compass independence, launcher controls, and departure/in-flight/customer guidance. Node tests cover AHledger parsing, cache limits, and failed/older download retention. CI also runs the Lua suite with Lua 5.1. Simulated checks do not replace real delivery tests.
 
 Before calling the preview stable, verify in Forever: each tooltip toggle; Auctionator full/incremental completion; an Auctioneer home-faction scan; accepting and completing a writ; learning two flight masters; map pins at zone and continent zoom; `/reload`; and a second character/faction. Report the game build and full Lua error if one occurs.
 

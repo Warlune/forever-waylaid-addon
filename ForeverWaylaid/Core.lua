@@ -1,6 +1,6 @@
 local _, F = ...
-F.version = "0.1.0"
-F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true }
+F.version = "0.2.0"
+F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true }
 
 function F.Now() return GetServerTime and GetServerTime() or time() end
 function F.Positive(n) return type(n) == "number" and n == n and n > 0 and n < math.huge end
@@ -19,12 +19,14 @@ function F.Market()
 end
 function F.Refresh()
   if F.UpdateTracking then F.UpdateTracking() end
+  if F.UpdateGuidance then F.UpdateGuidance() end
   if F.Render then F.Render() end
+  if F.UpdateNavigator then F.UpdateNavigator() end
 end
 
 local events = CreateFrame("Frame")
 F.events = events
-for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "QUEST_LOG_UPDATE", "BAG_UPDATE_DELAYED", "TAXIMAP_OPENED", "ZONE_CHANGED_NEW_AREA"}) do events:RegisterEvent(event) end
+for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "QUEST_LOG_UPDATE", "BAG_UPDATE_DELAYED", "TAXIMAP_OPENED", "ZONE_CHANGED_NEW_AREA", "QUEST_COMPLETE"}) do events:RegisterEvent(event) end
 local queued = false
 events:SetScript("OnEvent", function(_, event, name)
   if event == "ADDON_LOADED" and name == "ForeverWaylaid" then
@@ -36,11 +38,14 @@ events:SetScript("OnEvent", function(_, event, name)
     F.char.flights = F.char.flights or { nodes = {}, edges = {} }
     F.char.pins = F.char.pins or {}
     F.char.localPrices = F.char.localPrices or {}
+    F.char.recipients = F.char.recipients or {}
     F.char.realm = GetRealmName()
   elseif event == "PLAYER_LOGIN" then
-    F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.RegisterAuctionator(); F.Refresh()
+    F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.BuildNavigator(); F.RegisterAuctionator(); F.Refresh()
     F.Print("v" .. F.version .. " — /fwl to open. Choose your AHledger market in Settings.")
   elseif F.char then
+    if event=="ADDON_LOADED" then F.InstallMap();return end
+    if event=="QUEST_COMPLETE" then F.LearnRecipient() end
     if event == "TAXIMAP_OPENED" then F.LearnFlights() end
     if not queued then
       queued = true
@@ -49,14 +54,29 @@ events:SetScript("OnEvent", function(_, event, name)
   end
 end)
 
+-- Navigation must continue while the ledger and world map are closed.
+local poseElapsed,routeElapsed=0,0
+events:SetScript("OnUpdate",function(_,dt)
+  if not F.ready then return end
+  poseElapsed=poseElapsed+dt;routeElapsed=routeElapsed+dt
+  if poseElapsed>=0.1 then
+    poseElapsed=0;F.UpdateCompassPose();F.DrawMinimap()
+  end
+  if routeElapsed>=5 then
+    routeElapsed=0
+    if #(F.active or {})>0 then F.Refresh() end
+    F.InstallMap()
+  end
+end)
+
 SLASH_FOREVERWAYLAID1 = "/fwl"
 SLASH_FOREVERWAYLAID2 = "/waylaid"
 SlashCmdList.FOREVERWAYLAID = function(msg)
-  local quest, map, x, y = msg:match("^pin%s+(%d+)%s+(%d+)%s+([%d.]+)%s+([%d.]+)$")
+  local quest, map, x, y, npc = msg:match("^pin%s+(%d+)%s+(%d+)%s+([%d.]+)%s+([%d.]+)%s*(.*)$")
   if quest then
     quest, map, x, y = tonumber(quest), tonumber(map), tonumber(x), tonumber(y)
     if F.writsByQuest[quest] and C_Map.GetMapInfo(map) and x >= 0 and x <= 100 and y >= 0 and y <= 100 then
-      F.char.pins[quest] = { mapID = map, x = x / 100, y = y / 100, manual = true }
+      F.char.pins[quest] = { mapID = map, x = x / 100, y = y / 100, manual = true, npc = npc~="" and npc or nil }
       F.Refresh(); F.Print("Delivery pin saved.")
     else F.Print("Invalid writ, map or coordinates.") end
     return
@@ -64,6 +84,8 @@ SlashCmdList.FOREVERWAYLAID = function(msg)
   local clear = tonumber(msg:match("^unpin%s+(%d+)$"))
   if clear then F.char.pins[clear] = nil; F.Refresh(); return end
   if msg == "prices" then F.ImportPersonal(); F.Refresh(); return end
+  if msg == "compass" then F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator();return end
+  if msg == "reset" then F.ResetNavigator();return end
   if msg ~= "" then F.Print("/fwl | /fwl prices | /fwl pin QUEST_ID MAP_ID X Y | /fwl unpin QUEST_ID"); return end
   F.window:SetShown(not F.window:IsShown())
 end

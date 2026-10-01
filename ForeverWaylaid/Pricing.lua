@@ -17,15 +17,16 @@ function F.Price(id)
   local personal = F.db.settings.personal and F.char.localPrices[scope]
   return F.SelectPrice(public, personal and personal[id])
 end
-function F.CrateCosts(crate)
+function F.CrateCosts(crate, includeCrate)
   local rows, best = {}, nil
-  local box = F.db.settings.includeCrate and F.Price(crate.id) or nil
+  if includeCrate==nil then includeCrate=F.db.settings.includeCrate end
+  local box = includeCrate and F.Price(crate.id) or nil
   for _, option in ipairs(crate.options) do
     local quote = F.Price(option.itemId)
     local cost = quote and quote.price * option.qty or nil
-    if F.db.settings.includeCrate then cost = cost and box and cost + box.price or nil end
+    if includeCrate then cost = cost and box and cost + box.price or nil end
     local enough = quote and (not quote.quantity or quote.quantity >= option.qty)
-    if F.db.settings.includeCrate and box and box.quantity and box.quantity < 1 then enough = false end
+    if includeCrate and box and box.quantity and box.quantity < 1 then enough = false end
     local row = { option = option, quote = quote, cost = cost, enough = enough }
     rows[#rows + 1] = row
     if cost and enough and (not best or cost < best.cost) then best = row end

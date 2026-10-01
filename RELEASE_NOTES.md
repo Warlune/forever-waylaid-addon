@@ -1,11 +1,13 @@
-First testable Forever Waylaid preview for WoW Forever beta (interface 16001).
+## 0.2.0 — The merchant's field ledger
 
-- Classic-style crate, writ, route, and settings panels.
-- AHledger snapshots with an external updater; newer observations supersede older personal scans.
-- Optional Auctionator and Auctioneer integrations.
-- Configurable crate material-cost tooltips.
-- Accepted writ tracking, learned-flight route estimates, and numbered world-map stops.
+- Rebuilt the crate and writ browser with Classic borders, gold headings, native item icons, red buttons, and parchment details.
+- Added material search, tier/cargo filters, value/cost/name sorting, bag counts, auction stock, price age/source, favor, reputation, and purchase totals.
+- Added a draggable minimap crate bubble: left-click for the ledger, right-click for the travel compass.
+- Added the movable Courier's Compass with direction, distance, current writ, recipient information, and destination coordinates. Unfold its small map with the down-arrow button.
+- Added route lines and flight-master pins to the world map, compass map, and native minimap. Gold indicates travel; blue indicates flights. Guidance continues with the ledger closed.
+- Added named manual pins and recipient learning from writ completion dialogs.
+- Kept the AHledger helper optional; bundled prices and supported personal scans work without it.
 
-Extract `ForeverWaylaid` into the client's `Interface/AddOns` folder. Type `/fwl`, then choose your market in Settings. See README.md for the companion price updater.
+Extract `ForeverWaylaid` into the client's `Interface/AddOns` folder. On first use, select your AHledger market in Settings. `/fwl` opens the ledger; `/fwl compass` toggles guidance; `/fwl reset` restores the compass position.
 
-This is a prerelease with simulated-API verification, not an in-game certified build. The route planner is not terrain-aware; missing destinations can be pinned manually and cross-continent transport is not modeled. Test in the Forever client before relying on prices or travel estimates.
+Checked the ledger, launcher, and fold-out map in Forever 1.60.1.70124. Automated tests cover pricing, routing, clipping, compass bearings, and flight guidance. Real accepted-writ deliveries and auction integrations still need live testing. Routes are estimates, not terrain-aware roads; unknown destinations need a manual pin, and only learned flight connections are used. See README for details.

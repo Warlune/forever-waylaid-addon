@@ -1,5 +1,17 @@
 local _, F = ...
 
+function F.DestinationText(point)
+  if not point then return "Delivery location not supplied yet" end
+  local info=C_Map.GetMapInfo(point.mapID)
+  return (info and info.name or "Map "..point.mapID)..string.format("  %.1f, %.1f",point.x*100,point.y*100)
+end
+function F.LearnRecipient()
+  local questID=GetQuestID and GetQuestID()
+  if not questID or not F.writsByQuest[questID] then return end
+  local name=UnitName and UnitName("npc");local point=F.Route.Player()
+  if name and point then F.char.recipients[questID]={npc=name,point=point} end
+end
+
 function F.UpdateTracking()
   F.active = {}
   for questID, writ in pairs(F.writsByQuest) do
@@ -19,8 +31,17 @@ function F.UpdateTracking()
         end
       end
       local count = (C_Item and C_Item.GetItemCount or GetItemCount)(writ.targetId)
+      local point=F.Route.World(location)
+      local remembered=F.char.recipients[questID]
+      local npc=location and location.npc
+      if not npc and remembered and point and F.Route.Distance(point,remembered.point)<100 then npc=remembered.npc end
+      local deliveryText=C_QuestLog.GetNextWaypointText and C_QuestLog.GetNextWaypointText(questID)
+      if not deliveryText and C_QuestLog.GetLogIndexForQuestID and GetQuestLogCompletionText then
+        local index=C_QuestLog.GetLogIndexForQuestID(questID)
+        if index then deliveryText=GetQuestLogCompletionText(index) end
+      end
       F.active[#F.active + 1] = { questID = questID, writ = writ, ready = ready,
-        owned = count or 0, point = F.Route.World(location), manual = location and location.manual }
+        owned = count or 0, point = point, manual = location and location.manual, npc=npc, deliveryText=deliveryText }
     end
   end
   table.sort(F.active, function(a,b) return a.questID < b.questID end)
