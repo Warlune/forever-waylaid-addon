@@ -1,5 +1,23 @@
 # Auction scribe artwork
 
+## Current eight-frame sprites (v0.5.1)
+
+- Source: `auction-scribes-8.png` (1254 × 1254 transparent RGBA).
+- Runtime: `../ForeverWaylaid/Art/AuctionScribes8.tga` (1024 × 1024 uncompressed RGBA TGA).
+- Created in built-in image-generation edit mode, preserving the original faction scribes. The runtime conversion only resamples with nearest-neighbor to WoW's power-of-two texture dimensions.
+- Four columns, eight orc poses across the upper two rows and eight human poses across the lower two. The runtime uses equal-height UV windows to align desk baselines despite different transparent padding between source rows.
+- Eight frames run at 0.24 seconds each while idle and 0.11 seconds each during a scan.
+
+### Eight-frame edit prompt
+
+Use case: identity-preserve. Edit the supplied game sprite atlas into a smoother 8-frame loop PER CHARACTER, preserving exactly the same WoW Classic pixel-art orc and human scribes, faction clothing, faces, desks, props, palettes, lighting and hand-drawn pixel style the user loves. Output a transparent RGBA square 2048x2048 sprite atlas, a strict 4-column by 4-row grid of 16 equal 512x512 cells. Rows 1 and 2 contain the Horde orc's eight consecutive animation frames, read left-to-right then down. Rows 3 and 4 contain the Alliance human's eight corresponding frames. Both characters look at a propped auction ledger on their left and write with a feather quill into the open book on the desk. Add genuine in-between poses: frames 1-4 quill hand makes small progressive writing strokes across the page; frames 5-6 eyes and head subtly glance toward reference ledger while quill lifts slightly; frames 7-8 return smoothly to writing pose. Retain identical seated body, desk, books, inkpot, candle, chair and scale in EVERY cell. Fixed camera and anchoring, all subjects within equal cells with 30px clear padding and same baseline. Only writing hand, quill, eyes, slight head movement and subtle candle flame animate. Distinct but SMALL movements, no big body jumps. Eight distinct poses for each character. True transparent background outside sprites. No grid lines, labels, words, watermark, extra objects, scenery or borders. This is the actual production sprite sheet, not a mockup. Strong unmistakable Warcraft Classic aesthetic. Do not redesign the characters.
+
+### Final layout-repair prompt
+
+Edit this sprite atlas for production use. Preserve these exact Warcraft orc and Alliance human scribes and all sixteen poses. CRITICAL layout repair: output SQUARE canvas, strict FOUR columns by FOUR rows of equally sized SQUARE cells. Each individual sprite must be smaller inside its cell: maximum 80 percent of cell width and 80 percent cell height. At least 10 percent fully transparent margin on ALL FOUR sides of EACH sprite. No pixels touch any cell boundary. Same baseline and desk size in every cell. Top two rows = 8 orc frames; bottom two rows = 8 human frames. Read order left to right then down. Preserve gradual quill writing and glance animation; keep bodies and desks consistently anchored. Transparent RGBA background. No gridlines, lettering or labels. Layout and padding correction only, do not redesign characters. Exact 2048x2048 preferred.
+
+## Original four-frame sprites (v0.5.0)
+
 - Source: `auction-scribes.png` (transparent RGBA, 1774 × 887).
 - Runtime: `../ForeverWaylaid/Art/AuctionScribes.tga` (1024 × 512 RGBA, uncompressed TGA).
 - Generated with the built-in image-generation tool. Original output retained; runtime conversion resamples with nearest-neighbor to power-of-two dimensions required by WoW textures.

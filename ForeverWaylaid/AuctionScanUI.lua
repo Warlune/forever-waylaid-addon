@@ -19,13 +19,14 @@ function F.UpdateAuctionScanUI(info)
   ui.start:SetText(info.active and "Copying prices…" or "Scan auction house")
   ui.status:SetText(info.status)
   ui.stats[1]:SetText(info.total and (info.processed.." / "..info.total) or "—")
-  ui.stats[2]:SetText(info.matched);ui.stats[3]:SetText(info.saved)
+  ui.stats[2]:SetText(info.unique);ui.stats[3]:SetText(info.matched);ui.stats[4]:SetText(info.saved)
   local seconds=math.floor(info.elapsed)
-  ui.stats[4]:SetText(string.format("%d:%02d",math.floor(seconds/60),seconds%60))
+  ui.stats[5]:SetText(string.format("%d:%02d",math.floor(seconds/60),seconds%60))
   local progress=info.total and info.total>0 and info.processed/info.total or 0
   if info.phase=="complete" then progress=1 end
   ui.progress:SetValue(progress)
-  ui.caption:SetText(info.active and (info.phase=="waiting" and "Awaiting the auctioneer's ledger…" or "Recording today's market prices") or "Your faction's auction scribe")
+  local captions={waiting="Awaiting the auctioneer's ledger…",reading="Recording today's market prices",validating="Checking incomplete auction records"}
+  ui.caption:SetText(info.active and captions[info.phase] or "Your faction's auction scribe")
   ui.active=info.active
 end
 
@@ -38,7 +39,8 @@ function F.InstallAuctionScanUI()
   page:ClearAllPoints();page:SetPoint("TOPLEFT",8,-29);page:SetPoint("BOTTOMRIGHT",-8,29)
   page:SetFrameLevel(host:GetFrameLevel()+10);page:EnableMouse(true);page:Hide()
   local tab=CreateFrame("Button","ForeverWaylaidAuctionScanTab",host,"AuctionHouseFrameDisplayModeTabTemplate")
-  tab:ClearAllPoints();tab:SetPoint("TOPLEFT",previous,"TOPRIGHT",-14,0);tab:SetText("Scan")
+  -- Match PanelTemplates_AnchorTabs, which lays out the native AH tabs.
+  tab:ClearAllPoints();tab:SetPoint("TOPLEFT",previous,"TOPRIGHT",3,0);tab:SetText("Scan")
   PanelTemplates_TabResize(tab,20,nil,70);PanelTemplates_DeselectTab(tab)
   local ui={host=host,page=page,tab=tab,stats={}}
   F.auctionScanUI=ui
@@ -46,26 +48,30 @@ function F.InstallAuctionScanUI()
   centered(page,"THE AUCTION SCRIBE",-15,600,"GameFontNormalLarge",S.gold)
   ui.caption=centered(page,"Your faction's auction scribe",-40,600,"GameFontHighlightSmall",S.muted)
   local art=page:CreateTexture(nil,"ARTWORK")
-  art:SetSize(218,218);art:SetPoint("TOP",0,-55)
-  art:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\AuctionScribes.tga")
+  art:SetSize(260,209);art:SetPoint("TOP",0,-64)
+  art:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\AuctionScribes8.tga")
   ui.art=art
   local phase,elapsed=0,0
+  -- The source sheet has different transparent padding between its rows.
+  -- Equal-height UV windows align each desk baseline through the loop.
+  local rowTop={58,346,652,937}
   local function pose()
-    local row=UnitFactionGroup("player")=="Alliance" and 1 or 0
-    art:SetTexCoord(phase/4,(phase+1)/4,row/2,(row+1)/2)
+    local row=(UnitFactionGroup("player")=="Alliance" and 2 or 0)+math.floor(phase/4)
+    local column=phase%4
+    art:SetTexCoord(column/4,(column+1)/4,rowTop[row+1]/1254,(rowTop[row+1]+252)/1254)
   end
   pose()
   page:SetScript("OnUpdate",function(_,dt)
     elapsed=elapsed+dt
-    local interval=ui.active and 0.22 or 0.48
-    if elapsed>=interval then elapsed=elapsed%interval;phase=(phase+1)%4;pose()end
+    local interval=ui.active and 0.11 or 0.24
+    if elapsed>=interval then phase=(phase+math.floor(elapsed/interval))%8;elapsed=elapsed%interval;pose()end
   end)
-  local labels={"Auctions read","Relevant items","Prices saved","Time elapsed"}
-  local strip=CreateFrame("Frame",nil,page);strip:SetSize(632,62);strip:SetPoint("TOP",0,-280)
+  local labels={"Auctions read","All item types","Relevant items","Prices saved","Time elapsed"}
+  local strip=CreateFrame("Frame",nil,page);strip:SetSize(742,62);strip:SetPoint("TOP",0,-280)
   for i,label in ipairs(labels)do
-    local box=S.Panel(strip,(i-1)*160,0,152,62,true)
-    ui.stats[i]=centered(box,i==1 and "—" or (i==4 and "0:00" or "0"),-11,140,"GameFontNormalLarge",S.ink)
-    centered(box,label,-38,140,"GameFontHighlightSmall",S.ink)
+    local box=S.Panel(strip,(i-1)*150,0,142,62,true)
+    ui.stats[i]=centered(box,i==1 and "—" or (i==5 and "0:00" or "0"),-11,132,"GameFontNormal",S.ink)
+    centered(box,label,-38,132,"GameFontHighlightSmall",S.ink)
   end
   local bar=CreateFrame("StatusBar",nil,page)
   bar:SetSize(624,12);bar:SetPoint("TOP",0,-352)

@@ -5,7 +5,7 @@ local oldNow,oldMap,oldRefresh=F.Now,C_Map.GetBestMapForUnit,F.Refresh
 local oldPrices,oldLast=F.char.localPrices,F.char.nativeScanLastAttempt
 local oldPeers,oldSharing=F.char.peerPrices,F.db.settings.peerSharing
 local now,calls,refreshes=100000,0,0
-local rows={}
+local rows,reads={},{}
 F.Now=function()return now end
 C_Map.GetBestMapForUnit=function()return 1454 end
 F.Refresh=function()refreshes=refreshes+1 end
@@ -16,6 +16,7 @@ C_AuctionHouse={
   ReplicateItems=function()calls=calls+1 end,
   GetNumReplicateItems=function()return #rows end,
   GetReplicateItemInfo=function(i)
+    reads[i]=(reads[i] or 0)+1
     local row=rows[i+1]
     return nil,nil,row.qty,nil,nil,nil,nil,nil,nil,row.buyout,nil,nil,nil,nil,nil,nil,row.id
   end,
@@ -42,6 +43,7 @@ local scope=GetRealmName()..':Horde'
 local prices=F.char.localPrices[scope]
 assert(prices[2840].price==11 and prices[2840].quantity==15 and prices[2840].time==100000 and prices[2840].source=='Forever Waylaid')
 assert(not prices[2589] and not prices[999999],'Ignore bid-only and unrelated auctions')
+assert(F.GetScanProgress().unique==3 and F.GetScanProgress().matched==1,'All distinct item IDs include unrelated and bid-only items; retained prices are separate')
 assert(F.Price(2840).source=='Forever Waylaid')
 F.char.peerPrices[scope]={[2840]={time=now+1,price=8,quantity=50,source='Peer scan (unverified)'}}
 assert(F.Price(2840).source=='Peer scan (unverified)','Newer eligible peer price wins when sharing is on')
@@ -64,6 +66,25 @@ now=now+901;rows={{id=2840,qty=1,buyout=1},{id=2840,qty=0,buyout=1}}
 assert(F.StartNativeScan());response();assert(prices[2840]==saved,'Incomplete item totals must not replace valid observations')
 now=now+901;rows={};assert(F.StartNativeScan());response()
 assert(prices[2840]==saved and prices[2840].time==100000,'Empty snapshot does not redate missing prices')
+now=now+901;rows={{qty=5,buyout=500},{id=2840,qty=2,buyout=100}}
+local beforeRetry=calls
+assert(F.StartNativeScan());event('REPLICATE_ITEM_LIST_UPDATE');tick()
+assert(F.GetScanProgress().phase=='validating' and prices[2840]==saved,'Unidentified rows prevent a partial commit')
+rows[1].id=2840;tick(1.1)
+assert(not F.nativeScanActive and prices[2840].quantity==7 and prices[2840].price==50,'Late row is counted once, including all stock')
+assert(calls==beforeRetry+1,'Retry reads the existing snapshot without another server request')
+saved=prices[2840]
+now=now+901;rows={{qty=5,buyout=500}}
+assert(F.StartNativeScan());event('REPLICATE_ITEM_LIST_UPDATE');tick()
+for _=1,3 do tick(1.1)end
+assert(not F.nativeScanActive and F.GetScanProgress().saved==0 and prices[2840]==saved,'Permanently unidentified rows fail visibly and preserve saved prices')
+now=now+901;rows={};reads={}
+for i=1,751 do rows[i]={id=900000+i,qty=1,buyout=100}end
+rows[251]={id=2840,qty=4,buyout=120};rows[501]={id=2840,qty=3,buyout=60}
+assert(F.StartNativeScan());response()
+for i=0,750 do assert(reads[i]==1,'Every snapshot row is read exactly once across batch boundaries')end
+assert(F.GetScanProgress().processed==751 and F.GetScanProgress().unique==750 and F.GetScanProgress().matched==1)
+assert(prices[2840].price==20 and prices[2840].quantity==7,'Relevant rows across separate batches contribute to the same quote')
 now=now+901;C_AuctionHouse.ReplicateItems=function()error('unavailable')end
 assert(not F.StartNativeScan() and not F.nativeScanActive,'Rejected API call releases active state')
 C_AuctionHouse=nil;assert(not F.StartNativeScan(),'Unsupported client degrades safely')

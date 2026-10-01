@@ -52,7 +52,7 @@ function F.GetScanProgress()
   end
   local available=not F.HasAuctionScanner()
   return {active=state~=nil,available=available,status=text,phase=report.phase,
-    processed=report.index or 0,total=report.total,matched=report.matched or 0,
+    processed=report.index or 0,total=report.total,unique=report.unique or 0,matched=report.matched or 0,
     saved=report.saved or 0,elapsed=report.elapsed or 0,cooldown=wait,
     canStart=not not (available and not state and isOpen() and supported() and F.db.settings.personal and F.PersonalScanScope() and wait==0)}
 end
@@ -69,7 +69,7 @@ function F.UpdateScanUI()
 end
 local function finish(message,saved)
   if state then
-    lastReport={index=state.index,total=state.total,matched=state.matched,elapsed=state.elapsed,saved=saved or 0,phase=saved and "complete" or "stopped"}
+    lastReport={index=state.index,total=state.total,unique=state.unique,matched=state.matched,elapsed=state.elapsed,saved=saved or 0,phase=saved and "complete" or "stopped"}
   end
   state=nil;F.nativeScanActive=false;status=message;F.UpdateScanUI()
 end
@@ -91,7 +91,7 @@ function F.StartNativeScan()
     status="Wait for the other auction scan to finish.";F.UpdateScanUI();return false
   end
   local now=F.Now()
-  state={scope=scope,city=city,observed=now,elapsed=0,matched=0,phase="waiting",snapshot={},incomplete={}}
+  state={scope=scope,city=city,observed=now,elapsed=0,unique=0,seen={},matched=0,phase="waiting",snapshot={},incomplete={},unresolved={}}
   F.nativeScanActive=true
   local ok=pcall(C_AuctionHouse.ReplicateItems)
   if not ok then finish("The AH could not start a snapshot. Previous prices kept.");return false end
@@ -117,6 +117,29 @@ frame:SetScript("OnEvent",function(_,event)
   if F.char then F.UpdateScanUI()end
 end)
 local uiElapsed=0
+local function readRow(index)
+  local _,_,count,_,_,_,_,_,_,buyout,_,_,_,_,_,_,id=C_AuctionHouse.GetReplicateItemInfo(index)
+  if not F.Positive(id) or id~=math.floor(id) then return false end
+  if not state.seen[id] then state.seen[id]=true;state.unique=state.unique+1 end
+  if F.catalogIDs[id] then
+    if not F.Positive(count) or type(buyout)~="number" or buyout<0 or buyout~=buyout or buyout==math.huge then
+      state.incomplete[id]=true
+    elseif F.Positive(buyout) then
+      local row=state.snapshot[id]
+      if row then row.price=math.min(row.price,buyout/count);row.quantity=row.quantity+count
+      else state.snapshot[id]={price=buyout/count,quantity=count};state.matched=state.matched+1 end
+    end
+  end
+  return true
+end
+local function commit()
+  local skipped=0
+  for id in pairs(state.incomplete)do state.snapshot[id]=nil;skipped=skipped+1 end
+  local count=F.SaveNativeSnapshot(state.snapshot,state.scope,state.observed)
+  local text="Saved "..count.." item prices. Missing listings keep older prices."
+  if skipped>0 then text=text.." "..skipped.." incomplete items skipped."end
+  finish(text,count);F.Refresh()
+end
 frame:SetScript("OnUpdate",function(_,dt)
   uiElapsed=uiElapsed+dt
   if uiElapsed>=1 then uiElapsed=0;if F.char then F.UpdateScanUI()end end
@@ -127,21 +150,30 @@ frame:SetScript("OnUpdate",function(_,dt)
   if not isOpen() or scope~=state.scope or city~=state.city or not F.db.settings.personal then
     F.CancelNativeScan("Scan interrupted. Previous prices kept.");return
   end
-  if state.phase~="reading" then return end
+  if state.phase~="reading" and state.phase~="validating" then return end
   if C_AuctionHouse.GetNumReplicateItems()~=state.total then finish("AH snapshot changed. Previous prices kept.");return end
+  if state.phase=="validating" then
+    state.retryWait=state.retryWait-dt
+    if state.retryWait>0 then return end
+    for _=1,250 do
+      local index=state.unresolved[state.retryIndex]
+      if index==nil then break end
+      if not readRow(index) then state.retryNext[#state.retryNext+1]=index end
+      state.retryIndex=state.retryIndex+1
+    end
+    if state.retryIndex>#state.unresolved then
+      state.unresolved=state.retryNext
+      if #state.unresolved==0 then commit();return end
+      state.retryPass=state.retryPass+1
+      if state.retryPass>=3 then finish("Incomplete AH snapshot: "..#state.unresolved.." unidentified auctions. Previous prices kept.");return end
+      state.retryIndex=1;state.retryNext={};state.retryWait=1
+    end
+    status="Checking "..#state.unresolved.." unidentified auctions…";F.UpdateScanUI();return
+  end
   -- Read a bounded batch each frame to keep the game responsive. Item names,
   -- links and owner metadata are unnecessary for unit prices.
   for index=state.index,math.min(state.index+249,state.total-1)do
-    local _,_,count,_,_,_,_,_,_,buyout,_,_,_,_,_,_,id=C_AuctionHouse.GetReplicateItemInfo(index)
-    if F.catalogIDs[id] then
-      if not F.Positive(count) or type(buyout)~="number" or buyout<0 or buyout~=buyout then
-        state.incomplete[id]=true
-      elseif F.Positive(buyout) then
-        local row=state.snapshot[id]
-        if row then row.price=math.min(row.price,buyout/count);row.quantity=row.quantity+count
-        else state.snapshot[id]={price=buyout/count,quantity=count};state.matched=state.matched+1 end
-      end
-    end
+    if not readRow(index) then state.unresolved[#state.unresolved+1]=index end
   end
   state.index=math.min(state.index+250,state.total)
   status="Reading auctions: "..state.index.." / "..state.total
@@ -149,11 +181,9 @@ frame:SetScript("OnUpdate",function(_,dt)
   if state.index>=state.total then
     -- Only complete item observations replace existing prices. Items absent
     -- from this snapshot retain their previous price and original timestamp.
-    local skipped=0
-    for id in pairs(state.incomplete)do state.snapshot[id]=nil;skipped=skipped+1 end
-    local count=F.SaveNativeSnapshot(state.snapshot,state.scope,state.observed)
-    local text="Saved "..count.." item prices. Missing listings keep older prices."
-    if skipped>0 then text=text.." "..skipped.." incomplete items skipped."end
-    finish(text,count);F.Refresh()
+    if #state.unresolved>0 then
+      state.phase="validating";state.retryIndex=1;state.retryNext={};state.retryPass=0;state.retryWait=1
+      status="Checking "..#state.unresolved.." unidentified auctions…";F.UpdateScanUI()
+    else commit()end
   end
 end)

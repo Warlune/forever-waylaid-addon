@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.5.0 preview
+# Forever Waylaid — v0.5.1 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.5.0.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.5.1.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -40,11 +40,15 @@ Craft costs value the full batch, including materials you already own; bag count
 
 The built-in **Scan** tab appears along the bottom of the auction house, beside Buy / Sell / Auctions, when neither Auctionator nor Auctioneer Advanced is enabled for your character. Installed but disabled copies do not hide it. Open an auction house in your faction capital, choose **Scan**, then click **Scan auction house**. Opening the tab never starts a scan. The original **Settings → Scan AH prices** control remains available too.
 
-An animated orc (Horde) or human (Alliance) scribe copies prices into a ledger. Beneath the scribe, live counters show auctions read, distinct relevant items with buyouts, prices saved, and elapsed time. The progress bar reflects records processed, not a simulated timer. Prices saved stays at zero until a complete snapshot is committed; the final report remains visible until the next scan. Keep the AH open until completion. **Cancel** or closing the AH discards any unfinished scan. The scanner requests one full snapshot, reads it in small batches, and saves the lowest unit buyout and total buyout stock for relevant items. It makes no purchases and does not run automatically.
+An animated orc (Horde) or human (Alliance) scribe copies prices into a ledger, with eight frames per character. Beneath the scribe, live counters show auctions read, all distinct item IDs encountered (including bid-only and unrelated items), relevant items with buyouts, prices saved, and elapsed time. The progress bar reflects records processed, not a simulated timer. Prices saved stays at zero until a complete snapshot is committed; the final report remains visible until the next scan. Keep the AH open until completion. **Cancel** or closing the AH discards any unfinished scan. The scanner requests one full snapshot, reads it in small batches, and saves the lowest unit buyout and total buyout stock for relevant items. It makes no purchases and does not run automatically.
+
+**Comparing scan counts:** every auction row in Blizzard's returned snapshot is read. Only prices relevant to writs, crates, goods, and crafting ingredients are retained. A smaller saved-price count than a general-purpose AH addon does not mean fewer auction rows were read. This scanner does not reproduce Auctionator/Auctioneer's broader shopping, selling, or historical valuation tools. We have not measured accuracy or counts against both addons on a matching market snapshot, so no parity claim is made.
 
 The v0.5.0 Horde page and animation were checked in the Forever client, including a complete manual scan of 76,812 auctions that saved 273 relevant item prices in 11 seconds. Alliance artwork selection, tab switching, cancellation, cooldowns, and disabled-scanner detection also have automated coverage; the Alliance page has not yet been checked on a live Alliance character.
 
-Full snapshots have a 15-minute local cooldown, including a known Auctionator snapshot cooldown. Server throttling can also delay a response. Missing listings retain their previous price and original age; incomplete rows do not replace valid prices. Newer eligible peer observations can win while sharing is enabled. Personal scan prices must be enabled in Settings. Opening or closing the AH never initiates a scan.
+The v0.5.1 Horde artwork, five-counter layout, native tab spacing, and reload were also checked in-game. The existing cooldown was preserved; the new incomplete-record behavior is covered by automated tests, not a second live scan.
+
+Full snapshots have a 15-minute local cooldown, including a known Auctionator snapshot cooldown. Server throttling can also delay a response. Missing listings retain their previous price and original age; incomplete rows do not replace valid prices. Rows missing item IDs are re-read locally up to three times, without another server snapshot request. If any remain unidentified, the scan is rejected and previous prices are kept. Known relevant items with invalid quantities or buyouts are excluded from the update. Newer eligible peer observations can win while sharing is enabled. Personal scan prices must be enabled in Settings. Opening or closing the AH never initiates a scan.
 
 ## Auction searches and flight setup
 
