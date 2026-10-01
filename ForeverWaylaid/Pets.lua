@@ -67,6 +67,7 @@ function P.Init()
   for i=1,6 do if not whole(s.packs[i],0,100000)then s.packs[i]=0 end end
   s.bossClaims=type(s.bossClaims)=="table" and s.bossClaims or {}
   s.bossEggs=type(s.bossEggs)=="table" and s.bossEggs or {}
+  if not whole(s.nextTreatDrop,0,1e12)then s.nextTreatDrop=0 end
   for key,value in pairs(s.bossEggs)do if not whole(key,85,100) or not whole(value,0,100000)then s.bossEggs[key]=nil end end
   for key,value in pairs(s.bossClaims)do if type(key)~="string" or type(value)~="number" or value~=value or F.Now()-value>604800 then s.bossClaims[key]=nil end end
   P.state=s
@@ -82,7 +83,7 @@ function P.Die(pet,reason)
   P.notice=P.species[pet.species].." has died. Its level and lifespan are kept in the memorial."
 end
 function P.Select(id)
-  if P.state.battle then return false,"Finish or retreat from the battle first." end
+  if P.state.battle then return false,"Finish the battle first." end
   for _,pet in ipairs(P.state.pets)do if pet.id==id and not pet.deadAt then P.state.active=id;P.floor=math.min(100,pet.best+1);P.notice="Equipped "..P.species[pet.species]..".";return true end end
   return false,"This pet is in the memorial. Death is permanent."
 end
@@ -93,7 +94,7 @@ function P.Buy(item)
 end
 function P.Care(item)
   local pet=P.Active();if not pet then return false,"Adopt or select a living pet." end
-  if P.state.battle then return false,"Use battle actions or retreat first." end
+  if P.state.battle then return false,"Use the tower Heal button during battle." end
   if item=="rest" then pet.resting=not pet.resting;return true end
   if not P.items[item] or P.state.inventory[item]<1 then return false,"Buy that care item with pet tokens first." end
   P.state.inventory[item]=P.state.inventory[item]-1
@@ -107,9 +108,9 @@ function P.Tick(seconds)
   local s=P.state
   seconds=math.max(0,math.min(5,seconds)) -- No offline catch-up or long loading-screen penalties.
   local pet=P.Active()
-  s.rewardSeconds=s.rewardSeconds+seconds
-  if s.rewardSeconds>=300 then s.tokens=s.tokens+math.floor(s.rewardSeconds/300)*2;s.rewardSeconds=s.rewardSeconds%300 end
   if pet then
+    s.rewardSeconds=s.rewardSeconds+seconds
+    if s.rewardSeconds>=300 then s.tokens=s.tokens+math.floor(s.rewardSeconds/300)*2;s.rewardSeconds=s.rewardSeconds%300 end
     s.playSeconds=s.playSeconds+seconds
     pet.age=pet.age+seconds
     if not s.battle then
@@ -143,16 +144,23 @@ function P.CombatKill(event,sourceGUID,destGUID)
   local isPlayer=destGUID:match("^Player%-")~=nil
   if not isPlayer and not destGUID:match("^Creature%-") then return end
   if not P.EligibleKill(destGUID) then return end
-  local pet=P.Active();if not pet or pet.level>=100 then return end
+  local pet=P.Active();if not pet then return end
   local now=F.Now()
   for guid,when in pairs(P.recentKills)do if now-when>=300 then P.recentKills[guid]=nil end end
   if P.recentKills[destGUID] then return end
   if not P.combatWindow or now-P.combatWindow>=60 or now<P.combatWindow then P.combatWindow=now;P.combatXP=0 end
   local amount=math.min(isPlayer and 10 or 3,60-(P.combatXP or 0))
-  if amount<=0 then return end
+  local canDrop=not isPlayer and sourceGUID==playerGUID and now>=P.state.nextTreatDrop
+  if amount<=0 and not canDrop then return end
   P.recentKills[destGUID]=now;P.combatXP=(P.combatXP or 0)+amount
-  P.AddXP(pet,amount)
-  P.notice="+"..amount.." pet XP: "..(isPlayer and "PvP kill" or "NPC kill").."."
+  local earned=P.AddXP(pet,amount)
+  if earned>0 then P.notice="+"..earned.." pet XP: "..(isPlayer and "PvP kill" or "NPC kill").."." end
+  -- One percent from eligible personal NPC kills; at most one per 30 minutes.
+  -- The cooldown is saved, and the existing level/repeat guards still apply.
+  if canDrop and P.random(1,100)==1 then
+    P.state.inventory.food=P.state.inventory.food+1;P.state.nextTreatDrop=now+1800
+    P.notice="Found a rare trail treat! +1 treat in the pet store."..(earned>0 and " +"..earned.." pet XP." or "")
+  end
 end
 function P.UseCare(item)
   if not P.Active() or P.state.battle then return P.Care(item)end

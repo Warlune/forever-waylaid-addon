@@ -59,6 +59,11 @@ pet=P.Active();assert(pet.rarity==1);pet.health=0.01;pet.food=0;P.Tick(5);assert
 assert(P.Rescue());pet=P.Active();P.state.review=true;P.state.seal=123;P.Init();assert(not P.state.review and not P.state.seal)
 -- At matching level, every species and rarity can beat the final encounter with
 -- supplies. This is a viability test, not a promise of survival at low health.
+local function playerGuidedTick()
+  local battle=P.state.battle
+  if battle and battle.hp<battle.maxHP*0.6 and (battle.turn+1)%3~=0 and not battle.pendingHeal then P.RequestHeal()end
+  P.AdvanceBattle(0.25,true)
+end
 local wins=0;local maxHerbs=0
 for species=1,100 do
   for rarity=1,5 do
@@ -66,7 +71,7 @@ for species=1,100 do
     pet.health=100;pet.food=100;pet.energy=100;pet.deadAt=nil;P.state.active=pet.id
     P.state.inventory.medicine=30
     assert(P.StartBattle(100))
-    for tick=1,1600 do if not P.state.battle then break end;P.AdvanceBattle(0.25,true)end
+    for tick=1,1600 do if not P.state.battle then break end;playerGuidedTick()end
     assert(not P.state.battle and not pet.deadAt and pet.best==100,'Level 100 encounter viability: '..species..' / '..rarity)
     wins=wins+1;maxHerbs=math.max(maxHerbs,30-P.state.inventory.medicine)
   end
@@ -170,7 +175,7 @@ P.miniMode='care';P.Render();local oldFood=P.Active().food;P.Active().food=50;P.
 P.Active().food=oldFood
 P.mini.towerButton.scripts.OnClick();assert(P.miniMode=='tower' and P.mini.enter.shown and not P.mini.care[1].shown)
 P.floor=1;P.Active().energy=100;P.Active().food=100;P.Active().health=100;P.mini.enter.scripts.OnClick();assert(P.state.battle,'Tower starts inside compass')
-P.mini.battle[3].scripts.OnClick();assert(not P.state.battle,'Retreat works inside compass')
+P.state.battle.hp=math.floor(P.state.battle.maxHP*0.5);P.mini.battle[3].scripts.OnClick();assert(P.state.battle.pendingHeal,'Manual Heal queues inside compass');P.BattleAction('retreat')
 P.Active().health=100;P.Active().energy=100;assert(P.StartBattle(1))
 local b=P.state.battle
 P.AdvanceBattle(100,false);assert(b.turn==0,'Hidden battles pause')
@@ -211,7 +216,7 @@ local climbHerbs=0
 for floor=1,100 do
   pet.health=100;pet.food=100;pet.energy=100;P.state.inventory.medicine=30
   assert(P.StartBattle(floor))
-  for tick=1,1600 do if not P.state.battle then break end;P.AdvanceBattle(0.25,true)end
+  for tick=1,1600 do if not P.state.battle then break end;playerGuidedTick()end
   assert(not pet.deadAt and not P.state.battle and pet.best==floor,'First-clear common climb at floor '..floor)
   climbHerbs=climbHerbs+30-P.state.inventory.medicine
 end
@@ -293,6 +298,72 @@ assert(P.floor==100 and not P.state.battle and not P.window.scene.victory.shown,
 P.Init();assert(P.FloorStatus(67)=='Completed' and not P.victory,'Completion survives reload, presentation is transient')
 P.sceneClock=oldClock;F.db.settings.reduceMotion=oldMotion
 print('PASS: timed enemy fade, reduced motion, shared victory panels, persistent completion, replay reset and no auto-start/reward duplication')
+do
+  F.char.pets=nil;P.Init();P.random=function(a,b)return a end;assert(P.Rescue())
+  local companion=P.Active();companion.species=45;companion.rarity=3;companion.level=100;companion.health=40
+  P.state.tokens=20;P.state.inventory.medicine=5
+  assert(P.StartBattle(1));local battle=P.state.battle;battle.enemy.hp=10000;battle.enemy.attack=1
+  local hp=battle.hp
+  local function nextRound()
+    local turn=battle.turn
+    for i=1,20 do P.AdvanceBattle(0.25,true);if not P.state.battle or battle.turn>turn then return end end
+    error('Expected a battle round')
+  end
+  nextRound()
+  assert(battle.hp<hp and P.state.inventory.medicine==5 and P.state.tokens==20 and battle.cooldown==0,'No automatic healing, including healing abilities')
+  assert(P.RequestHeal() and battle.pendingHeal=='burst' and not P.RequestHeal())
+  hp=battle.hp;nextRound();assert(battle.hp>hp and P.state.inventory.medicine==5 and P.state.tokens==20,'Click can use a ready healing ability for free')
+  battle.hp=math.floor(battle.maxHP*0.3);assert(P.RequestHeal());nextRound()
+  assert(P.state.inventory.medicine==4 and P.state.tokens==20,'Manual heal consumes one herb before tokens')
+  companion.rarity=1;P.state.inventory.medicine=0;battle.hp=math.floor(battle.maxHP*0.3)
+  local happy=companion.happy
+  assert(P.RequestHeal() and P.state.tokens==20,'Queueing costs nothing')
+  P.PauseBattle();P.AdvanceBattle(100,true);assert(P.state.tokens==20 and battle.pendingHeal)
+  P.PauseBattle();nextRound()
+  assert(P.state.tokens==16 and companion.happy<happy,'Manual fallback costs four tokens and hits reduce happiness')
+  P.state.tokens=3;battle.hp=1;assert(not P.RequestHeal(),'Cannot queue unaffordable healing')
+  P.state.tokens=20;assert(P.RequestHeal());battle.enemy.speed=1000;battle.enemy.attack=100000
+  nextRound();assert(companion.deadAt and P.state.tokens==20,'Faster lethal enemy prevents healing and does not charge tokens')
+  -- Online tokens require a living equipped pet; the store only adds stock.
+  P.state.rewardSeconds=299;P.Tick(1);assert(P.state.tokens==20)
+  assert(P.Rescue());companion=P.Active();P.Tick(1);assert(P.state.tokens==22)
+  P.OpenStore();local food=P.state.inventory.food;local hunger=companion.food
+  P.store.buy.food.scripts.OnClick()
+  assert(P.state.inventory.food==food+1 and P.state.tokens==20 and companion.food==hunger)
+  P.store:Hide()
+  -- Thresholds stay explicit: hunger hurts, zero energy or happiness alone do not.
+  companion.food=0;companion.health=50;companion.happy=0;companion.energy=0;P.Tick(5)
+  assert(companion.health<50 and companion.energy>0 and companion.happy==0)
+  companion.food=100;hp=companion.health;P.Tick(5);assert(companion.health==hp)
+  assert(not P.StartBattle(1),'Insufficient energy blocks new fights')
+  -- Tower treats only roll on first clears; ten percent includes the boundary.
+  companion.level=100;companion.energy=100;companion.health=100
+  P.random=function(a,b)return b==100 and 10 or a end
+  food=P.state.inventory.food;assert(P.StartBattle(1));P.state.battle.enemy.hp=1;P.BattleAction('strike')
+  assert(P.victory.treats==1 and P.state.inventory.food==food+1)
+  companion.energy=100;companion.health=100;assert(P.StartBattle(1));P.state.battle.enemy.hp=1;P.BattleAction('strike')
+  assert(P.victory.treats==0 and P.state.inventory.food==food+1,'Repeat floors never grant treats')
+  companion.energy=100;companion.health=100;P.random=function(a,b)return b==100 and 11 or a end
+  assert(P.StartBattle(2));P.state.battle.enemy.hp=1;P.BattleAction('strike');assert(P.victory.treats==0)
+  -- NPC treats: eligible player kills only, one percent, saved 30-minute cap.
+  local savedGUID,savedEligible,savedTime=UnitGUID,P.EligibleKill,F.Now
+  local now=2000000;F.Now=function()return now end
+  UnitGUID=function(unit)return unit=='player' and 'Player-me' or unit=='pet' and 'Pet-me' end
+  P.EligibleKill=function(guid)return guid~='Creature-gray' end
+  P.recentKills={};P.combatWindow=nil;P.state.nextTreatDrop=0
+  P.random=function(a,b)return 2 end
+  food=P.state.inventory.food;P.CombatKill('PARTY_KILL','Player-me','Creature-miss');assert(P.state.inventory.food==food)
+  P.random=function(a,b)return 1 end
+  P.CombatKill('PARTY_KILL','Player-me','Creature-gray')
+  P.CombatKill('PARTY_KILL','Player-me','Player-enemy')
+  P.CombatKill('PARTY_KILL','Pet-me','Creature-petkill');assert(P.state.inventory.food==food)
+  P.CombatKill('PARTY_KILL','Player-me','Creature-hit');assert(P.state.inventory.food==food+1,'Max-level pet can still receive a treat')
+  P.Init();P.CombatKill('PARTY_KILL','Player-me','Creature-cooldown');assert(P.state.inventory.food==food+1)
+  now=now+1800;P.CombatKill('PARTY_KILL','Player-me','Creature-next');assert(P.state.inventory.food==food+2)
+  P.CombatKill('PARTY_KILL','Player-me','Creature-next');assert(P.state.inventory.food==food+2)
+  UnitGUID,P.EligibleKill,F.Now=savedGUID,savedEligible,savedTime
+end
+print('PASS: manual-only healing, token fallback, no charge before lethal turn, hit happiness, store purchases, pet-online income and rare bounded treat drops')
 F.char.pets={version=1,pets='broken'};P.Init();assert(not P.state.review and F.char.petQuarantine.pets=='broken','Unreadable save is backed up without accusing the player')
 P.state=old;F.char.pets=oldChar;P.random=oldRandom;P.notice=oldNotice;P.window=oldWindow;P.mini=oldMini
 print('PASS: pet rarity boundaries, care/persistence, permanent death/memorials, 100-floor gates, battle actions, NPC/PvP combat XP limits, save recovery, opt-in target inspection and compass/large pet UI')

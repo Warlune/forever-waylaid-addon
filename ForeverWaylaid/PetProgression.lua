@@ -8,7 +8,7 @@ function P.LivingCount()
   local n=0;for _,pet in ipairs(P.state.pets)do if not pet.deadAt then n=n+1 end end;return n
 end
 local function room()
-  if P.state.battle then return false,"Finish or retreat from the battle first." end
+  if P.state.battle then return false,"Finish the battle first." end
   if #P.state.pets>=512 then return false,"The stable and memorial have reached 512 records." end
   if P.LivingCount()>=100 then return false,"Your stable holds 100 living companions." end
   return true
@@ -51,6 +51,25 @@ function P.Ability(pet)
 end
 function P.AbilityHelp(effect)
   return ({bite="180% attack damage.",flurry="165% attack damage.",cleave="90% attack damage to every enemy.",renew="80% attack damage and restore 18% max health.",drain="110% attack damage; heal for 60% of that hit.",shield="Strike and reduce later hits this round by 55%."})[effect].." Three-round cooldown."
+end
+function P.IsHealingAbility(ability)
+  return ability and (ability.effect=="renew" or ability.effect=="drain")
+end
+function P.HealChoice()
+  local b=P.state.battle;if not b then return nil,"Start a battle first." end
+  if b.hp>=b.maxHP then return nil,"Your pet is already at full health." end
+  local ability=P.Ability(P.Active())
+  if P.IsHealingAbility(ability) and b.cooldown==0 then return "burst",ability.ability.." (free ability)" end
+  if P.state.inventory.medicine>0 then return "heal","Use 1 healing herb" end
+  if P.state.tokens>=P.items.medicine.cost then return "heal","Heal for "..P.items.medicine.cost.." tokens" end
+  return nil,"Need a healing herb or "..P.items.medicine.cost.." tokens."
+end
+function P.RequestHeal()
+  local b=P.state.battle
+  if b and b.pendingHeal then return false,"A heal is already queued for your pet's next turn." end
+  local action,description=P.HealChoice();if not action then return false,description end
+  b.pendingHeal=action;P.notice=description.." queued for your pet's next turn."
+  return true
 end
 function P.Stats(pet)
   local family=D.families[D.species[pet.species].family]
@@ -107,7 +126,7 @@ function P.BattleAction(action)
   if action~="strike" and action~="guard" and action~="burst" and action~="heal" then return false,"Unknown action." end
   local ability=P.Ability(pet)
   if action=="burst" and (not ability or b.cooldown>0)then return false,ability and "Ability is cooling down." or "Special abilities require Rare quality or higher." end
-  if action=="heal" and s.inventory.medicine<1 then return false,"No healing herbs." end
+  if action=="heal" and s.inventory.medicine<1 and s.tokens<P.items.medicine.cost then return false,"Need a healing herb or 4 tokens." end
   local round={at=P.sceneClock or 0,action=action,enemy=b.enemy,enemies=b.enemies,pet=pet,events={},maxHP=b.maxHP,hit=0,heal=0,hurt=0}
   P.lastRound=round;b.cooldown=math.max(0,b.cooldown-1)
   local actors={{player=true,speed=b.speed}}
@@ -128,8 +147,11 @@ function P.BattleAction(action)
       local target;for _,e in ipairs(b.enemies)do if e.hp>0 then target=e;break end end
       if not target then break end
       if action=="heal" then
-        s.inventory.medicine=s.inventory.medicine-1;local before=b.hp;b.hp=math.min(b.maxHP,b.hp+math.ceil(b.maxHP*0.4));round.heal=b.hp-before
-        record(0,"Healing herbs",round.heal)
+        local label="Healing herb"
+        if s.inventory.medicine>0 then s.inventory.medicine=s.inventory.medicine-1
+        else s.tokens=s.tokens-P.items.medicine.cost;label="Token heal" end
+        local before=b.hp;b.hp=math.min(b.maxHP,b.hp+math.ceil(b.maxHP*0.4));round.heal=b.hp-before
+        record(0,label,round.heal)
       elseif action=="guard" then record(0,"Guard",0)
       else
         local effect=action=="burst" and ability.effect or "strike"
@@ -149,6 +171,7 @@ function P.BattleAction(action)
         local heavy=(b.turn+1)%3==0
         local hit=damage(e.attack*(heavy and 1.6 or 1)*(action=="guard" and 0.25 or shield and 0.45 or 1),b.armor)
         b.hp=math.max(0,b.hp-hit);round.hurt=round.hurt+hit
+        pet.happy=clamp(pet.happy-math.min(5,hit/b.maxHP*20))
         record(actor.index,heavy and "Heavy attack" or "Attack",hit)
       end
     end
@@ -162,9 +185,11 @@ function P.BattleAction(action)
     local xp=P.AddXP(pet,math.floor((30+b.floor*6)*(first and 1 or 0.4)))
     -- First clears are the main income; repeat farming gives only one token.
     local reward=first and 5+math.floor(b.floor/10) or 1
+    local treat=first and P.random(1,100)<=10 and 1 or 0
+    s.inventory.food=s.inventory.food+treat
     s.tokens=s.tokens+reward;pet.happy=clamp(pet.happy+8);s.battle=nil
-    P.victory={petID=pet.id,floor=b.floor,first=first,xp=xp,tokens=reward,round=round,readyAt=round.at+round.duration}
-    P.notice="Floor "..b.floor.." cleared! +"..reward.." tokens. "..(pet.best==100 and "Tower conquered!" or "Next floor unlocked.")
+    P.victory={petID=pet.id,floor=b.floor,first=first,xp=xp,tokens=reward,treats=treat,round=round,readyAt=round.at+round.duration}
+    P.notice="Floor "..b.floor.." cleared! +"..reward.." tokens. "..(treat>0 and "+1 trail treat! " or "")..(pet.best==100 and "Tower conquered!" or first and "Next floor unlocked." or "Repeat clear.")
   else P.notice="Round "..b.turn.." - "..living.." enemies remaining. "..((b.turn+1)%3==0 and "Heavy attacks next round." or "Fighting automatically.")end
   return true
 end
@@ -174,7 +199,15 @@ function P.AdvanceBattle(dt,visible)
   b.elapsed=(b.elapsed or 0)+math.min(dt,0.25)
   if b.elapsed<(P.lastRound and P.lastRound.duration or 1.6)then return end
   b.elapsed=0
-  local action=(b.turn+1)%3==0 and "guard" or b.hp<b.maxHP*0.5 and P.state.inventory.medicine>0 and "heal" or P.Ability(P.Active()) and b.cooldown==0 and "burst" or "strike"
+  local ability=P.Ability(P.Active())
+  local action=b.pendingHeal
+  b.pendingHeal=nil
+  if action=="heal" and P.state.inventory.medicine<1 and P.state.tokens<P.items.medicine.cost then
+    b.paused=true;P.notice="Queued heal needs a healing herb or 4 tokens. Battle paused."
+    if P.Render then P.Render()end
+    return
+  end
+  action=action or ((b.turn+1)%3==0 and "guard" or ability and not P.IsHealingAbility(ability) and b.cooldown==0 and "burst" or "strike")
   P.BattleAction(action);if P.Render then P.Render()end
 end
 

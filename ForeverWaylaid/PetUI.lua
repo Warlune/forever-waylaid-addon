@@ -1,7 +1,7 @@
 local _,F=...
 local P,S=F.Pets,F.Style
 local atlas="Interface\\AddOns\\ForeverWaylaid\\Art\\WaylaidPets"
-local icons={food="INV_Misc_Food_14",toy="INV_Misc_Bone_01",rest="Spell_Nature_Sleep",medicine="INV_Potion_51",adopt="INV_Egg_02",next="Ability_Hunter_BeastCall",fight="Ability_DualWield",pause="Spell_Frost_Stun",retreat="Ability_Rogue_Sprint",open="INV_Misc_Book_09",inspect="Ability_Hunter_EagleEye"}
+local icons={food="INV_Misc_Food_14",toy="INV_Misc_Bone_01",rest="Spell_Nature_Sleep",medicine="INV_Potion_51",adopt="INV_Egg_02",next="Ability_Hunter_BeastCall",fight="Ability_DualWield",pause="Spell_Frost_Stun",open="INV_Misc_Book_09",inspect="Ability_Hunter_EagleEye"}
 local function text(parent,value,x,y,width,height,color)
   local t=S.Text(parent,value,x,y,width,"GameFontHighlightSmall",color or S.gold);t:SetHeight(height);return t
 end
@@ -57,7 +57,7 @@ local function updateOutcome(f)
   f.victory:SetShown(not not visible)
   if visible then
     f.victory.title:SetText(result.floor==100 and "TOWER CONQUERED" or "VICTORY!")
-    f.victory.detail:SetText("Floor "..result.floor..(result.first and " completed!" or " cleared again!").."\n+"..result.xp.." XP  |  +"..result.tokens.." tokens")
+    f.victory.detail:SetText("Floor "..result.floor..(result.first and " completed!" or " cleared again!").."\n+"..result.xp.." XP  |  +"..result.tokens.." tokens"..((result.treats or 0)>0 and "\n+1 trail treat" or ""))
     f.victory.next:SetText(result.floor<100 and "Next floor" or "Done")
   end
 end
@@ -76,7 +76,7 @@ local function stage(parent,x,y,width,height)
   f.victory=S.Panel(f,(width-vw)/2,-(height-144)/2,vw,144)
   local v=f.victory;v:SetFrameLevel(f:GetFrameLevel()+5);v:EnableMouse(true)
   v.title=text(v,"VICTORY!",8,-8,vw-16,26,S.gold);v.title:SetJustifyH("CENTER")
-  v.detail=text(v,"",8,-40,vw-16,48,{1,1,1});v.detail:SetJustifyH("CENTER")
+  v.detail=text(v,"",8,-35,vw-16,62,{1,1,1});v.detail:SetJustifyH("CENTER")
   v.next=S.Button(v,"Next floor",(vw-166)/2,-105,166,function()
     local result=P.CurrentVictory();if not result then return end
     result.dismissed=true
@@ -149,9 +149,12 @@ local function careIcons(parent,x,y,size,gap)
 end
 local function fightIcons(parent,x,y,size,gap)
   return {
-    icon(parent,"fight","Fight",x,y,size,function()return P.StartBattle(P.floor or 1)end,"Fight one floor automatically. Your pet strikes, guards heavy attacks and uses healing herbs when needed. Defeat is permanent death."),
+    icon(parent,"fight","Fight",x,y,size,function()return P.StartBattle(P.floor or 1)end,"Fight one floor automatically. Attacks and guards are automatic; healing requires your click. Defeat is permanent death."),
     icon(parent,"pause","Pause",x+gap,y,size,P.PauseBattle,"Pause or resume this pet battle. Hidden battle views pause automatically."),
-    icon(parent,"retreat","Retreat",x+gap*2,y,size,function()return P.BattleAction('retreat')end,"Leave safely now. Spent supplies and lost health remain.")}
+    icon(parent,"medicine","Heal",x+gap*2,y,size,P.RequestHeal,function()
+      local _,description=P.HealChoice()
+      return description..". Takes your pet's next turn; faster enemies can attack first. A ready healing ability is used first, otherwise one herb, otherwise 4 tokens. Herbs/token healing restores 40% max HP. No automatic healing."
+    end)}
 end
 function P.BattleVisible()
   return (P.window and P.window:IsShown() and P.mode=="tower") or (P.mini and P.mini:IsShown() and F.compass and F.compass:IsShown() and P.miniMode=="tower")
@@ -173,7 +176,8 @@ function P.BuildCompass(parent)
   m.prev=S.Button(m,"<",10,-232,32,function()if not P.state.battle then P.floor=math.max(1,P.floor-1)end;P.Render()end)
   m.next=S.Button(m,">",242,-232,32,function()if not P.state.battle then P.floor=math.min(P.Unlocked(),P.floor+1)end;P.Render()end)
   m.floor=text(m,"",50,-233,184,22);m.floor:SetJustifyH("CENTER")
-  m.notice=text(m,"",10,-324,264,24);m.notice:SetMaxLines(1)
+  m.notice=text(m,"",10,-324,178,24);m.notice:SetMaxLines(1)
+  S.Button(m,"Store",196,-321,78,function()P.OpenStore()end)
   tip(m,"Companion",function()return P.notice or "Open the large view to adopt, switch companions and inspect other players."end)
   m.adopt=S.Button(m,"Adopt companion",49,-265,186,function()P.OpenAdopt()end)
   m:Hide()
@@ -192,6 +196,7 @@ function P.RenderCompass()
   m.enter:SetEnabled(not b);m.battle[2].label:SetText(b and b.paused and "Resume" or "Pause")
   m.enter.label:SetText(P.FloorStatus(P.floor)=="Completed" and "Replay" or "Fight")
   m.battle[2]:SetEnabled(b~=nil);m.battle[3]:SetEnabled(b~=nil)
+  m.battle[3].label:SetText(b and b.pendingHeal and "Queued" or "Heal")
   m.adopt:SetShown(pet==nil);m.notice:SetText(P.notice or "Hover an icon for details")
 end
 function P.BuildUI()
@@ -204,7 +209,8 @@ function P.BuildUI()
   for i,mode in ipairs({"collection","tower","peers"})do local value=mode
     S.Button(w,({"Camp & stable","Tower","Inspect pets"})[i],20+(i-1)*158,-52,148,function()P.mode=value;P.page=1;P.Render()end)
   end
-  S.Button(w,"Compass view",526,-52,230,function()w:Hide();P.ToggleCompass(true)end)
+  S.Button(w,"Store",526,-52,80,function()P.OpenStore()end)
+  S.Button(w,"Compass view",616,-52,140,function()w:Hide();P.ToggleCompass(true)end)
   w.scene=stage(w,20,-94,456,272)
   w.health=meter(w,20,-381,220,"",{0.25,0.65,0.4});w.food=meter(w,256,-381,220,"",{0.7,0.53,0.2})
   w.happy=meter(w,20,-414,220,"",{0.4,0.6,0.8});w.energy=meter(w,256,-414,220,"",{0.55,0.4,0.7})
@@ -236,7 +242,7 @@ function P.BuildUI()
   S.Button(t,"<",12,-118,40,function()if not P.state.battle then P.floor=math.max(1,P.floor-1)end;P.Render()end)
   S.Button(t,">",204,-118,40,function()if not P.state.battle then P.floor=math.min(P.Unlocked(),P.floor+1)end;P.Render()end)
   t.floor=text(t,"",57,-120,142,24);t.floor:SetJustifyH("CENTER")
-  text(t,"One floor per fight.\nAuto uses healing herbs.\nDefeat is permanent.\nPause or retreat anytime.",12,-166,232,96)
+  text(t,"One floor per fight.\nClick Heal to save your pet.\nDefeat is permanent.\nPause to plan your next turn.",12,-166,232,96)
   w.social=S.Panel(w.side,6,-146,256,272);local p=w.social
   p.share=S.Button(p,"",8,-8,240,function()P.SetSharing(not P.state.share);P.Render()end)
   S.Button(p,"Inspect target",8,-48,240,function()act(P.InspectTarget)end)
@@ -249,6 +255,36 @@ function P.BuildUI()
   w:Hide()
 end
 function P.Toggle()P.BuildUI();P.window:SetShown(not P.window:IsShown());P.Render()end
+function P.OpenStore()
+  if not P.store then
+    local w=S.Panel(UIParent,0,0,396,364);P.store=w
+    w:ClearAllPoints();w:SetPoint("CENTER");w:SetFrameStrata("DIALOG");w:SetClampedToScreen(true)
+    local close=CreateFrame("Button",nil,w,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-3,-3);close:SetScript("OnClick",function()w:Hide()end)
+    text(w,"COMPANION SUPPLIES",16,-14,350,26)
+    w.wallet=text(w,"",16,-46,364,24);w.rows={};w.buy={}
+    for i,key in ipairs({"food","toy","medicine"})do
+      local itemKey=key;local item=P.items[key];local y=-80-(i-1)*68
+      local art=w:CreateTexture(nil,"ARTWORK");art:SetPoint("TOPLEFT",16,y);art:SetSize(34,34);art:SetTexture("Interface\\Icons\\"..icons[key])
+      local label=text(w,"",60,y,204,48);w.rows[key]=label
+      w.buy[key]=S.Button(w,"Buy 1",282,y-2,96,function()act(function()
+        local ok,message=P.Buy(itemKey)
+        if ok then P.notice="Bought "..P.items[itemKey].name..". Use its care icon or battle Heal when needed." end
+        return ok,message
+      end)end)
+    end
+    text(w,"2 tokens per 5 minutes online with a living equipped pet. Purchases add supplies; they do not use them.",16,-286,364,64,S.muted)
+  end
+  P.store:Show();P.RenderStore()
+end
+function P.RenderStore()
+  local w=P.store;if not w or not w:IsShown() or not P.state then return end
+  w:SetScale(F.AccessibleScale(F.db.settings.ledgerScale,396,364))
+  w.wallet:SetText(P.state.tokens.." pet tokens")
+  for key,label in pairs(w.rows)do
+    local item=P.items[key];label:SetText(item.name.."\n"..item.cost.." tokens | Owned: "..P.state.inventory[key])
+    w.buy[key]:SetEnabled(P.state.tokens>=item.cost)
+  end
+end
 function P.OpenAdopt()
   if not P.adoption then
     local a=S.Panel(UIParent,0,0,820,680);P.adoption=a
@@ -285,7 +321,7 @@ function P.RenderAdopt()
     c.owned:SetText("Owned: "..s.packs[i])
   end
   local seen,count={},0;for _,pet in ipairs(s.pets)do if not seen[pet.species]then seen[pet.species]=true;count=count+1 end end
-  a.info:SetText(s.tokens.." tokens | "..count.." / 100 species found\nEarn tokens through tower clears, time online and dungeon/raid bosses.")
+  a.info:SetText(s.tokens.." tokens | "..count.." / 100 species found\nEarn tokens from time with your pet, tower clears and bosses.")
   a.rescue:SetEnabled(P.LivingCount()==0 and not s.battle)
   a.bossSpecies=false;for i=85,100 do if (s.bossEggs[i] or 0)>0 then a.bossSpecies=i;break end end
   a.claim:SetEnabled(not not a.bossSpecies and not s.battle and P.LivingCount()<100)
@@ -293,7 +329,7 @@ function P.RenderAdopt()
   a.notice:SetText(P.notice or "Choose a pack to adopt. Your equipped pet stays with you.")
 end
 function P.Render()
-  P.RenderAdopt();P.RenderCompass();local w=P.window;if not w or not P.state or not w:IsShown()then return end
+  P.RenderStore();P.RenderAdopt();P.RenderCompass();local w=P.window;if not w or not P.state or not w:IsShown()then return end
   w:SetScale(F.AccessibleScale(F.db.settings.ledgerScale,780,610))
   local s=P.state;local pet=P.Active();local tower=P.mode=="tower";local social=P.mode=="peers";local viewed=pet;local owner
   if not s.battle then P.floor=math.max(1,math.min(P.floor or 1,P.Unlocked()))end
@@ -327,6 +363,7 @@ function P.Render()
   w.fight[1]:SetEnabled(not s.battle and pet~=nil);w.fight[2].label:SetText(s.battle and s.battle.paused and "Resume" or "Pause")
   w.fight[1].label:SetText(P.FloorStatus(P.floor)=="Completed" and "Replay" or "Fight")
   w.fight[2]:SetEnabled(s.battle~=nil);w.fight[3]:SetEnabled(s.battle~=nil)
+  w.fight[3].label:SetText(s.battle and s.battle.pendingHeal and "Queued" or "Heal")
   w.care[3].label:SetText(pet and pet.resting and "Wake" or "Rest")
   w.collection:SetShown(not tower and not social);w.tower:SetShown(tower);w.social:SetShown(social)
   if not tower and not social then

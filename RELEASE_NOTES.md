@@ -1,11 +1,11 @@
-# Forever Waylaid 0.13.1 preview
+# Forever Waylaid 0.13.2 preview
 
-- Added a victory panel to both tower views, showing the completed floor and earned XP/tokens after the final hit and enemy fade.
-- Defeated enemies fade out individually and remain gone. Reduced motion hides them immediately after their lethal hit.
-- Marked cleared floors Completed for the equipped pet, including after reload. Their Fight button now reads Replay.
-- Next floor selects the next challenge without starting combat. Floor 100 shows Tower conquered and Done.
-- Replay resets enemy visibility; retreat never shows victory. Rewards are granted once by combat, never by the victory display.
+- Replaced the tower Retreat control with Heal in both pet views. Healing is manual, including healing abilities; automatic attacks never spend herbs or tokens.
+- Heal queues the next pet action: ready healing ability, otherwise one herb, otherwise 4 tokens for 40% maximum HP. Costs apply only when the pet acts. Faster enemies can still strike first.
+- Added a companion Store in the compass and large pet view for treats, toys and herbs. Buying adds stock without using it.
+- Added happiness loss from tower hits.
+- Added rare treats: 10% on first floor clears (never replays), or 1% on eligible personal NPC kills, capped at one per 30 minutes with a saved cooldown.
+- Online income now requires a living equipped pet: 2 tokens per five minutes. Existing wallets remain unchanged.
+- Documented hunger, energy and happiness at zero in the companion guide.
 
-Installed users: run `/reload`.
-
-Validation: Lua 5.1 syntax and full regression suite, including timed fades, reduced motion, both victory views, persistent completion, replay reset and no duplicate rewards or automatic next battle. This remains a preview release.
+Run `/reload`. Tests cover manual healing/cost timing, faster fatal enemy turns, no auto-heal behavior, store purchases, needs thresholds, income and rare-drop boundaries/cooldowns, alongside existing addon regressions. Level-100 matchup and full-climb simulations now explicitly request healing. This remains a preview release.
