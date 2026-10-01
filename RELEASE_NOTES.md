@@ -1,10 +1,10 @@
-# Forever Waylaid 0.11.3 preview
+# Forever Waylaid 0.12.0 preview
 
-- Fixed the protected-action popup on login/reload caused by registering the old combat-log event for pet XP.
-- Pet kill XP now listens to Forever's supported standalone `PARTY_KILL` event (attacker GUID, target GUID). It never registers `COMBAT_LOG_EVENT_UNFILTERED` or reads the secure combat log.
-- Restricted/secret identities are skipped before comparison, parsing or storage. Kills with hidden identities do not award pet XP; tower XP remains available.
-- Added a regression guard that fails if any addon module registers a restricted combat-log event, plus tests for the standalone payload and unreadable identities.
+- Redesigned the companion game around illustrated pixel scenes, with separate Horde and Alliance camps and tower arenas. The faction debug preview also switches the scene.
+- Replaced the care button grid with four icon controls, hover details and supply costs. Empty supplies can be replenished with pet tokens directly from a care action; no real gold is used.
+- Added animated automatic tower fights in both compass and large views: lunging sprites, hit feedback, damage numbers and health bars. Choose a floor and Fight; Pause and Retreat are always available. One floor per click, no automatic next floor. Hidden tower views pause combat; long loading gaps never fast-forward it. Defeat remains permanent death.
+- Added a strict combat-XP level gate: enemy must be within five levels of your character and not gray. Unknown, stale or restricted levels are skipped. Kill XP still uses the supported standalone Forever event, not the restricted combat log.
+- Kept the personal stable, memorial and opt-in pet inspection. No leaderboard.
+- Tested gray/out-of-range boundaries, unknown and restricted levels, automatic boss combat, hidden/explicit pause, loading gaps, faction scenes and both UI sizes. Live client layout, animation and XP testing still needed.
 
-Updated to **0.11.3 preview**, still below 1.0. After installing, choose **Ignore** on the existing popup and `/reload`. If the addon was disabled, re-enable Forever Waylaid in the AddOns list first. Live kill-XP testing remains necessary.
-
-API references: [Forever combat-log restrictions](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated/CombatLogDocumentation.lua) and [standalone kill event](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated/UnitDocumentation.lua).
+After updating, use `/reload`, then **Pet** on the compass or **Pets** in the ledger. This is still a **0.x preview**, not 1.0.

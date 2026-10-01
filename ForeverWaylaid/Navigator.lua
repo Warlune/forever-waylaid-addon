@@ -253,7 +253,7 @@ function F.UpdateNavigator()
   c.flightNotice:SetText(needsScan and ("Missing flights: "..table.concat(missing," / ").."\nRoutes may not be optimal.") or "")
   c.flightNotice:SetShown(needsScan)
   c.flightNotice:ClearAllPoints();c.flightNotice:SetPoint("TOPLEFT",11,-baseHeight+3)
-  F.compassLayoutHeight=height+(petOpen and 310 or expanded and (large and 238 or 212) or 0)
+  F.compassLayoutHeight=height+(petOpen and 364 or expanded and (large and 238 or 212) or 0)
   c:SetHeight(F.compassLayoutHeight);c.map:SetShown(expanded);c.legend:SetShown(expanded)
   if F.Pets.mini then
     F.Pets.mini:ClearAllPoints();F.Pets.mini:SetPoint("TOPLEFT",8,-height-3);F.Pets.mini:SetShown(petOpen)

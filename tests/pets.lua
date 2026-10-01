@@ -43,9 +43,19 @@ for turn=1,30 do
 end
 assert(not pet.deadAt and pet.best==100 and pet.level==100 and pet.xp==0,'Final boss is beatable with guard/heal timing and level stays capped')
 assert(not P.StartBattle(101))
+pet.health=100;pet.food=100;pet.energy=100;P.state.inventory.medicine=30
+assert(P.StartBattle(100))
+for i=1,500 do if not P.state.battle then break end;P.AdvanceBattle(0.2,true)end
+assert(not P.state.battle and not pet.deadAt and pet.best==100,'Automatic guard/heal strategy can finish final boss')
+P.AdvanceBattle(10,true);assert(not P.state.battle,'Auto battle never starts the next floor without a click')
+local oldLevel,oldEffective,oldGray=UnitLevel,UnitEffectiveLevel,UnitQuestTrivialLevelRange
 local oldGUID,oldAccess,oldSecret,oldNow=UnitGUID,canaccessvalue,issecretvalue,F.Now
 local clock=10000;F.Now=function()return clock end
 UnitGUID=function(unit)return unit=='player' and 'Player-self' or unit=='pet' and 'Pet-self' end
+UnitLevel=function()return 20 end;UnitEffectiveLevel=function()return 20 end;UnitQuestTrivialLevelRange=function()return 6 end
+local function observed(guid,level)P.enemyLevels[guid]={level=level or 20,seen=clock}end
+for _,guid in ipairs({'Creature-first','Creature-other','Player-enemy','Creature-cap','Creature-dead'})do observed(guid)end
+for i=1,30 do observed('Creature-'..i)end
 pet.level=1;pet.xp=0;P.recentKills={};P.combatWindow=nil
 assert(P.events.events.PARTY_KILL,'Standalone Forever kill event registered')
 P.events.scripts.OnEvent(nil,'PARTY_KILL','Player-self','Creature-first');assert(pet.xp==3,'Standalone kill event awards NPC XP')
@@ -68,10 +78,26 @@ P.CombatKill('PARTY_KILL','Player-self','Player-enemy');assert(pet.xp==13,'PvP r
 for i=1,30 do P.CombatKill('PARTY_KILL','Player-self','Creature-'..i)end
 assert(P.combatXP==60 and pet.level==3 and pet.xp==5,'Rate limit and level carry-over enforced')
 clock=clock+61;P.CombatKill('PARTY_KILL','Player-self','Player-enemy');assert(pet.xp==5,'Repeat remains blocked across rate windows')
-clock=clock+240;P.CombatKill('PARTY_KILL','Player-self','Player-enemy');assert(pet.xp==15,'Target can award again after five minutes')
+clock=clock+240;observed('Player-enemy');P.CombatKill('PARTY_KILL','Player-self','Player-enemy');assert(pet.xp==15,'Target can award again after five minutes')
 pet.level=100;pet.xp=0;P.CombatKill('PARTY_KILL','Player-self','Creature-cap');assert(pet.xp==0,'Max-level pet gains no XP')
 P.Die(pet,'test');P.CombatKill('PARTY_KILL','Player-self','Creature-dead');assert(pet.xp==0,'Dead pet gains no XP')
 assert(P.Adopt());pet=P.Active()
+observed('Creature-low',14);observed('Creature-high',26);observed('Creature-gray',15)
+assert(not P.EligibleKill('Creature-low') and not P.EligibleKill('Creature-high'),'Out-of-range enemies rejected')
+UnitQuestTrivialLevelRange=function()return 4 end
+assert(not P.EligibleKill('Creature-gray'),'Gray enemy rejected even within five levels')
+UnitQuestTrivialLevelRange=function()return 6 end
+observed('Creature-edge',15);assert(P.EligibleKill('Creature-edge'),'Non-gray lower boundary accepted')
+observed('Creature-edge',25);assert(P.EligibleKill('Creature-edge'),'Upper boundary accepted')
+clock=clock+61;assert(not P.EligibleKill('Creature-edge'),'Stale observation rejected')
+assert(not P.EligibleKill('Creature-unseen'),'Unseen enemy gets no guessed XP')
+observed('Creature-known',20)
+canaccessvalue=function(value)return not rawequal(value,secret)end
+UnitEffectiveLevel=function()return secret end
+assert(not P.EligibleKill('Creature-known'),'Restricted character level gives no XP')
+UnitEffectiveLevel=function()return 20 end;UnitQuestTrivialLevelRange=function()return secret end
+assert(not P.EligibleKill('Creature-known'),'Restricted gray threshold gives no XP')
+UnitLevel,UnitEffectiveLevel,UnitQuestTrivialLevelRange=oldLevel,oldEffective,oldGray
 UnitGUID,canaccessvalue,issecretvalue,F.Now=oldGUID,oldAccess,oldSecret,oldNow
 P.SetSharing(true);P.Receive('2,1,2,20,100,3,3','PARTY','Other')
 assert(P.peers.Other)
@@ -99,21 +125,35 @@ P.SetSharing(false);P.Share();P.Receive('ASK2','WHISPER','Off');assert(sends==be
 C_ChatInfo,IsInGuild,IsInGroup,IsInRaid=oldChat,oldGuild,oldGroup,oldRaid
 UnitIsPlayer,UnitIsUnit,GetUnitName=oldIsPlayer,oldIsUnit,oldGetName
 P.window=nil;P.BuildUI();P.window:Show()
+local oldPreview=F.db.settings.debugAlliance
+local background
+P.window.scene.bg.SetTexture=function(_,path)background=path end
+F.db.settings.debugAlliance=true;P.Render();assert(background:find('Alliance',1,true),'Alliance scene follows preview')
+F.db.settings.debugAlliance=false;P.Render();assert(background:find('Horde',1,true),'Horde scene uses its own artwork')
+F.db.settings.debugAlliance=oldPreview
 for _,mode in ipairs({'collection','tower','peers'})do P.mode=mode;P.Render()end
 P.SetSharing(true);P.Receive('2,1,2,2,100,1,1','PARTY','Alpha');P.Receive('2,4,5,100,10000,100,100','PARTY','Zulu')
 P.inspectName=nil;P.page=1;P.mode='peers';P.Render()
 assert(P.window.social.text.text:find('Alpha',1,true),'Pet viewer sorts by name, never strength')
 P.page=2;P.Render();assert(P.window.social.text.text:find('Zulu',1,true),'Every shared pet can be inspected')
-P.SetSharing(false);P.Render();assert(not P.window.social.art.shown,'Opt-out hides cached portraits')
+P.SetSharing(false);P.Render();assert(not P.window.scene.pet.shown,'Opt-out hides cached portraits')
 local oldExpanded,oldPets=F.char.navExpanded,F.char.navPets
 P.ToggleCompass(true);assert(F.char.navPets and not F.char.navExpanded and P.mini.shown and not F.compass.map.shown)
 P.window:Hide();P.Render();assert(P.mini.stats.text:find('Lv',1,true),'Compact game renders while large window is closed')
-local oldFood=P.Active().food;P.Active().food=50;P.mini.care[1].scripts.OnClick();assert(P.Active().food==85,'Compass care uses the same active pet')
+P.miniMode='care';P.Render();local oldFood=P.Active().food;P.Active().food=50;P.mini.care[1].scripts.OnClick();assert(P.Active().food==85,'Compass care uses the same active pet')
 P.Active().food=oldFood
 P.mini.towerButton.scripts.OnClick();assert(P.miniMode=='tower' and P.mini.enter.shown and not P.mini.care[1].shown)
 P.floor=1;P.Active().energy=100;P.Active().food=100;P.Active().health=100;P.mini.enter.scripts.OnClick();assert(P.state.battle,'Tower starts inside compass')
-P.mini.battle[5].scripts.OnClick();assert(not P.state.battle,'Retreat works inside compass')
-P.mini.scripts.OnUpdate(nil,0.1)
+P.mini.battle[3].scripts.OnClick();assert(not P.state.battle,'Retreat works inside compass')
+P.Active().health=100;P.Active().energy=100;assert(P.StartBattle(1))
+local b=P.state.battle
+P.AdvanceBattle(100,false);assert(b.turn==0,'Hidden battles pause')
+P.PauseBattle();for i=1,20 do P.AdvanceBattle(0.1,true)end;assert(b.turn==0,'Explicit pause prevents attacks')
+P.PauseBattle();P.AdvanceBattle(100,true);assert(b.turn==0,'Loading gap does not fast-forward combat')
+for i=1,16 do P.AdvanceBattle(0.1,true)end;assert(b.turn==1 and P.lastRound,'Visible battles progress with animation records')
+P.BattleAction('retreat')
+
+P.mini.scene.scripts.OnUpdate(P.mini.scene,0.1)
 F.compass.expand.scripts.OnClick();assert(F.char.navExpanded and not F.char.navPets and not P.mini.shown and F.compass.map.shown,'Map and pet switch without covering route')
 F.char.navExpanded,F.char.navPets=oldExpanded,oldPets;F.UpdateNavigator()
 F.char.pets={version=1,pets='broken'};P.Init();assert(not P.state.review and F.char.petQuarantine.pets=='broken','Unreadable save is backed up without accusing the player')

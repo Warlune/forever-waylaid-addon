@@ -1,19 +1,100 @@
 local _,F=...
 local P,S=F.Pets,F.Style
 local atlas="Interface\\AddOns\\ForeverWaylaid\\Art\\WaylaidPets"
-local function portrait(parent,size)
-  local art=parent:CreateTexture(nil,"ARTWORK");art:SetSize(size,size);art:SetTexture(atlas,"CLAMP","CLAMP","NEAREST")
-  return art
+local icons={food="INV_Misc_Food_14",toy="INV_Misc_Bone_01",rest="Spell_Nature_Sleep",medicine="INV_Potion_51",adopt="INV_Egg_02",next="Ability_Hunter_BeastCall",fight="Ability_DualWield",pause="Spell_Frost_Stun",retreat="Ability_Rogue_Sprint",open="INV_Misc_Book_09",inspect="Ability_Hunter_EagleEye"}
+local function text(parent,value,x,y,width,height,color)
+  local t=S.Text(parent,value,x,y,width,"GameFontHighlightSmall",color or S.gold);t:SetHeight(height);return t
 end
-local function showPet(art,pet)
-  art:SetShown(pet~=nil)
-  if not pet then return end
+local function sprite(parent,size)
+  local art=parent:CreateTexture(nil,"ARTWORK");art:SetSize(size,size);art:SetTexture(atlas,"CLAMP","CLAMP","NEAREST");return art
+end
+local function showPet(art,pet,flip)
+  art:SetShown(not not pet);if not pet then return end
   local col=(pet.species-1)%2;local row=math.floor((pet.species-1)/2)
-  art:SetTexCoord(col/2,(col+1)/2,row/2,(row+1)/2)
+  art:SetTexCoord((col+(flip and 1 or 0))/2,(col+(flip and 0 or 1))/2,row/2,(row+1)/2)
   art:SetDesaturated(pet.deadAt~=nil)
 end
-local function act(fn)
-  local ok,message=fn();if not ok and message then P.notice=message end;P.Render()
+local function act(fn)local ok,message=fn();if not ok and message then P.notice=message end;P.Render()end
+local function tip(frame,title,body)
+  frame:SetScript("OnEnter",function(self)
+    GameTooltip:SetOwner(self,"ANCHOR_RIGHT");GameTooltip:SetText(title)
+    GameTooltip:AddLine(type(body)=="function" and body() or body,1,1,1,true);GameTooltip:Show()
+  end)
+  frame:SetScript("OnLeave",function()GameTooltip:Hide()end)
+end
+local function icon(parent,key,label,x,y,size,fn,help)
+  local b=CreateFrame("Button",nil,parent);b:SetPoint("TOPLEFT",x,y);b:SetSize(size,size)
+  b:SetNormalTexture("Interface\\Icons\\"..icons[key]);b:SetPushedTexture("Interface\\Buttons\\UI-Quickslot-Depress")
+  b:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square","ADD")
+  local border=b:CreateTexture(nil,"OVERLAY");border:SetTexture("Interface\\Buttons\\UI-Quickslot2");border:SetPoint("CENTER");border:SetSize(size*1.6,size*1.6)
+  b.label=text(parent,label,x-10,y-size-3,size+20,20);b.label:SetJustifyH("CENTER")
+  b:SetScript("OnClick",function()act(fn)end);tip(b,label,help or label)
+  return b
+end
+local function shown(b,value)b:SetShown(value);b.label:SetShown(value)end
+local function meter(parent,x,y,width,label,color)
+  local b=CreateFrame("StatusBar",nil,parent);b:SetPoint("TOPLEFT",x,y);b:SetSize(width,19)
+  b:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar");b:SetMinMaxValues(0,100);b:SetStatusBarColor(unpack(color))
+  local bg=b:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints();bg:SetColorTexture(0,0,0,0.9)
+  b.label=text(b,label,4,0,width-8,19,{1,1,1});return b
+end
+local function fill(bar,value,label)bar:SetValue(value or 0);bar.label:SetText(label)end
+local function stage(parent,x,y,width,height)
+  local f=S.Panel(parent,x,y,width,height);f.width=width;f.height=height
+  f.bg=f:CreateTexture(nil,"BACKGROUND");f.bg:SetPoint("TOPLEFT",3,-3);f.bg:SetPoint("BOTTOMRIGHT",-3,3)
+  f.pet=sprite(f,height*0.88);f.enemy=sprite(f,height*0.88)
+  f.leftHP=meter(f,10,-10,(width-30)/2,"",{0.25,0.65,0.4})
+  f.rightHP=meter(f,width/2+5,-10,(width-30)/2,"",{0.75,0.25,0.2})
+  f.float=text(f,"",10,-50,width-20,28,{1,0.85,0.3});f.float:SetJustifyH("CENTER")
+  f.caption=text(f,"",8,-height+29,width-16,24,{1,1,1});f.caption:SetJustifyH("CENTER")
+  f:SetScript("OnUpdate",function(self)
+    local t=P.sceneClock or 0;local round=P.lastRound;local age=round and t-round.at or 9
+    local motion=not F.db.settings.reduceMotion;local attack=0;local reply=0
+    if self.tower and round and age<1.3 then
+      if motion then attack=age<0.45 and math.sin(age/0.45*math.pi)*width*0.09 or 0;reply=age>=0.6 and age<1.05 and math.sin((age-0.6)/0.45*math.pi)*width*0.07 or 0 end
+      local value=age<0.6 and (round.hit>0 and "-"..round.hit or round.action=="guard" and "Guard" or "+"..round.heal) or round.hurt and "-"..round.hurt or "Victory!"
+      self.float:SetText(value)
+    else self.float:SetText("")end
+    local bob=motion and math.floor(math.sin(t*2)*2) or 0
+    self.pet:SetPoint("CENTER",self,"TOPLEFT",width*(self.tower and 0.28 or 0.5)+attack,-height*0.59+bob)
+    self.enemy:SetPoint("CENTER",self,"TOPLEFT",width*0.73-reply,-height*0.59)
+    self.pet:SetVertexColor(1,motion and self.tower and age>0.7 and age<0.85 and 0.5 or 1,1)
+  end)
+  return f
+end
+local function renderStage(f,pet,tower)
+  f.tower=tower
+  f.bg:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\PetScenes"..S.Faction(),"CLAMP","CLAMP","NEAREST")
+  f.bg:SetTexCoord(tower and 0.5 or 0,tower and 1 or 0.5,0.2,0.8);f.bg:SetAlpha(S.HighContrast() and 0.25 or 1)
+  local b=P.state.battle;local r=P.lastRound;local recent=tower and r and (P.sceneClock or 0)-r.at<3
+  local enemy=tower and (b and b.enemy or recent and r.enemy or P.Enemy(P.floor or 1))
+  showPet(f.pet,pet or recent and r.pet);showPet(f.enemy,enemy,true)
+  f.leftHP:SetShown(tower);f.rightHP:SetShown(tower)
+  if tower then
+    fill(f.leftHP,b and b.hp/b.maxHP*100 or pet and pet.health or 0,"Your pet: "..math.floor(pet and pet.health or 0).."%")
+    fill(f.rightHP,enemy and (enemy.hp or enemy.maxHP)/enemy.maxHP*100 or 0,"Enemy: "..math.floor(enemy and (enemy.hp or enemy.maxHP) or 0))
+    f.caption:SetText(b and (b.paused and "Paused" or "Round "..(b.turn+1).." - auto battle") or "Floor "..(P.floor or 1).." / 100")
+  else f.caption:SetText(pet and (pet.resting and "Resting at camp" or P.rarities[pet.rarity].." "..P.species[pet.species]) or "Your next companion awaits")end
+end
+local function careIcons(parent,x,y,size,gap)
+  local result={}
+  for i,entry in ipairs({{"food","Feed"},{"toy","Play"},{"rest","Rest"},{"medicine","Heal"}})do
+    local key=entry[1]
+    result[i]=icon(parent,key,entry[2],x+(i-1)*gap,y,size,function()return P.UseCare(key)end,function()
+      local item=P.items[key]
+      return item and (item.name..": "..P.state.inventory[key].." in your bag. If empty, buy one for "..item.cost.." pet tokens and use it. No real gold.") or "Rest to recover energy and health while fed. Click again to wake."
+    end)
+  end
+  return result
+end
+local function fightIcons(parent,x,y,size,gap)
+  return {
+    icon(parent,"fight","Fight",x,y,size,function()return P.StartBattle(P.floor or 1)end,"Fight one floor automatically. Your pet strikes, guards heavy attacks and uses healing herbs when needed. Defeat is permanent death."),
+    icon(parent,"pause","Pause",x+gap,y,size,P.PauseBattle,"Pause or resume this pet battle. Hidden battle views pause automatically."),
+    icon(parent,"retreat","Retreat",x+gap*2,y,size,function()return P.BattleAction('retreat')end,"Leave safely now. Spent supplies and lost health remain.")}
+end
+function P.BattleVisible()
+  return (P.window and P.window:IsShown() and P.mode=="tower") or (P.mini and P.mini:IsShown() and F.compass and F.compass:IsShown() and P.miniMode=="tower")
 end
 function P.ToggleCompass(show)
   F.char.navPets=show==nil and not F.char.navPets or show
@@ -21,183 +102,119 @@ function P.ToggleCompass(show)
   F.UpdateNavigator();P.Render()
 end
 function P.BuildCompass(parent)
-  local m=S.Panel(parent,8,-129,284,302);P.mini=m;P.miniMode="care";P.floor=P.floor or 1
-  m.careButton=S.Button(m,"Care",8,-8,79,function()P.miniMode="care";P.Render()end)
-  m.towerButton=S.Button(m,"Tower",96,-8,79,function()P.miniMode="tower";P.Render()end)
-  S.Button(m,"Open",184,-8,91,function()P.BuildUI();P.window:Show();P.mode=P.miniMode=="tower" and "tower" or "collection";P.Render()end)
-  m.art=portrait(m,90);m.art:SetPoint("TOPLEFT",8,-39)
-  m.stats=S.Text(m,"",104,-40,171,"GameFontHighlightSmall");m.stats:SetHeight(86)
-  m.notice=S.Text(m,"",10,-133,264,"GameFontHighlightSmall",S.gold);m.notice:SetHeight(53);m.notice:SetMaxLines(3)
-  m.noticeHit=CreateFrame("Frame",nil,m);m.noticeHit:SetPoint("TOPLEFT",10,-133);m.noticeHit:SetSize(264,53);m.noticeHit:EnableMouse(true)
-  m.noticeHit:SetScript("OnEnter",function(self)GameTooltip:SetOwner(self,"ANCHOR_LEFT");GameTooltip:SetText("Companion");GameTooltip:AddLine(P.notice or "Tower defeat and prolonged starvation cause permanent death.",1,1,1,true);GameTooltip:Show()end)
-  m.noticeHit:SetScript("OnLeave",function()GameTooltip:Hide()end)
-  m.care={};m.battle={}
-  local function button(list,label,x,y,fn)
-    local b=S.Button(m,label,x,y,82,function()act(fn)end);list[#list+1]=b;return b
-  end
-  for i,entry in ipairs({{"Feed","food"},{"Play","toy"},{"Rest","rest"},{"Treat 2","buyfood"},{"Toy 3","buytoy"},{"Herb 4","buymedicine"},{"Heal","medicine"}})do
-    local action=entry[2]
-    local b=button(m.care,entry[1],10+((i-1)%3)*91,-194-math.floor((i-1)/3)*33,function()
-      if action:sub(1,3)=="buy" then return P.Buy(action:sub(4))end
-      return P.Care(action)
-    end)
-    if action=="rest" then m.rest=b end
-  end
-  button(m.care,"Adopt",101,-260,P.Adopt)
-  button(m.care,"Next pet",192,-260,function()
-    if P.state.battle then return false,"Finish or retreat from the battle first." end
-    local pets=P.state.pets;local current=0
-    for i,pet in ipairs(pets)do if pet.id==P.state.active then current=i;break end end
-    for offset=1,#pets do local pet=pets[(current+offset-1)%#pets+1];if not pet.deadAt then return P.Select(pet.id)end end
-    return false,"Adopt a living companion first."
-  end)
-  for i,entry in ipairs({{"Strike","strike"},{"Guard","guard"},{"Special","burst"},{"Herbs","heal"},{"Retreat","retreat"}})do
-    local action=entry[2];button(m.battle,entry[1],10+((i-1)%3)*91,-194-math.floor((i-1)/3)*33,function()return P.BattleAction(action)end)
-  end
-  m.enter=button(m.battle,"Enter",192,-227,function()return P.StartBattle(P.floor)end)
-  button(m.battle,"< Floor",10,-260,function()if not P.state.battle then P.floor=math.max(1,P.floor-1)end;return true end)
-  button(m.battle,"Floor >",101,-260,function()if not P.state.battle then P.floor=math.min(100,P.floor+1)end;return true end)
-  button(m.battle,"Inspect",192,-260,function()P.BuildUI();P.mode="peers";P.window:Show();return true end)
-  local elapsed=0
-  m:SetScript("OnUpdate",function(_,dt)
-    elapsed=elapsed+dt;local bob=F.db.settings.reduceMotion and 0 or math.sin(elapsed*2)*2
-    m.art:SetPoint("TOPLEFT",8,-39+bob)
-  end)
+  local m=S.Panel(parent,8,-129,284,356);P.mini=m;P.miniMode="care";P.floor=P.floor or 1
+  m.careButton=S.Button(m,"Camp",8,-8,80,function()P.miniMode="care";P.Render()end)
+  m.towerButton=S.Button(m,"Tower",98,-8,80,function()P.miniMode="tower";P.Render()end)
+  S.Button(m,"Open",188,-8,86,function()P.BuildUI();P.window:Show();P.mode=P.miniMode=="tower" and "tower" or "collection";P.Render()end)
+  m.scene=stage(m,8,-40,268,161)
+  m.stats=text(m,"",10,-206,264,20);m.stats:SetJustifyH("CENTER")
+  m.health=meter(m,10,-232,127,"",{0.25,0.65,0.4});m.food=meter(m,147,-232,127,"",{0.7,0.53,0.2})
+  m.care=careIcons(m,20,-263,34,64);m.battle=fightIcons(m,37,-263,34,86);m.enter=m.battle[1]
+  m.prev=S.Button(m,"<",10,-232,32,function()if not P.state.battle then P.floor=math.max(1,P.floor-1)end;P.Render()end)
+  m.next=S.Button(m,">",242,-232,32,function()if not P.state.battle then P.floor=math.min(100,P.floor+1)end;P.Render()end)
+  m.floor=text(m,"",50,-233,184,22);m.floor:SetJustifyH("CENTER")
+  m.notice=text(m,"",10,-324,264,24);m.notice:SetMaxLines(1)
+  tip(m,"Companion",function()return P.notice or "Open the large view to adopt, switch companions and inspect other players."end)
+  m.adopt=S.Button(m,"Adopt companion",49,-265,186,function()act(P.Adopt)end)
   m:Hide()
 end
 function P.RenderCompass()
   local m=P.mini;if not m or not P.state or not m:IsShown()then return end
-  local pet=P.Active();local battle=P.state.battle;local tower=P.miniMode=="tower"
-  showPet(m.art,pet)
-  if tower then
-    local floor=battle and battle.enemy.floor or P.floor
-    m.stats:SetText(battle and string.format("Floor %d / 100\nHP %d / %d\nEnemy %d / %d\nSpecial: %d turns",floor,battle.hp,battle.maxHP,battle.enemy.hp,battle.enemy.maxHP,battle.cooldown)
-      or ("Floor "..floor.." / 100\nBest: "..(pet and pet.best or 0).."\nDefeat is permanent.\nEnter when ready."))
-  else
-    m.stats:SetText(pet and string.format("%s | Lv %d\nHP %d | Food %d\nHappy %d | Energy %d\nXP %d | Tokens %d",P.species[pet.species],pet.level,math.floor(pet.health),math.floor(pet.food),math.floor(pet.happy),math.floor(pet.energy),pet.xp,P.state.tokens)
-      or "No active companion.\nAdopt to begin.\nDeath is permanent.")
-  end
-  m.notice:SetText(P.notice or "Feed, play and train while travelling. Open shows the larger pet screen.")
-  m.rest:SetText(pet and pet.resting and "Wake" or "Rest")
-  m.enter:SetEnabled(not battle and pet~=nil)
-  for _,b in ipairs(m.care)do b:SetShown(not tower)end
-  for _,b in ipairs(m.battle)do b:SetShown(tower)end
-end
-local function shell(name,width,height,title)
-  local w=S.Panel(UIParent,0,0,width,height);w:ClearAllPoints();w:SetPoint("CENTER")
-  w:SetFrameStrata("HIGH");w:SetClampedToScreen(true);w:SetMovable(true);w:EnableMouse(true);w:RegisterForDrag("LeftButton")
-  w:SetScript("OnDragStart",w.StartMoving);w:SetScript("OnDragStop",w.StopMovingOrSizing)
-  local close=CreateFrame("Button",nil,w,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-3,-3);close:SetScript("OnClick",function()w:Hide()end)
-  S.Text(w,title,18,-15,width-55,"GameFontNormalLarge",S.gold)
-  w:Hide();return w
+  local pet=P.Active();local tower=P.miniMode=="tower";local b=P.state.battle
+  renderStage(m.scene,pet,tower)
+  m.stats:SetText(pet and ("Lv "..pet.level.." | XP "..pet.xp.." | "..P.state.tokens.." tokens") or "A new friend for your journey")
+  fill(m.health,pet and pet.health or 0,"Health "..math.floor(pet and pet.health or 0));fill(m.food,pet and pet.food or 0,"Food "..math.floor(pet and pet.food or 0))
+  m.health:SetShown(not tower);m.food:SetShown(not tower);m.prev:SetShown(tower);m.next:SetShown(tower);m.floor:SetShown(tower)
+  m.floor:SetText("Floor "..(b and b.enemy.floor or P.floor).." / 100")
+  for _,control in ipairs(m.care)do shown(control,not tower and pet~=nil)end
+  for _,control in ipairs(m.battle)do shown(control,tower and pet~=nil)end
+  m.enter:SetEnabled(not b);m.battle[2].label:SetText(b and b.paused and "Resume" or "Pause")
+  m.adopt:SetShown(pet==nil);m.notice:SetText(P.notice or "Hover an icon for details")
 end
 function P.BuildUI()
   if P.window then return end
-  local w=shell("Pets",760,570,"WAYLAID COMPANIONS");P.window=w;P.mode="collection";P.page=1;P.floor=P.floor or 1
-  w.name=S.Text(w,"Adopt a companion",20,-50,220,"GameFontNormalLarge",S.gold)
-  w.art=portrait(w,196);w.art:SetPoint("TOPLEFT",20,-74)
-  w.age=S.Text(w,"",20,-270,220,"GameFontHighlightSmall",S.muted);w.age:SetHeight(40)
-  local xpHelp=CreateFrame("Frame",nil,w);xpHelp:SetPoint("TOPLEFT",20,-270);xpHelp:SetSize(220,40);xpHelp:EnableMouse(true)
-  xpHelp:SetScript("OnEnter",function(self)
-    GameTooltip:SetOwner(self,"ANCHOR_RIGHT");GameTooltip:SetText("Growing your companion")
-    GameTooltip:AddLine("Tower wins earn XP. Your NPC killing blows give 3 XP; PvP killing blows give 10. Your combat pet's kills count too.",1,1,1,true)
-    GameTooltip:AddLine("Combat: up to 60 XP per minute, same target once per 5 minutes. Only your living active companion earns XP. Level cap: 100.",1,0.82,0,true);GameTooltip:Show()
-  end)
-  xpHelp:SetScript("OnLeave",function()GameTooltip:Hide()end)
-  w.needs=S.Text(w,"",20,-318,220,"GameFontHighlight");w.needs:SetHeight(78)
-  S.Button(w,"Feed",20,-401,103,function()act(function()return P.Care('food')end)end)
-  S.Button(w,"Play",133,-401,103,function()act(function()return P.Care('toy')end)end)
-  w.rest=S.Button(w,"Rest",20,-435,103,function()act(function()return P.Care('rest')end)end)
-  S.Button(w,"Heal",133,-435,103,function()act(function()return P.Care('medicine')end)end)
-  S.Button(w,"Compass view",20,-477,216,function()w:Hide();P.ToggleCompass(true)end)
-  w.stock=S.Text(w,"",20,-518,720,"GameFontHighlightSmall",S.gold);w.stock:SetHeight(38)
-  for i,mode in ipairs({"collection","tower","peers"})do
-    local selectedMode=mode
-    S.Button(w,({"Stable","Tower","Social"})[i],260+(i-1)*157,-48,147,function()P.mode=selectedMode;P.page=1;P.Render()end)
+  local w=S.Panel(UIParent,0,0,780,610);P.window=w;P.mode="collection";P.page=1;P.floor=P.floor or 1
+  w:ClearAllPoints();w:SetPoint("CENTER");w:SetFrameStrata("HIGH");w:SetClampedToScreen(true);w:SetMovable(true);w:EnableMouse(true);w:RegisterForDrag("LeftButton")
+  w:SetScript("OnDragStart",w.StartMoving);w:SetScript("OnDragStop",w.StopMovingOrSizing)
+  local close=CreateFrame("Button",nil,w,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-3,-3);close:SetScript("OnClick",function()w:Hide()end)
+  text(w,"WAYLAID COMPANIONS",22,-16,680,26)
+  for i,mode in ipairs({"collection","tower","peers"})do local value=mode
+    S.Button(w,({"Camp & stable","Tower","Inspect pets"})[i],20+(i-1)*158,-52,148,function()P.mode=value;P.page=1;P.Render()end)
   end
-  w.collection=S.Panel(w,252,-88,488,342)
-  local c=w.collection
-  local adopt=S.Button(c,"Adopt (25 tokens)*",12,-12,214,function()act(P.Adopt)end)
-  adopt:SetScript("OnEnter",function(self)
-    GameTooltip:SetOwner(self,"ANCHOR_RIGHT");GameTooltip:SetText("Adopt a random companion")
-    GameTooltip:AddLine("Common 55% / Uncommon 25% / Rare 14% / Epic 5% / Legendary 1%",1,1,1,true)
-    GameTooltip:AddLine("Each of the four species is equally likely. Free when you have no living pets. Death is permanent.",1,0.82,0,true);GameTooltip:Show()
-  end)
-  adopt:SetScript("OnLeave",function()GameTooltip:Hide()end)
-  S.Text(c,"*Free if no living pets",240,-18,230,"GameFontHighlightSmall",S.muted)
-  c.rows={}
-  for i=1,5 do
-    local row=S.Button(c,"",12,-53-(i-1)*46,458,function()end);row:SetHeight(42)
-    row:SetScript("OnClick",function(self)if self.petID then act(function()return P.Select(self.petID)end)end end)
-    c.rows[i]=row
+  S.Button(w,"Compass view",526,-52,230,function()w:Hide();P.ToggleCompass(true)end)
+  w.scene=stage(w,20,-94,456,272)
+  w.health=meter(w,20,-381,220,"",{0.25,0.65,0.4});w.food=meter(w,256,-381,220,"",{0.7,0.53,0.2})
+  w.happy=meter(w,20,-414,220,"",{0.4,0.6,0.8});w.energy=meter(w,256,-414,220,"",{0.55,0.4,0.7})
+  w.care=careIcons(w,50,-454,45,112);w.fight=fightIcons(w,75,-454,45,145)
+  w.side=S.Panel(w,492,-94,268,424)
+  w.name=text(w.side,"",14,-14,240,46);w.meta=text(w.side,"",14,-66,240,66,S.muted)
+  tip(w.side,"Pet progression","Tower victories earn XP. Your NPC kills give 3 XP; PvP kills give 10. Enemy levels must be within five of your character and not gray. Unknown or restricted levels give no XP. Up to 60 combat XP per minute; repeat target cooldown: five minutes.")
+  w.collection=S.Panel(w.side,6,-146,256,272);local c=w.collection;c.rows={}
+  for i=1,3 do
+    local row=CreateFrame("Button",nil,c);row:SetPoint("TOPLEFT",8,-8-(i-1)*60);row:SetSize(238,56)
+    row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight","ADD");row.art=sprite(row,52);row.art:SetPoint("TOPLEFT",0,0)
+    row.info=text(row,"",55,-3,180,50)
+    row:SetScript("OnClick",function(self)if self.petID then act(function()return P.Select(self.petID)end)end end);c.rows[i]=row
   end
-  S.Button(c,"<",12,-293,50,function()P.page=math.max(1,P.page-1);P.Render()end)
-  S.Button(c,">",420,-293,50,function()P.page=P.page+1;P.Render()end)
-  c.page=S.Text(c,"",80,-299,320,"GameFontHighlightSmall");c.page:SetJustifyH("CENTER")
-  w.tower=S.Panel(w,252,-88,488,342);local t=w.tower
-  t.title=S.Text(t,"",14,-14,454,"GameFontNormalLarge",S.gold)
-  t.stats=S.Text(t,"",14,-51,454,"GameFontHighlight");t.stats:SetHeight(95)
-  t.warning=S.Text(t,"Defeat is permanent death. Retreat before health reaches zero.",14,-152,454,"GameFontHighlightSmall",S.gold);t.warning:SetHeight(40)
-  S.Button(t,"< Floor",14,-202,100,function()if not P.state.battle then P.floor=math.max(1,P.floor-1);P.Render()end end)
-  S.Button(t,"Next >",124,-202,100,function()if not P.state.battle then P.floor=math.min(100,P.floor+1);P.Render()end end)
-  t.start=S.Button(t,"Enter tower",244,-202,224,function()act(function()return P.StartBattle(P.floor)end)end)
-  for i,entry in ipairs({{'Strike','strike'},{'Guard','guard'},{'Special','burst'},{'Herbs','heal'}})do
-    local action=entry[2];S.Button(t,entry[1],14+(i-1)*116,-244,106,function()act(function()return P.BattleAction(action)end)end)
-  end
-  S.Button(t,"Retreat",14,-290,454,function()act(function()return P.BattleAction('retreat')end)end)
-  w.social=S.Panel(w,252,-88,488,342);local p=w.social
-  p.share=S.Button(p,"",12,-12,458,function()P.SetSharing(not P.state.share);P.Render()end)
-  S.Button(p,"Inspect targeted player",12,-50,458,function()act(P.InspectTarget)end)
-  p.text=S.Text(p,"",14,-94,290,"GameFontHighlightSmall");p.text:SetHeight(185)
-  p.art=portrait(p,138);p.art:SetPoint("TOPRIGHT",-14,-110)
-  S.Button(p,"<",12,-290,50,function()P.inspectName=nil;P.page=math.max(1,P.page-1);P.Render()end)
-  S.Button(p,">",420,-290,50,function()P.inspectName=nil;P.page=P.page+1;P.Render()end)
-  p.page=S.Text(p,"",76,-297,330,"GameFontHighlightSmall");p.page:SetJustifyH("CENTER")
-  w.buyFood=S.Button(w,"Treat: 2",260,-441,147,function()act(function()return P.Buy('food')end)end)
-  S.Button(w,"Toy: 3",417,-441,147,function()act(function()return P.Buy('toy')end)end)
-  S.Button(w,"Herbs: 4",574,-441,147,function()act(function()return P.Buy('medicine')end)end)
-  w.notice=S.Text(w,"",260,-474,480,"GameFontHighlightSmall",S.gold);w.notice:SetHeight(38)
+  S.Button(c,"<",8,-190,30,function()P.page=math.max(1,P.page-1);P.Render()end)
+  S.Button(c,">",218,-190,30,function()P.page=P.page+1;P.Render()end)
+  c.page=text(c,"",45,-192,168,24);c.page:SetJustifyH("CENTER")
+  S.Button(c,"Adopt - 25 tokens*",8,-230,240,function()act(P.Adopt)end)
+  w.tower=S.Panel(w.side,6,-146,256,272);local t=w.tower
+  t.info=text(t,"",12,-12,232,98)
+  S.Button(t,"<",12,-118,40,function()if not P.state.battle then P.floor=math.max(1,P.floor-1)end;P.Render()end)
+  S.Button(t,">",204,-118,40,function()if not P.state.battle then P.floor=math.min(100,P.floor+1)end;P.Render()end)
+  t.floor=text(t,"",57,-120,142,24);t.floor:SetJustifyH("CENTER")
+  text(t,"One floor per fight.\nAuto uses healing herbs.\nDefeat is permanent.\nPause or retreat anytime.",12,-166,232,96)
+  w.social=S.Panel(w.side,6,-146,256,272);local p=w.social
+  p.share=S.Button(p,"",8,-8,240,function()P.SetSharing(not P.state.share);P.Render()end)
+  S.Button(p,"Inspect target",8,-48,240,function()act(P.InspectTarget)end)
+  p.text=text(p,"",12,-94,232,126)
+  S.Button(p,"<",8,-234,35,function()P.inspectName=nil;P.page=math.max(1,P.page-1);P.Render()end)
+  S.Button(p,">",213,-234,35,function()P.inspectName=nil;P.page=P.page+1;P.Render()end)
+  p.page=text(p,"",46,-236,164,24);p.page:SetJustifyH("CENTER")
+  w.notice=text(w,"",22,-534,732,38);w.notice:SetMaxLines(2)
+  w.stock=text(w,"",22,-580,732,22,S.muted)
+  w:Hide()
 end
-function P.Toggle()
-  P.BuildUI();P.window:SetShown(not P.window:IsShown());P.Render()
-end
+function P.Toggle()P.BuildUI();P.window:SetShown(not P.window:IsShown());P.Render()end
 function P.Render()
-  P.RenderCompass()
-  if not P.window or not P.state then return end
-  local w,s=P.window,P.state;local pet=P.Active()
-  if not w:IsShown()then return end
-  showPet(w.art,pet)
-  w.name:SetText(pet and (P.rarities[pet.rarity].." "..P.species[pet.species]) or "Adopt a companion")
-  S.TextColor(w.name,pet and P.colors[pet.rarity] or S.gold)
-  w.age:SetText(pet and ("Lv "..pet.level.." • XP "..pet.xp.."/"..(pet.level==100 and "MAX" or 20+pet.level*5).."\nTime alive: "..P.Age(pet.age)) or "Stable pets and offline time\ndo not lose needs.")
-  w.needs:SetText(pet and string.format("Health  %d / 100\nFood  %d / 100\nHappy  %d / 100\nEnergy  %d / 100",math.floor(pet.health),math.floor(pet.food),math.floor(pet.happy),math.floor(pet.energy)) or "Adopt a random pet.\nDeath is permanent.\nFirst replacement is free.")
-  w.rest:SetText(pet and pet.resting and "Wake" or "Rest")
-  w.stock:SetText(string.format("Pet tokens: %d   •   Treats: %d   Toys: %d   Herbs: %d\nEarn 1 token per 5 active pet minutes; tower victories also award tokens.",s.tokens,s.inventory.food,s.inventory.toy,s.inventory.medicine))
-  w.notice:SetText(P.notice or "Active pets need care. Stabled pets rest safely. No real gold is used.")
-  w.collection:SetShown(P.mode=='collection');w.tower:SetShown(P.mode=='tower');w.social:SetShown(P.mode=='peers')
-  if P.mode=='collection' then
-    local pages=math.max(1,math.ceil(#s.pets/5));P.page=math.min(P.page,pages)
-    w.collection.page:SetText("Stable & memorial  "..P.page.." / "..pages)
-    for i,row in ipairs(w.collection.rows)do
-      local item=s.pets[(P.page-1)*5+i];row.petID=item and item.id or false;row:SetShown(item~=nil)
-      if item then row:SetText((item.deadAt and "RIP " or item.id==s.active and "* " or "")..P.rarities[item.rarity].." "..P.species[item.species].."  Lv "..item.level.."\n"..P.Age(item.age).." alive • Floor "..item.best)end
-    end
-  elseif P.mode=='tower' then
-    local b=s.battle;local floor=b and b.enemy.floor or P.floor;local e=b and b.enemy or P.Enemy(floor)
-    w.tower.title:SetText("Floor "..floor.." / 100"..(e.boss and " — BOSS" or ""))
-    w.tower.stats:SetText(b and string.format("Your HP: %d / %d\nEnemy HP: %d / %d\nTurn %d • Special cooldown: %d",b.hp,b.maxHP,e.hp,e.maxHP,b.turn+1,b.cooldown)
-      or (P.species[e.species].." challenger • "..e.maxHP.." health\nYour highest floor: "..(pet and pet.best or 0).."\nClear floors in order. Replay cleared floors to train."))
-    w.tower.start:SetEnabled(not b and pet~=nil)
-  else
-    w.social.share:SetText(s.share and "Pet stats: sharing with guild / group" or "Pet stats: sharing OFF (click to opt in)")
+  P.RenderCompass();local w=P.window;if not w or not P.state or not w:IsShown()then return end
+  w:SetScale(F.AccessibleScale(F.db.settings.ledgerScale,780,610))
+  local s=P.state;local pet=P.Active();local tower=P.mode=="tower";local social=P.mode=="peers";local viewed=pet;local owner
+  if social then
     local rows={};for name,entry in pairs(P.peers)do rows[#rows+1]={name=name,pet=entry}end
     table.sort(rows,function(a,b)return a.name:lower()<b.name:lower()end)
     if P.inspectName then for i,row in ipairs(rows)do if row.name==P.inspectName then P.page=i;break end end end
-    P.page=math.max(1,math.min(P.page,math.max(1,#rows)))
-    local row=rows[P.page];local viewed=row and row.pet
-    showPet(w.social.art,viewed)
-    w.social.text:SetText(viewed and (row.name:sub(1,28).."\n"..P.rarities[viewed.rarity].." "..P.species[viewed.species].."\nLevel "..viewed.level.."\nTime alive: "..P.Age(viewed.age).."\nHighest floor: "..viewed.best.." / 100\nTower wins: "..viewed.wins)
-      or "Target a player to inspect their companion, or browse pets shared by your guild and group.\n\nBoth players must enable pet sharing.")
-    w.social.page:SetText(#rows>0 and ("Pet "..P.page.." / "..#rows.." • Alphabetical") or "No shared pets yet")
+    P.page=math.max(1,math.min(P.page,math.max(1,#rows)));local row=rows[P.page];viewed=row and row.pet;owner=row and row.name
+    w.social.share:SetText(s.share and "Sharing: ON" or "Sharing: OFF")
+    w.social.text:SetText(viewed and (owner.."\nHighest floor: "..viewed.best.." / 100\nTower wins: "..viewed.wins.."\nAlive: "..P.Age(viewed.age)) or "Target an opted-in addon user, or browse shared guild/group pets.")
+    w.social.page:SetText(#rows>0 and (P.page.." / "..#rows.." pets") or "No shared pets")
   end
+  renderStage(w.scene,viewed,tower)
+  w.name:SetText(viewed and (P.rarities[viewed.rarity].." "..P.species[viewed.species]) or "Your adventure begins")
+  S.TextColor(w.name,viewed and P.colors[viewed.rarity] or S.gold)
+  w.meta:SetText(viewed and ("Level "..viewed.level..(social and "" or " | XP "..viewed.xp.." / "..(viewed.level==100 and "MAX" or 20+viewed.level*5)).."\nAlive: "..P.Age(viewed.age)) or "Adopt your first companion.\n*Free when none are alive.")
+  fill(w.health,pet and pet.health or 0,"Health "..math.floor(pet and pet.health or 0).." / 100")
+  fill(w.food,pet and pet.food or 0,"Food "..math.floor(pet and pet.food or 0).." / 100")
+  fill(w.happy,pet and pet.happy or 0,"Happiness "..math.floor(pet and pet.happy or 0).." / 100")
+  fill(w.energy,pet and pet.energy or 0,"Energy "..math.floor(pet and pet.energy or 0).." / 100")
+  for _,b in ipairs({w.health,w.food,w.happy,w.energy})do b:SetShown(not social)end
+  for _,b in ipairs(w.care)do shown(b,not tower and not social)end
+  for _,b in ipairs(w.fight)do shown(b,tower)end
+  w.fight[1]:SetEnabled(not s.battle and pet~=nil);w.fight[2].label:SetText(s.battle and s.battle.paused and "Resume" or "Pause")
+  w.care[3].label:SetText(pet and pet.resting and "Wake" or "Rest")
+  w.collection:SetShown(not tower and not social);w.tower:SetShown(tower);w.social:SetShown(social)
+  if not tower and not social then
+    local pages=math.max(1,math.ceil(#s.pets/3));P.page=math.min(P.page,pages);w.collection.page:SetText(P.page.." / "..pages)
+    for i,row in ipairs(w.collection.rows)do local item=s.pets[(P.page-1)*3+i];row.petID=item and item.id;row:SetShown(item~=nil)
+      if item then showPet(row.art,item);row.info:SetText((item.deadAt and "Memorial: " or item.id==s.active and "Active: " or "")..P.species[item.species].."\nLv "..item.level.." | "..P.Age(item.age));S.TextColor(row.info,P.colors[item.rarity])end
+    end
+  elseif tower then
+    local b=s.battle;local floor=b and b.enemy.floor or P.floor;local e=b and b.enemy or P.Enemy(floor)
+    w.tower.info:SetText((e.boss and "BOSS CHAMBER" or "THE NEXT CHALLENGE").."\n"..P.species[e.species].." | "..e.maxHP.." HP\nYour best: "..(pet and pet.best or 0))
+    w.tower.floor:SetText("Floor "..floor.." / 100")
+  end
+  w.notice:SetText(P.notice or "Care for a companion. Explore together. Face the tower when ready.")
+  w.stock:SetText(s.tokens.." tokens | Treats "..s.inventory.food.." | Toys "..s.inventory.toy.." | Herbs "..s.inventory.medicine.." | Hover icons for details")
 end

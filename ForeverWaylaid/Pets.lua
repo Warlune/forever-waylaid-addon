@@ -7,6 +7,31 @@ P.items={food={name="Trail treats",cost=2},toy={name="Chew toy",cost=3},medicine
 P.random=math.random
 local function clamp(n)return math.max(0,math.min(100,n))end
 local function whole(n,min,max)return type(n)=="number" and n==math.floor(n) and n>=min and n<=max end
+local function readable(value)
+  if canaccessvalue then return canaccessvalue(value)end
+  return not issecretvalue or not issecretvalue(value)
+end
+P.enemyLevels={}
+function P.ObserveEnemy(unit)
+  if not UnitGUID or not UnitLevel then return end
+  local guid,level=UnitGUID(unit),UnitLevel(unit)
+  if not readable(guid) or not readable(level) or type(guid)~="string" then return end
+  if not whole(level,1,1000) then P.enemyLevels[guid]=nil;return end
+  local now=F.Now();local count=0
+  for key,entry in pairs(P.enemyLevels)do if now-entry.seen>60 then P.enemyLevels[key]=nil else count=count+1 end end
+  if count<128 or P.enemyLevels[guid] then P.enemyLevels[guid]={level=level,seen=now}end
+end
+function P.EligibleKill(guid)
+  for _,unit in ipairs({"target","focus","mouseover"})do P.ObserveEnemy(unit)end
+  local entry=P.enemyLevels[guid]
+  if not entry or F.Now()-entry.seen>60 then return false end
+  local level
+  if UnitEffectiveLevel then level=UnitEffectiveLevel("player") elseif UnitLevel then level=UnitLevel("player")end
+  local grayRange=UnitQuestTrivialLevelRange and UnitQuestTrivialLevelRange("player")
+  if not readable(level) or not readable(grayRange) or not whole(level,1,1000) or not whole(grayRange,0,1000) then return false end
+  local diff=entry.level-level
+  return math.abs(diff)<=5 and not (diff < -4 and -diff>grayRange)
+end
 local function validSave(s)
   if type(s)~="table" or s.version~=1 or type(s.pets)~="table" or #s.pets>128 or type(s.inventory)~="table" then return false end
   for _,key in ipairs({"tokens","nextID","playSeconds","rewardSeconds"})do
@@ -123,10 +148,6 @@ function P.CombatKill(event,sourceGUID,destGUID)
   if event~="PARTY_KILL" or not P.state or not UnitGUID then return end
   -- Forever's standalone kill event may carry restricted identities. Never
   -- compare, parse, stringify or retain those values in addon code.
-  local function readable(value)
-    if canaccessvalue then return canaccessvalue(value)end
-    return not issecretvalue or not issecretvalue(value)
-  end
   if not readable(sourceGUID) or not readable(destGUID) then return end
   local playerGUID,combatPetGUID=UnitGUID("player"),UnitGUID("pet")
   if not readable(playerGUID) or not readable(combatPetGUID) then return end
@@ -134,6 +155,7 @@ function P.CombatKill(event,sourceGUID,destGUID)
   if type(destGUID)~="string" or destGUID==playerGUID or destGUID==combatPetGUID then return end
   local isPlayer=destGUID:match("^Player%-")~=nil
   if not isPlayer and not destGUID:match("^Creature%-") then return end
+  if not P.EligibleKill(destGUID) then return end
   local pet=P.Active();if not pet or pet.level>=100 then return end
   local now=F.Now()
   for guid,when in pairs(P.recentKills)do if now-when>=300 then P.recentKills[guid]=nil end end
@@ -153,8 +175,9 @@ function P.StartBattle(floor)
   if pet.health<40 or pet.energy<15 or pet.food<15 then return false,"Prepare your pet: 40 health, 15 energy and 15 food required." end
   local hp,attack=P.Stats(pet);pet.energy=pet.energy-15;pet.food=clamp(pet.food-5);pet.resting=false
   enemy.hp=enemy.maxHP
-  P.state.battle={petID=pet.id,enemy=enemy,hp=math.ceil(hp*pet.health/100),maxHP=hp,attack=attack,turn=0,cooldown=0}
-  P.notice="Battle is turn-based. Defeat permanently kills your pet. Retreat is always available.";return true
+  P.state.battle={petID=pet.id,enemy=enemy,hp=math.ceil(hp*pet.health/100),maxHP=hp,attack=attack,turn=0,cooldown=0,elapsed=0,paused=false}
+  P.lastRound=nil
+  P.notice="Battle started. Your companion fights automatically. Retreat is always available.";return true
 end
 function P.BattleAction(action)
   local s=P.state;local b=s.battle;local pet=P.Active()
@@ -163,6 +186,8 @@ function P.BattleAction(action)
   if action~="strike" and action~="guard" and action~="burst" and action~="heal" then return false,"Unknown action." end
   if action=="burst" and b.cooldown>0 then return false,"Special attack is cooling down." end
   if action=="heal" and s.inventory.medicine<1 then return false,"No healing herbs." end
+  local round={at=P.sceneClock or 0,action=action,enemy=b.enemy,pet=pet,beforeHP=b.hp,beforeEnemyHP=b.enemy.hp,maxHP=b.maxHP}
+  P.lastRound=round
   local charging=(b.turn+1)%3==0
   b.cooldown=math.max(0,b.cooldown-1)
   if action=="heal" then s.inventory.medicine=s.inventory.medicine-1;b.hp=math.min(b.maxHP,b.hp+math.ceil(b.maxHP*0.4))
@@ -171,6 +196,7 @@ function P.BattleAction(action)
     if action=="burst" then b.cooldown=3 end
   end
   b.turn=b.turn+1
+  round.hit=math.max(0,round.beforeEnemyHP-b.enemy.hp);round.heal=math.max(0,b.hp-round.beforeHP)
   if b.enemy.hp<=0 then
     local first=b.enemy.floor>pet.best;pet.best=math.max(pet.best,b.enemy.floor);pet.wins=pet.wins+1
     P.AddXP(pet,math.floor((15+b.enemy.floor*3)*(first and 1 or 0.35)))
@@ -180,9 +206,33 @@ function P.BattleAction(action)
   end
   local damage=math.max(1,math.floor(b.enemy.attack*(charging and 1.7 or 1)*(action=="guard" and 0.3 or 1)))
   b.hp=math.max(0,b.hp-damage);pet.health=b.hp/b.maxHP*100
+  round.hurt=damage
   P.notice="Enemy hit for "..damage..". "..((b.turn+1)%3==0 and "Heavy attack next turn: consider Guard!" or "Choose your next action.")
   if b.hp<=0 then P.Die(pet,"Tower floor "..b.enemy.floor)end
   return true
+end
+function P.UseCare(item)
+  if not P.Active() or P.state.battle then return P.Care(item)end
+  if P.items[item] and P.state.inventory[item]<1 then
+    local ok,message=P.Buy(item);if not ok then return ok,message end
+  end
+  local ok,message=P.Care(item)
+  if ok then P.notice=item=="rest" and (P.Active().resting and "Resting beside the camp." or "Ready for adventure.") or "Your companion enjoyed the care." end
+  return ok,message
+end
+function P.PauseBattle()
+  if not P.state.battle then return false,"Start a battle first." end
+  P.state.battle.paused=not P.state.battle.paused;return true
+end
+function P.AdvanceBattle(dt,visible)
+  local b=P.state and P.state.battle
+  if not b or b.paused or not visible then return end
+  b.elapsed=(b.elapsed or 0)+math.min(dt,0.25)
+  if b.elapsed<1.6 then return end
+  b.elapsed=0 -- Never fast-forward unseen turns after a loading screen.
+  local action=(b.turn+1)%3==0 and "guard" or b.hp<b.maxHP*0.5 and P.state.inventory.medicine>0 and "heal" or b.cooldown==0 and "burst" or "strike"
+  P.BattleAction(action)
+  if P.Render then P.Render()end
 end
 function P.Age(seconds)
   return string.format("%dh %02dm",math.floor(seconds/3600),math.floor(seconds/60)%60)
@@ -261,15 +311,24 @@ local events=CreateFrame("Frame");P.events=events;events:RegisterEvent("CHAT_MSG
 -- COMBAT_LOG_EVENT_UNFILTERED is forbidden to addons on Forever. PARTY_KILL
 -- is a separate supported event with (attackerGUID, targetGUID) payload.
 events:RegisterEvent("PARTY_KILL")
+events:RegisterEvent("PLAYER_TARGET_CHANGED")
+events:RegisterEvent("PLAYER_FOCUS_CHANGED")
+events:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 events:SetScript("OnEvent",function(_,event,p,message,channel,sender)
   if event=="PARTY_KILL" then
     P.CombatKill(event,p,message)
+  elseif event=="PLAYER_TARGET_CHANGED" then P.ObserveEnemy("target")
+  elseif event=="PLAYER_FOCUS_CHANGED" then P.ObserveEnemy("focus")
+  elseif event=="UPDATE_MOUSEOVER_UNIT" then P.ObserveEnemy("mouseover")
   elseif p==prefix then P.Receive(message,channel,sender)end
 end)
 local elapsed=0
 events:SetScript("OnUpdate",function(_,dt)
   if not P.state then return end
+  P.sceneClock=(P.sceneClock or 0)+math.min(dt,0.25)
+  P.AdvanceBattle(dt,P.BattleVisible and P.BattleVisible())
   elapsed=elapsed+dt;if elapsed<1 then return end
+  P.ObserveEnemy("target")
   P.Tick(elapsed);elapsed=0
   if F.Now()>=(P.nextShare or 0)then
     P.nextShare=F.Now()+120;P.Share()

@@ -1,0 +1,17 @@
+# Companion scenes
+
+Created with the built-in image-generation tool on 2026-10-01. Original generated Warcraft-inspired fan art, not extracted game textures.
+
+`PetScenesAlliance.png` and `PetScenesHorde.png` are the original source atlases. The matching `.tga` files are 2048 by 1024 RGB exports resized with nearest-neighbor sampling. Each atlas contains a camp (left) and tower arena (right). The UI chooses the real or debug-preview faction and crops each scene without changing sprite scale.
+
+## Alliance / original generation prompt
+
+Use case: stylized-concept. Create one landscape 2:1 pixel-art game background atlas with exactly two equally sized SQUARE scenes side by side, no gutter. Left square: cozy Warcraft Classic inspired woodland adventurer pet camp, mossy earth, huge old tree framing left edge, canvas tent and wooden crates at rear left, tiny warm lantern at far right, deep green forest canopy, dusky teal distance, tranquil golden evening light. Right square: Warcraft Classic inspired ancient stone tower arena, worn circular flagstone floor, rough stone arches at the back, amber wall torches at far left and right, dark indigo stone shadows, a little moss, adventurous and inviting. Both scenes have the same straight-on side-view game stage perspective with a broad EMPTY FLAT FOREGROUND occupying bottom 45 percent, so two separate animated pet sprites can stand on it later. Floor horizon at 65 percent height. Substantial clean empty space in the central area of each square. Authentic crisp chunky hand-pixelled 16-bit game art with visible square pixels, restrained classic fantasy palette, rich environment detail around edges, no blur, no smooth painted gradients. NO characters, creatures, pets, text, letters, UI, buttons, borders, logos, watermarks or numbers. Output exactly these two square backgrounds side by side in one wide image. Opaque background.
+
+## Neutral intermediate edit used as the Horde reference
+
+Edit this two-scene game background atlas. Keep the exact side-by-side square composition, empty flat foreground, forest camp on left, stone tower arena on right, colors, pixel-art style and all scenery. Remove ALL blue-and-gold Alliance banners, emblems, crests and recognizable faction symbols. Replace their cloth areas with simple unmarked muted brown cloth or unobtrusive stone/foliage matching the environment. These must be neutral shared backgrounds usable by both Horde and Alliance. Do not add text, characters, UI, borders or other symbols.
+
+## Horde variant prompt
+
+Create the Horde faction variant of this exact two-square side-by-side pixel-art background atlas. Keep the canvas dimensions, exact scene framing, two equal square cells, horizon, broad empty flat foreground for animated pets, and all object scale consistent. LEFT: make the woodland camp distinctly Warcraft Horde with muted red canvas, red Horde banners, chunky dark wooden beams, iron bands and restrained orcish tusk decoration at the edges. RIGHT: keep the same tower arena layout but decorate the back wall with red Horde banners, rugged iron brackets and restrained orcish wood/tusk trim. Warm amber torch light, earthy red and dark iron accents, no blue Alliance banners or Alliance symbols. Preserve clear central staging space and empty foreground in both halves. Authentic chunky 16-bit pixel art consistent with reference. No creatures, people, text, buttons, UI or watermarks. Background for a small in-game pet scene.
