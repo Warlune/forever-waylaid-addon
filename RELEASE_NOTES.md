@@ -1,7 +1,7 @@
-## 0.3.4 — Fill the focused search box
+## 0.3.5 — Crate and writ rarity colors
 
-- Click into the desired search text box, then Shift-click an item picture to fill it with the item name and leave the cursor at the end.
-- No automatic Shopping selection, tab changes, filter resets, or search submission. The ledger stays open.
-- With the auction house closed or no text box focused, the shortcut quietly does nothing. No chat warning.
+- Crate and writ names, inset card borders, and inner icon borders now use their in-game item rarity colors, including the selected detail heading and route entries.
+- Existing card backgrounds and value indicators still show value for money.
+- Uncached item colors update when the game finishes loading their information.
 
 Install the ForeverWaylaid folder in Interface/AddOns, then /reload. Live accepted-writ delivery testing remains pending.

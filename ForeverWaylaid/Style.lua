@@ -2,6 +2,39 @@ local _, F = ...
 local S = {}; F.Style = S
 S.gold = {0.94,0.77,0.42}; S.ink = {0.22,0.13,0.07}; S.muted = {0.66,0.61,0.49}
 S.icons = {crate="Interface\\Icons\\INV_Crate_01", writ="Interface\\Icons\\INV_Misc_Note_01", flight="Interface\\Icons\\Ability_Druid_FlightForm", route="Interface\\Icons\\INV_Misc_Map_01"}
+S.qualityPending={}
+function S.RarityColor(id)
+  local info=C_Item and C_Item.GetItemInfo or GetItemInfo
+  local quality
+  if info then local _,_,value=info(id);quality=value end
+  if quality==nil then S.qualityPending[id]=true;return 0.66,0.66,0.66 end
+  S.qualityPending[id]=nil
+  local color=C_Item and C_Item.GetItemQualityColor or GetItemQualityColor
+  if color then return color(quality)end
+  local entry=ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[quality]
+  if entry then return entry.r,entry.g,entry.b end
+  return 0.66,0.66,0.66
+end
+function S.InnerBorder(parent,inset)
+  local lines={}
+  for _,edge in ipairs({"TOP","BOTTOM","LEFT","RIGHT"})do
+    local line=parent:CreateTexture(nil,"OVERLAY")
+    if edge=="TOP" or edge=="BOTTOM" then
+      local y=edge=="TOP" and -inset or inset
+      line:SetPoint(edge.."LEFT",parent,edge.."LEFT",inset,y)
+      line:SetPoint(edge.."RIGHT",parent,edge.."RIGHT",-inset,y);line:SetHeight(1)
+    else
+      local x=edge=="LEFT" and inset or -inset
+      line:SetPoint("TOP"..edge,parent,"TOP"..edge,x,-inset)
+      line:SetPoint("BOTTOM"..edge,parent,"BOTTOM"..edge,x,inset);line:SetWidth(1)
+    end
+    lines[#lines+1]=line
+  end
+  return lines
+end
+function S.ColorBorder(lines,r,g,b,alpha)
+  for _,line in ipairs(lines)do line:SetColorTexture(r,g,b,alpha or 0.8)end
+end
 function S.Theme()
   if UnitFactionGroup("player")=="Alliance" then
     return {bg={0.043,0.09,0.16,1},panel={0.09,0.16,0.26,1},accent={0.23,0.43,0.70,1},crest="Interface\\Timer\\Alliance-Logo"}
@@ -83,6 +116,7 @@ end
 function S.Icon(parent, x,y,size, itemID, fallback)
   local p=S.Panel(parent,x,y,size,size)
   p.icon=p:CreateTexture(nil,"ARTWORK");p.icon:SetPoint("TOPLEFT",4,-4);p.icon:SetPoint("BOTTOMRIGHT",-4,4);p.icon:SetTexCoord(0.07,0.93,0.07,0.93)
+  p.rarityBorder=S.InnerBorder(p,4)
   S.SetIcon(p,itemID,fallback);return p
 end
 function S.SetIcon(frame,id,fallback)
@@ -90,6 +124,10 @@ function S.SetIcon(frame,id,fallback)
   local icon=id and C_Item and C_Item.GetItemIconByID and C_Item.GetItemIconByID(id)
   if not icon and id and GetItemIcon then icon=GetItemIcon(id) end
   frame.icon:SetTexture(icon or fallback or S.icons.crate)
+  local r,g,b=0,0,0
+  local cargo=id and (F.cratesByID[id] or F.writsByID[id])
+  if cargo then r,g,b=S.RarityColor(id)end
+  S.ColorBorder(frame.rarityBorder,r,g,b,cargo and 1 or 0)
 end
 function S.Rule(parent,x,y,w)
   local t=parent:CreateTexture(nil,"ARTWORK");t:SetPoint("TOPLEFT",x,y);t:SetSize(w,1);t:SetColorTexture(0.5,0.35,0.15,0.4);return t

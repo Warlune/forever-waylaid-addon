@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.3.4"
+F.version = "0.3.5"
 F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false }
 
 function F.Now() return GetServerTime and GetServerTime() or time() end
@@ -26,9 +26,13 @@ end
 
 local events = CreateFrame("Frame")
 F.events = events
-for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "QUEST_LOG_UPDATE", "BAG_UPDATE_DELAYED", "TAXIMAP_OPENED", "ZONE_CHANGED_NEW_AREA", "QUEST_COMPLETE"}) do events:RegisterEvent(event) end
+for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "QUEST_LOG_UPDATE", "BAG_UPDATE_DELAYED", "TAXIMAP_OPENED", "ZONE_CHANGED_NEW_AREA", "QUEST_COMPLETE", "GET_ITEM_INFO_RECEIVED"}) do events:RegisterEvent(event) end
 local queued = false
-events:SetScript("OnEvent", function(_, event, name)
+events:SetScript("OnEvent", function(_, event, name, success)
+  if event=="GET_ITEM_INFO_RECEIVED" then
+    if not success or not F.Style or not F.Style.qualityPending[name] then return end
+    F.Style.qualityPending[name]=nil
+  end
   if event == "ADDON_LOADED" and name == "ForeverWaylaid" then
     ForeverWaylaidDB = ForeverWaylaidDB or {}
     ForeverWaylaidCharDB = ForeverWaylaidCharDB or {}

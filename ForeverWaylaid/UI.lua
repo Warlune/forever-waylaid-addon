@@ -121,6 +121,7 @@ function F.BuildUI()
   for i=1,pageSize do
     local row=CreateFrame("Button",nil,F.body);row:SetPoint("TOPLEFT",7,-31-(i-1)*62);row:SetSize(574,60)
     row.bg=row:CreateTexture(nil,"BACKGROUND");row.bg:SetAllPoints();row.bg:SetColorTexture(1,0.78,0.34,0.035)
+    row.rarityBorder=S.InnerBorder(row,4)
     row.stripe=row:CreateTexture(nil,"ARTWORK");row.stripe:SetPoint("TOPLEFT");row.stripe:SetPoint("BOTTOMLEFT");row.stripe:SetWidth(3)
     row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight","ADD")
     row.icon=S.Icon(row,5,-5,48)
@@ -204,6 +205,9 @@ local function detailWriter()
     row:ClearAllPoints();row:SetPoint("TOPLEFT",0,-y);row:SetHeight(height);row:Show();row.icon:SetShown(icon~=nil)
     row.title:ClearAllPoints();row.title:SetPoint("TOPLEFT",icon and 43 or 4,-5);row.title:SetWidth(amount and 170 or (icon and 286 or 326))
     row.title:SetFontObject(heading and "GameFontNormalLarge" or "GameFontNormal");row.title:SetTextColor(unpack(S.ink));row.title:SetText(title)
+    local cargo=icon and (F.cratesByID[icon] or F.writsByID[icon])
+    row.title:SetShadowColor(0,0,0,cargo and 1 or 0);row.title:SetShadowOffset(1,-1)
+    if cargo then local r,g,b=S.RarityColor(icon);row.title:SetTextColor(r,g,b)end
     row.description:ClearAllPoints();row.description:SetPoint("TOPLEFT",icon and 43 or 4,heading and -43 or -26);row.description:SetWidth(icon and 286 or 326);row.description:SetText(description or "")
     row.amount:SetText(amount or "");if icon then S.SetIcon(row.icon,icon)end
     local titleHeight=row.title:GetStringHeight() or 16
@@ -325,6 +329,9 @@ function F.Render()
     local entry=entries[F.offset+i];row:SetShown(entry~=nil)
     if entry then
       row.entry=entry;row.itemID=entry.item.id;S.SetIcon(row.icon,entry.item.id)
+      local r,g,b=S.RarityColor(entry.item.id)
+      S.ColorBorder(row.rarityBorder,r,g,b)
+      row.text:SetTextColor(r,g,b)
       local color=entry.band and F.valueColors[entry.band] or neutral
       row.bg:SetColorTexture(color[1],color[2],color[3],entry==selected and 0.27 or 0.11)
       row.stripe:SetColorTexture(color[1],color[2],color[3],1)
