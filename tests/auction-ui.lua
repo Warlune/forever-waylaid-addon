@@ -40,33 +40,22 @@ for _=1,3 do
 end
 assert(calls==0,'Opening and switching Scan tabs never requests a scan')
 ui.tab.scripts.OnClick()
-local A=F.Scribe
-assert(A.frameCount==16,'Animation has sixteen actual sprite poses')
-local staticChanges,animatedChanges=0,0
-for _,region in ipairs(ui.scribe.regions)do
-  region.texture.SetTexCoord=function()
-    if region.animated then animatedChanges=animatedChanges+1 else staticChanges=staticChanges+1 end
-  end
-end
-local seen={}
-for index=0,15 do ui.scribe:Update(index);seen[ui.scribe.index]=true end
-local count=0;for _ in pairs(seen)do count=count+1 end
-assert(count==16 and staticChanges==0 and animatedChanges==30,'All sixteen poses play while scenery stays on the same pixels')
-ui.scribe:Update(0)
-animatedChanges=0
-ui.page.scripts.OnUpdate(nil,A.interval/2)
-assert(ui.scribe.index==0 and animatedChanges==0,'Sub-frame time holds a crisp pose without blending')
-ui.page.scripts.OnUpdate(nil,A.interval/2)
-assert(ui.scribe.index==1 and animatedChanges==2,'Frame changes swap only the moving regions')
-ui.scribe:Update(15.5)
-ui.page.scripts.OnUpdate(nil,A.interval)
-assert(ui.scribe.index==0,'Last pose wraps to the first')
-local phase=ui.scribe.phase
+local coords,updates=nil,0
+ui.art.SetTexCoord=function(_,...)coords={...};updates=updates+1 end
+ui.pose()
+assert(coords[1]==0 and coords[3]==0,'Original orc starts in the first atlas cell')
+ui.page.scripts.OnUpdate(nil,0.24)
+assert(updates==1,'Original idle cadence holds each pose for 0.48 seconds')
+ui.page.scripts.OnUpdate(nil,0.24)
+assert(coords[1]==0.25,'Original animation advances to the next of four poses')
+for _=1,3 do ui.page.scripts.OnUpdate(nil,0.48)end
+assert(coords[1]==0,'Four-frame animation wraps to the first pose')
+ui.active=true;ui.page.scripts.OnUpdate(nil,0.22);ui.active=false
+assert(coords[1]==0.25,'Original scan cadence advances every 0.22 seconds')
 F.db.settings.debugAlliance=true;F.Style.ApplyTheme()
-assert(ui.scribe.faction=='Alliance' and UnitFactionGroup('player')=='Horde','Preview changes art, not actual faction')
-assert(ui.scribe.phase==phase,'Faction preview preserves animation time')
+assert(coords[1]==0.25 and coords[3]==0.5 and UnitFactionGroup('player')=='Horde','Preview selects the original human row without changing faction or pose')
 F.db.settings.debugAlliance=false;F.Style.ApplyTheme()
-assert(ui.scribe.faction=='Horde','Turning the preview off restores the orc')
+assert(coords[3]==0,'Turning the preview off restores the original orc')
 ui.start.scripts.OnClick();assert(calls==1 and F.GetScanProgress().phase=='waiting')
 F.scanFrame.scripts.OnEvent(nil,'REPLICATE_ITEM_LIST_UPDATE')
 F.scanFrame.scripts.OnUpdate(nil,0.25)

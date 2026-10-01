@@ -15,7 +15,6 @@ Scanner.lua
 Peers.lua
 Crafting.lua
 Style.lua
-Scribe.lua
 AuctionScanUI.lua
 Geometry.lua
 Routing.lua

@@ -2,13 +2,13 @@
 
 ## Current animation (v0.8.3)
 
+The original four-frame artwork and playback from the first Scan-tab release are restored. `AuctionScanUI.lua` loads `AuctionScribes.tga` and selects the Horde or Alliance row, including the appearance debug setting. Each pose lasts 0.48 seconds idle or 0.22 seconds during a scan. No blending, deformation, or region compositing is applied. The original asset and prompt are documented below.
+
+## Archived pixel16 experiment
+
 - Sources: `auction-scribe-horde-pixel16.png` and `auction-scribe-alliance-pixel16.png`. Generated in built-in imagegen edit mode using the original four-frame scribes as the visual reference. Exact prompts: [scribes-pixel16-prompts.md](scribes-pixel16-prompts.md).
 - Sixteen poses per faction include quill strokes, accumulating ink lines, small head movements, a page turn and candle flicker.
-- Rebuild with `python tools/pack-pixel-scribes.py` (Pillow required). Packing uses a single scale for all poses of each faction, nearest-neighbor resampling and a fixed desk baseline. The original generated sources remain unchanged.
-- Runtime files: `AuctionScribeHordePixel16.tga` and `AuctionScribeAlliancePixel16.tga`, each a 1024 × 1024 RGBA atlas. Packed PNG copies are included for inspection.
-- `Scribe.lua` changes actual sprite frames every 0.16 seconds, without crossfading or texture deformation. The desk, banner and reference ledger always sample frame one; the scribe and flame sample the current pose.
-- Idle and scanning use the same 2.56-second loop. Animation updates only while the Scan panel is visible.
-
+- Packed PNG copies are retained for reference. These experimental textures are not shipped in the addon.
 ## Archived separately generated poses (v0.8.0)
 
 - Original generated sources: `auction-scribe-horde-16.png` and `auction-scribe-alliance-16.png`.

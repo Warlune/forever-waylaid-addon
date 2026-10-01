@@ -47,10 +47,21 @@ function F.InstallAuctionScanUI()
 
   centered(page,"THE AUCTION SCRIBE",-15,600,"GameFontNormalLarge",S.gold)
   ui.caption=centered(page,"Your faction's auction scribe",-40,600,"GameFontHighlightSmall",S.muted)
-  ui.scribe=F.Scribe.Create(page)
-  ui.pose=function()ui.scribe:Update(ui.scribe.phase)end
+  local art=page:CreateTexture(nil,"ARTWORK")
+  art:SetSize(218,218);art:SetPoint("TOP",0,-55)
+  art:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\AuctionScribes.tga")
+  ui.art=art
+  local phase,elapsed=0,0
+  local function pose()
+    local row=S.Faction()=="Alliance" and 1 or 0
+    art:SetTexCoord(phase/4,(phase+1)/4,row/2,(row+1)/2)
+  end
+  pose()
+  ui.pose=pose
   page:SetScript("OnUpdate",function(_,dt)
-    ui.scribe:Update(ui.scribe.phase+dt/F.Scribe.interval)
+    elapsed=elapsed+dt
+    local interval=ui.active and 0.22 or 0.48
+    if elapsed>=interval then elapsed=elapsed%interval;phase=(phase+1)%4;pose()end
   end)
   local labels={"Auctions read","All item types","Relevant items","Prices saved","Time elapsed"}
   local strip=CreateFrame("Frame",nil,page);strip:SetSize(742,62);strip:SetPoint("TOP",0,-280)
