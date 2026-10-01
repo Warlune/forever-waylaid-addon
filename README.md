@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.9.10 preview
+# Forever Waylaid — v0.9.11 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.9.10.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.9.11.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -21,7 +21,7 @@ The addon has no bundled auction prices or external price service. Until you sca
 - Auctioneer Advanced's home-faction scan image, read when the auction house closes or when you click **Read personal prices**. Versions lacking that API are ignored safely.
 - Price selection per item: the newest dated observation wins; personal scans win ties. Peer prices are considered only while sharing is enabled and expire after 24 hours. Each quote keeps its original observation age and source.
 - Accepted writ tracking, material progress, automatic completed-quest waypoints when exposed by the client, and manual destination pins.
-- Numbered deliveries and flight-master pins on Blizzard's world map: gold travel legs and blue flight legs. Select a delivery and click **Track delivery** or **Show on map**. Optional TomTom waypoint support.
+- Numbered deliveries and flight-master pins on Blizzard's world map: gold travel legs and blue flight legs. Select a delivery and click **Follow route** or **Show on map**. Optional TomTom waypoint support.
 - A movable **Courier's Compass** that stays available when the ledger and main map close: direction arrow, distance, current writ, recipient information, and destination coordinates. Its down-arrow button unfolds a small map using the game's actual map artwork.
 - Route lines on the native minimap, clipped to its circular edge and adjusted for zoom and rotating-map settings. The compass automatically guides to the next flight master, boat/zeppelin dock, personal teleport or customer. It keeps the arrival target during a booked flight and recalculates from your current position every five seconds.
 - Flight points and directed routes learned by opening flight masters. Unlearned routes are not invented. Visit order is optimized for up to nine located stops, with a nearest-next estimate for larger sets. The warning icon beside Known flight points lists Eastern Kingdoms and/or Kalimdor when no recorded flight-master departure exists for that continent. Hover it for details; open a flight master's map there without buying a flight. A recorded visit does not mean every route on the continent is known.
@@ -134,7 +134,7 @@ Personal travel is considered only when available to your character:
 - **Engineering:** carried Gadgetzan or Everlook transporter, Engineering 260 and its matching learned specialization. Equip and use it yourself when directed. Malfunctions are not predicted.
 - **Mage teleport/portal:** mage characters only, a learned Classic capital spell, its required rune in your bags and a readable cooldown. Portal routes allow extra time to enter the portal. No other player's portal is assumed.
 
-Waiting for a cooldown is included in the estimate; the planner uses ordinary travel when that is faster. For multiple writs it reserves runes and limits each Hearthstone/engineering device to one use in the itinerary. Personal travel makes visit ordering an estimate rather than an exact optimization. The route recalculates as you travel, use items, learn flights or finish deliveries. It does not model warlock summons or Forever-specific teleports.
+Waiting for a cooldown is included in the estimate; the planner uses ordinary travel when that is faster. For multiple writs it reserves runes and limits each Hearthstone/engineering device to one use in the itinerary. Personal travel makes visit ordering an estimate rather than an exact optimization. The route recalculates as you travel, use items, learn flights or change your accepted writs. Abandoning or turning in a writ immediately removes its compass step and map pin, even if the quest log has not refreshed yet. The remaining turn-ins are reordered from your current position. Selecting a writ no longer locks the compass to that single customer; it follows the planned multi-writ itinerary. Reaccepting a writ adds it back, and removing the final writ clears the route. It does not model warlock summons or Forever-specific teleports.
 
 The compact compass map has **+ / −** buttons to step between world, continent and your current zone. Hover a button to see the next map. Your chosen zoom level stays in place while the route updates and follows your location when you change zones.
 

@@ -50,12 +50,13 @@ C_Map.GetWorldPosFromMapPos=failedMap
 local island={mapID=2521,instance=1,wx=0,wy=0}
 assert(R.WalkDistance(island,{mapID=1412,instance=1,wx=10,wy=0})==math.huge,'Never walk across the sea to Zephras')
 
-local oldGuide,oldQuest=F.guidance,F.char.navQuest
+local oldGuide,oldQuest,oldRoute=F.guidance,F.char.navQuest,F.route
 F.char.navQuest=123
 F.guidance={steps=steps,stop={point=outward.to}}
+F.route={{stop=F.guidance.stop,steps=steps}}
 local segments=F.DisplayRoute()
 assert(#segments==2 and segments[1].to.mapID==1424 and segments[2].from.mapID==1424,'Map must show intermediate ports')
-F.guidance,F.char.navQuest=oldGuide,oldQuest
+F.guidance,F.char.navQuest,F.route=oldGuide,oldQuest,oldRoute
 
 -- The normal API rejects an off-map point. Invert a rotated/sheared basis
 -- so a line to that point can still be clipped to the visible map boundary.

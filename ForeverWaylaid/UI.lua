@@ -165,7 +165,7 @@ function F.BuildUI()
   F.prev=S.Button(w,"Previous",24,-645,102,function()F.offset=math.max(0,(F.offset or 0)-pageSize);F.Render()end)
   F.next=S.Button(w,"Next",135,-645,102,function()F.offset=(F.offset or 0)+pageSize;F.Render()end)
   F.pageLabel=S.Text(w,"",257,-653,340,"GameFontHighlightSmall",S.muted)
-  F.trackButton=S.Button(w,"Track delivery",627,-645,187,function()
+  F.trackButton=S.Button(w,"Follow route",627,-645,187,function()
     if F.detailEntry and F.detailEntry.stop then F.TrackDelivery(F.detailEntry.stop.questID) end
   end)
   F.mapButton=S.Button(w,"Show on map",827,-645,187,function()

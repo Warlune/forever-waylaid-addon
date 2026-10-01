@@ -3,15 +3,13 @@ local S,G=F.Style,F.Geometry
 local unfold="|TInterface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up:18:18|t"
 local fold="|TInterface\\Buttons\\UI-ScrollBar-ScrollUpButton-Up:18:18|t"
 function F.TrackDelivery(questID)
-  F.char.navQuest=questID;F.db.settings.navigator=true;F.Refresh()
+  -- Selection opens the route; it must not lock the compass to a customer
+  -- and override the planner's order for the remaining deliveries.
+  F.char.navQuest=nil;F.db.settings.navigator=true;F.Refresh()
 end
 function F.UpdateGuidance()
-  local chosen
-  for _,stop in ipairs(F.active or {})do if stop.questID==F.char.navQuest and stop.point then chosen=stop end end
-  if not chosen then
-    F.char.navQuest=nil
-    chosen=chosen or (F.route and F.route[1] and F.route[1].stop)
-  end
+  F.char.navQuest=nil -- Retire persisted single-writ navigation locks.
+  local chosen=F.route and F.route[1] and F.route[1].stop
   local player=F.Route.Player()
   if not chosen or not player then F.guidance=nil;F.flightGuidance=nil;return end
   -- Keep the booked flight's arrival target while on the taxi. Replanning from
@@ -60,15 +58,10 @@ function F.DisplayRoute()
     end
     segments[#segments+1]={from=from,to=step.to,mode=step.mode,detail=step.detail}
   end
-  if F.guidance and F.char.navQuest then
-    for _,step in ipairs(F.guidance.steps)do append(step)end
-    stops[1]={point=F.guidance.stop.point,stop=F.guidance.stop,number=1}
-  else
-    for i,leg in ipairs(F.route or {})do
-      local steps=i==1 and F.guidance and F.guidance.stop.questID==leg.stop.questID and F.guidance.steps or leg.steps
-      for _,step in ipairs(steps)do append(step)end
-      stops[#stops+1]={point=leg.stop.point,stop=leg.stop,number=i}
-    end
+  for i,leg in ipairs(F.route or {})do
+    local steps=i==1 and F.guidance and F.guidance.stop.questID==leg.stop.questID and F.guidance.steps or leg.steps
+    for _,step in ipairs(steps)do append(step)end
+    stops[#stops+1]={point=leg.stop.point,stop=leg.stop,number=i}
   end
   return segments,stops
 end

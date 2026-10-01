@@ -153,7 +153,7 @@ F.Route.Player=function()return player end
 local customer=p(7100);customer.mapID=1454;customer.x=0.7;customer.y=0.5
 local stop={questID=first.questId,writ=first,point=customer,ready=true,npc='Test Customer'}
 F.char.flights=flights;F.db.settings.flights=true;F.char.navQuest=first.questId
-F.active={stop};F.route={};UnitOnTaxi=function()return false end
+F.active={stop};F.route={{stop=stop}};UnitOnTaxi=function()return false end
 F.UpdateGuidance();assert(F.guidance.target==flights.nodes.a and F.guidance.action=='Go to flight master')
 player.wx=0;F.UpdateGuidance();assert(F.guidance.action:find('Take flight',1,true))
 UnitOnTaxi=function()return true end;player.wx=4000
@@ -215,3 +215,4 @@ do
 end
 
 assert(loadfile('tests/requirements.lua'))(F)
+assert(loadfile('tests/reroute.lua'))(F)

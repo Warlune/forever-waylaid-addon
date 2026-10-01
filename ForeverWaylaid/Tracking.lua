@@ -15,7 +15,7 @@ end
 function F.UpdateTracking()
   F.active = {}
   for questID, writ in pairs(F.writsByQuest) do
-    if C_QuestLog.IsOnQuest(questID) then
+    if not (F.removedWrits and F.removedWrits[questID]) and C_QuestLog.IsOnQuest(questID) then
       local ready = C_QuestLog.IsComplete(questID)
       local location = F.char.pins[questID]
       -- Before completion a quest waypoint may be a material objective.

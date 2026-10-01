@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.9.10"
+F.version = "0.9.11"
 F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
 
 function F.ApplySettings()
@@ -28,7 +28,7 @@ end
 
 local events = CreateFrame("Frame")
 F.events = events
-for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "QUEST_LOG_UPDATE", "BAG_UPDATE_DELAYED", "TAXIMAP_OPENED", "ZONE_CHANGED_NEW_AREA", "QUEST_COMPLETE", "GET_ITEM_INFO_RECEIVED", "SKILL_LINES_CHANGED", "PLAYER_LEVEL_UP", "HEARTHSTONE_BOUND", "SPELLS_CHANGED", "PLAYER_ENTERING_WORLD", "UNIT_SPELLCAST_SUCCEEDED"}) do events:RegisterEvent(event) end
+for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "QUEST_LOG_UPDATE", "QUEST_ACCEPTED", "QUEST_REMOVED", "QUEST_TURNED_IN", "BAG_UPDATE_DELAYED", "TAXIMAP_OPENED", "ZONE_CHANGED_NEW_AREA", "QUEST_COMPLETE", "GET_ITEM_INFO_RECEIVED", "SKILL_LINES_CHANGED", "PLAYER_LEVEL_UP", "HEARTHSTONE_BOUND", "SPELLS_CHANGED", "PLAYER_ENTERING_WORLD", "UNIT_SPELLCAST_SUCCEEDED"}) do events:RegisterEvent(event) end
 local queued = false
 events:SetScript("OnEvent", function(_, event, name, success,spellID)
   if event=="UNIT_SPELLCAST_SUCCEEDED" then
@@ -65,6 +65,19 @@ events:SetScript("OnEvent", function(_, event, name, success,spellID)
     if F.NeedsFlightScan()then F.Print("Flight paths not scanned: open a flight master's map to learn your routes. No flight purchase needed; until then, routing uses walking estimates.")end
   elseif F.char then
     if event=="ADDON_LOADED" then F.InstallMap();return end
+    if F.writsByQuest[name] then
+      if event=="QUEST_REMOVED" or event=="QUEST_TURNED_IN" then
+        -- The removal event can arrive before IsOnQuest catches up. Exclude
+        -- this writ immediately so a queued refresh cannot resurrect it.
+        F.removedWrits=F.removedWrits or {};F.removedWrits[name]=true
+        F.char.navQuest=nil
+        if F.guidance and F.guidance.stop.questID==name then F.guidance=nil end
+        if F.flightGuidance and F.flightGuidance.stop.questID==name then F.flightGuidance=nil end
+        if F.ready then F.Refresh();return end
+      elseif event=="QUEST_ACCEPTED" and F.removedWrits then
+        F.removedWrits[name]=nil
+      end
+    end
     if event=="QUEST_COMPLETE" then F.LearnRecipient() end
     if event=="HEARTHSTONE_BOUND" then C_Timer.After(0.5,F.Travel.RecordHome) end
     if (event=="PLAYER_ENTERING_WORLD" or event=="ZONE_CHANGED_NEW_AREA") and F.hearthPending then
