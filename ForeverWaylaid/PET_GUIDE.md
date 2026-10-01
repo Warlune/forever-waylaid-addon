@@ -1,4 +1,4 @@
-# Waylaid companions — 0.13.4 preview
+# Waylaid companions — 0.13.5 preview
 
 Open **Pets → Adopt**, choose a adoption crate, then select the new companion in the stable and click **Equip**. Browsing a pet does not change the equipped companion. The first living companion is equipped automatically. The compass and large window share the same pet and battle.
 
@@ -16,6 +16,12 @@ All 100 species are Warcraft creatures. The 84 regular species are equally likel
 | Azeroth's Adoption Crate | 100 | — | 30% | 40% | 25% | 5% |
 
 Earned adoption crates are opened free before charging tokens for that adoption crate type. If no living pets remain, **Free common rescue** supplies a common companion without spending tokens. Old pets, rarity, progress and memorial records are preserved. The stable holds 100 living pets and 512 total living/memorial records.
+
+## Compact care and status cues
+
+The compass camp shows Health, Food, Happy (happiness), and Energy in two rows without increasing the compass height. All meters are out of 100; hover for their full labels.
+
+Both camp scenes show floating pixel Zs while the pet rests, a yellow stomach zigzag below 25 food, and a red anger mark below 25 happiness. These cues can appear together, have explanatory tooltips, and clear when the need is met. Reduced motion keeps the symbols stationary. They are hidden during the tower display so they do not cover battle information.
 
 ## Stats and abilities
 

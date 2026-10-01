@@ -175,6 +175,36 @@ P.ToggleCompass(true);assert(F.char.navPets and not F.char.navExpanded and P.min
 P.window:Hide();P.Render();assert(P.mini.stats.text:find('Lv',1,true),'Compact game renders while large window is closed')
 P.miniMode='care';P.Render();local oldFood=P.Active().food;P.Active().food=50;P.mini.care[1].scripts.OnClick();assert(P.Active().food==85,'Compass care uses the same active pet')
 P.Active().food=oldFood
+-- Compact care meters and status symbols track the same pet without changing needs.
+do
+  local pet=P.Active();local saved={pet.food,pet.happy,pet.energy,pet.resting}
+  local clock,motion=P.sceneClock,F.db.settings.reduceMotion
+  pet.food=24;pet.happy=24;pet.energy=42;pet.resting=true
+  P.Render()
+  assert(P.mini.food.label.text=='Food 24' and P.mini.happy.label.text=='Happy 24' and P.mini.energy.label.text=='Energy 42')
+  assert(P.mini.happy:IsShown() and P.mini.energy:IsShown())
+  local f=P.mini.scene;local n=f.needs
+  assert(n.sleep[1]:IsShown() and n.sleep[2]:IsShown() and n.sleep[3]:IsShown())
+  assert(n.hungry:IsShown() and n.angry:IsShown(),'Low food and happiness can appear together with sleep')
+  local positions={}
+  local oldPoint=n.sleep[1].SetPoint
+  n.sleep[1].SetPoint=function(_,_,_,_,x,y)positions[#positions+1]={x,y}end
+  F.db.settings.reduceMotion=false;P.sceneClock=0.4;f.scripts.OnUpdate(f)
+  P.sceneClock=1.3;f.scripts.OnUpdate(f)
+  assert(positions[1][2]~=positions[2][2],'Sleep marks float upward')
+  F.db.settings.reduceMotion=true;P.sceneClock=2;f.scripts.OnUpdate(f)
+  P.sceneClock=3;f.scripts.OnUpdate(f)
+  assert(positions[3][1]==positions[4][1] and positions[3][2]==positions[4][2],'Reduced motion keeps status marks still')
+  n.sleep[1].SetPoint=oldPoint
+  pet.food=25;pet.happy=25;pet.resting=false;P.Render()
+  assert(not n.sleep[1]:IsShown() and not n.hungry:IsShown() and not n.angry:IsShown(),'Care clears cues at the threshold')
+  pet.food=0;pet.happy=0;pet.resting=true;P.miniMode='tower';P.Render()
+  assert(not P.mini.happy:IsShown() and not P.mini.energy:IsShown() and not n.sleep[1]:IsShown() and not n.hungry:IsShown(),'Tower controls and combat art stay unobstructed')
+  P.miniMode='care';f.needsPet=false;f.scripts.OnUpdate(f)
+  assert(not n.sleep[1]:IsShown() and not n.angry:IsShown(),'No companion means no need indicators')
+  pet.food,pet.happy,pet.energy,pet.resting=unpack(saved)
+  P.sceneClock,F.db.settings.reduceMotion=clock,motion;P.Render()
+end
 P.mini.towerButton.scripts.OnClick();assert(P.miniMode=='tower' and P.mini.enter.shown and not P.mini.care[1].shown)
 P.floor=1;P.Active().energy=100;P.Active().food=100;P.Active().health=100;P.mini.enter.scripts.OnClick();assert(P.state.battle,'Tower starts inside compass')
 P.state.battle.hp=math.floor(P.state.battle.maxHP*0.5);P.mini.battle[3].scripts.OnClick();assert(P.state.battle.pendingHeal,'Manual Heal queues inside compass');P.BattleAction('retreat')

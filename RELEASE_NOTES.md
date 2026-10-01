@@ -1,7 +1,7 @@
-# Forever Waylaid 0.13.4 preview
+# Forever Waylaid 0.13.5 preview
 
-- Fixed Store and Adoption opening behind the Pets window after it gains focus. These panels now use a separate higher display layer instead of relying on fixed frame levels.
-- Opening Store closes Adoption, and opening Adoption closes Store, keeping the chosen panel in front.
-- Keeps the adoption crate names, restored scene backgrounds and ledger overlap fixes from 0.13.3.
+- Added Happiness and Energy alongside Health and Food in the compact camp view, with two rows of meters and the same overall compass height.
+- Added pixel status cues in both camp views: floating Zs while resting, a hunger zigzag below 25 food, and an anger mark below 25 happiness. Hover each symbol for details.
+- Cues clear after care, stay hidden for absent companions and tower battles, and remain still with reduced motion enabled.
 
-Run `/reload`. Regression checks cover reopening and switching panels after the Pets frame has been raised. The final window appearance needs an in-game check. This remains a preview release.
+Run `/reload`. Addon regressions and Lua 5.1 checks pass, including need thresholds, care clearing, animation movement, reduced motion and tower visibility. The final layout and animation still need an in-game check. This remains a preview release.

@@ -41,6 +41,49 @@ local function meter(parent,x,y,width,label,color)
   b.label=text(b,label,4,0,width-8,19,{1,1,1});return b
 end
 local function fill(bar,value,label)bar:SetValue(value or 0);bar.label:SetText(label)end
+-- Small pixel glyphs stay sharp without requiring a particular font or new artwork.
+local function pixelMark(parent,rows,color)
+  local mark=CreateFrame("Frame",nil,parent);mark:SetSize(#rows[1]*2,#rows*2)
+  for y,row in ipairs(rows)do for x=1,#row do if row:sub(x,x)=="1" then
+    local shadow=mark:CreateTexture(nil,"ARTWORK");shadow:SetColorTexture(0,0,0,0.85);shadow:SetSize(3,3);shadow:SetPoint("TOPLEFT",(x-1)*2+1,-(y-1)*2-1)
+    local pixel=mark:CreateTexture(nil,"OVERLAY");pixel:SetColorTexture(unpack(color));pixel:SetSize(2,2);pixel:SetPoint("TOPLEFT",(x-1)*2,-(y-1)*2)
+  end end end
+  mark:EnableMouse(true);mark:Hide();return mark
+end
+local function buildNeeds(f)
+  f.needs={sleep={}}
+  for i=1,3 do
+    local z=pixelMark(f,{"11111","00010","00100","01000","11111"},{0.7,0.85,1,1})
+    tip(z,"Sleeping","Resting restores energy, and restores health while food is at least 25. Click Rest to wake.")
+    f.needs.sleep[i]=z
+  end
+  f.needs.hungry=pixelMark(f,{"11000000","01100000","00110000","00011000","00110000","01100000","00110000","00011000"},{1,0.8,0.25,1})
+  tip(f.needs.hungry,"Hungry","Food is below 25. Feed your pet; below 10 food it loses health.")
+  f.needs.angry=pixelMark(f,{"00010001000","00010001000","11110001111","00000000000","00000000000","11110001111","00010001000","00010001000"},{1,0.35,0.25,1})
+  tip(f.needs.angry,"Unhappy","Happiness is below 25. Play with your pet using a chew toy.")
+end
+local function updateNeeds(f,t,motion)
+  local pet=f.needsPet
+  local alive=pet and not pet.deadAt and not f.tower
+  local cx,cy=f.width*0.5,-f.height*0.62
+  local head=cy+f.height*0.28
+  for i,z in ipairs(f.needs.sleep)do
+    local visible=alive and pet.resting
+    z:SetShown(not not visible)
+    if visible then
+      local phase=motion and (t/2.4+(i-1)/3)%1 or (i-1)/3
+      z:SetPoint("CENTER",f,"TOPLEFT",math.floor(cx+f.width*0.14+phase*18),math.floor(head+phase*24))
+      z:SetAlpha(motion and math.min(1,phase*6,(1-phase)*6) or 1)
+    end
+  end
+  local hungry=alive and (pet.food or 100)<25
+  local angry=alive and (pet.happy or 100)<25
+  f.needs.hungry:SetShown(not not hungry);f.needs.angry:SetShown(not not angry)
+  if hungry then f.needs.hungry:SetPoint("CENTER",f,"TOPLEFT",math.floor(cx-f.width*0.17+(motion and math.sin(t*5)*2 or 0)),math.floor(cy))end
+  if angry then
+    f.needs.angry:SetPoint("CENTER",f,"TOPLEFT",math.floor(cx-f.width*0.15),math.floor(head+(motion and math.sin(t*3)*2 or 0)))
+  end
+end
 local function updateOutcome(f)
   local now=P.sceneClock or 0
   for i,art in ipairs(f.enemies)do
@@ -67,6 +110,7 @@ local function stage(parent,x,y,width,height)
   -- Above the BackdropTemplate's fill, below the ARTWORK pet sprites.
   f.bg=f:CreateTexture(nil,"BORDER",nil,1);f.bg:SetPoint("TOPLEFT",6,-6);f.bg:SetPoint("BOTTOMRIGHT",-6,6)
   f.pet=sprite(f,height*0.88);f.enemies={};f.enemyHP={}
+  buildNeeds(f)
   for i=1,3 do f.enemies[i]=sprite(f,height*0.88);f.enemyHP[i]=meter(f,width*0.48+(i-1)*width*0.17,-36,width*0.15,"",{0.75,0.25,0.2})end
   f.enemy=f.enemies[1]
   f.leftHP=meter(f,10,-10,(width-30)/2,"",{0.25,0.65,0.4})
@@ -104,12 +148,13 @@ local function stage(parent,x,y,width,height)
       art:SetPoint("CENTER",self,"TOPLEFT",width*((self.enemyCount or 1)==1 and 0.73 or 0.54+(i-1)*0.17)-(event and event.actor==i and reply or 0),-height*0.65)
     end
     self.pet:SetVertexColor(1,event and event.actor~=0 and motion and 0.6 or 1,1)
+    updateNeeds(self,t,motion)
     updateOutcome(self)
   end)
   return f
 end
 local function renderStage(f,pet,tower)
-  f.tower=tower
+  f.tower=tower;f.needsPet=pet or false
   f.bg:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\PetScenes"..S.Faction()..".tga","CLAMP","CLAMP","NEAREST")
   f.bg:SetTexCoord(tower and 0.5 or 0,tower and 1 or 0.5,0.2,0.8);f.bg:SetAlpha(S.HighContrast() and 0.25 or 1)
   local b=P.state.battle;local result=tower and P.CurrentVictory()
@@ -135,6 +180,7 @@ local function renderStage(f,pet,tower)
     else fill(f.leftHP,b and b.hp/b.maxHP*100 or pet and pet.health or 0,"Your pet: "..math.floor(pet and pet.health or 0).."%")end
     f.caption:SetText(b and (b.paused and "Paused" or "Round "..(b.turn+1).." - 1 vs "..#enemies) or "Floor "..(P.floor or 1).." - "..P.FloorStatus(P.floor or 1))
   else f.caption:SetText(pet and (pet.resting and "Resting at camp" or P.rarities[pet.rarity].." "..P.species[pet.species]) or "Your next companion awaits")end
+  updateNeeds(f,P.sceneClock or 0,not F.db.settings.reduceMotion)
   updateOutcome(f)
 end
 local function careIcons(parent,x,y,size,gap)
@@ -170,9 +216,13 @@ function P.BuildCompass(parent)
   m.careButton=S.Button(m,"Camp",8,-8,80,function()P.miniMode="care";P.Render()end)
   m.towerButton=S.Button(m,"Tower",98,-8,80,function()P.miniMode="tower";P.Render()end)
   S.Button(m,"Open",188,-8,86,function()P.BuildUI();P.window:Show();P.mode=P.miniMode=="tower" and "tower" or "collection";P.Render()end)
-  m.scene=stage(m,8,-40,268,161)
-  m.stats=text(m,"",10,-206,264,20);m.stats:SetJustifyH("CENTER")
-  m.health=meter(m,10,-232,127,"",{0.25,0.65,0.4});m.food=meter(m,147,-232,127,"",{0.7,0.53,0.2})
+  m.scene=stage(m,8,-40,268,137)
+  m.stats=text(m,"",10,-182,264,20);m.stats:SetJustifyH("CENTER")
+  m.health=meter(m,10,-208,127,"",{0.25,0.65,0.4});m.food=meter(m,147,-208,127,"",{0.7,0.53,0.2})
+  m.happy=meter(m,10,-232,127,"",{0.4,0.6,0.8});m.energy=meter(m,147,-232,127,"",{0.55,0.4,0.7})
+  for _,entry in ipairs({{m.health,"Health"},{m.food,"Food"},{m.happy,"Happiness"},{m.energy,"Energy"}})do
+    entry[1]:EnableMouse(true);tip(entry[1],entry[2],"Out of 100. Use Feed, Play, Rest or Heal to care for your companion.")
+  end
   m.care=careIcons(m,20,-263,34,64);m.battle=fightIcons(m,37,-263,34,86);m.enter=m.battle[1]
   m.prev=S.Button(m,"<",10,-232,32,function()if not P.state.battle then P.floor=math.max(1,P.floor-1)end;P.Render()end)
   m.next=S.Button(m,">",242,-232,32,function()if not P.state.battle then P.floor=math.min(P.Unlocked(),P.floor+1)end;P.Render()end)
@@ -190,6 +240,8 @@ function P.RenderCompass()
   renderStage(m.scene,pet,tower)
   m.stats:SetText(pet and ("Lv "..pet.level.." | XP "..pet.xp.." | "..P.state.tokens.." tokens") or "A new friend for your journey")
   fill(m.health,pet and pet.health or 0,"Health "..math.floor(pet and pet.health or 0));fill(m.food,pet and pet.food or 0,"Food "..math.floor(pet and pet.food or 0))
+  fill(m.happy,pet and pet.happy or 0,"Happy "..math.floor(pet and pet.happy or 0));fill(m.energy,pet and pet.energy or 0,"Energy "..math.floor(pet and pet.energy or 0))
+  m.happy:SetShown(not tower);m.energy:SetShown(not tower)
   m.health:SetShown(not tower);m.food:SetShown(not tower);m.prev:SetShown(tower);m.next:SetShown(tower);m.floor:SetShown(tower)
   m.floor:SetText("Floor "..(b and b.floor or P.floor).." | "..P.FloorStatus(b and b.floor or P.floor))
   for _,control in ipairs(m.care)do shown(control,not tower and pet~=nil)end
