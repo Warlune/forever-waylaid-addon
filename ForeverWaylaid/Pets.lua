@@ -1,6 +1,6 @@
 local _,F=...
 local P={};F.Pets=P
-P.species={"Murloc","Whelp","Wolf pup","Owl"}
+P.species=F.PetData.names
 P.rarities={"Common","Uncommon","Rare","Epic","Legendary"}
 P.colors={{0.9,0.9,0.9},{0.2,1,0.2},{0.3,0.6,1},{0.8,0.4,1},{1,0.6,0.15}}
 P.items={food={name="Trail treats",cost=2},toy={name="Chew toy",cost=3},medicine={name="Healing herbs",cost=4}}
@@ -33,7 +33,7 @@ function P.EligibleKill(guid)
   return math.abs(diff)<=5 and not (diff < -4 and -diff>grayRange)
 end
 local function validSave(s)
-  if type(s)~="table" or s.version~=1 or type(s.pets)~="table" or #s.pets>128 or type(s.inventory)~="table" then return false end
+  if type(s)~="table" or s.version~=1 or type(s.pets)~="table" or #s.pets>512 or type(s.inventory)~="table" then return false end
   for _,key in ipairs({"tokens","nextID","playSeconds","rewardSeconds"})do
     local n=s[key];if type(n)~="number" or n~=n or n<0 or n>1e12 then return false end
   end
@@ -41,7 +41,7 @@ local function validSave(s)
   for key in pairs(P.items)do if not whole(s.inventory[key],0,10000000)then return false end end
   local ids={}
   for _,pet in ipairs(s.pets)do
-    if type(pet)~="table" or not whole(pet.id,1,1000000) or ids[pet.id] or not whole(pet.species,1,4)
+    if type(pet)~="table" or not whole(pet.id,1,1000000) or ids[pet.id] or not whole(pet.species,1,100)
       or not whole(pet.rarity,1,5) or not whole(pet.level,1,100) or not whole(pet.best,0,100) or not whole(pet.wins,0,10000000)then return false end
     ids[pet.id]=true
     for _,key in ipairs({"health","food","happy","energy","age","born","xp"})do
@@ -62,6 +62,12 @@ function P.Init()
   end
   if invalid then P.notice="Unreadable pet save preserved in a backup. Started a fresh stable." end
   s.review=nil;s.seal=nil -- Retire preview integrity flags; this is a personal game.
+  s.packs=type(s.packs)=="table" and s.packs or {}
+  for i=1,6 do if not whole(s.packs[i],0,100000)then s.packs[i]=0 end end
+  s.bossClaims=type(s.bossClaims)=="table" and s.bossClaims or {}
+  s.bossEggs=type(s.bossEggs)=="table" and s.bossEggs or {}
+  for key,value in pairs(s.bossEggs)do if not whole(key,85,100) or not whole(value,0,100000)then s.bossEggs[key]=nil end end
+  for key,value in pairs(s.bossClaims)do if type(key)~="string" or type(value)~="number" or value~=value or F.Now()-value>604800 then s.bossClaims[key]=nil end end
   P.state=s
   -- Quitting mid-fight counts as a retreat, never a free healed battle.
   if s.battle then s.battle=nil;P.notice="Your pet retreated when the session ended." end
@@ -74,22 +80,9 @@ function P.Die(pet,reason)
   pet.health=0;pet.deadAt=F.Now();pet.deathReason=reason;P.state.battle=nil
   P.notice=P.species[pet.species].." has died. Its level and lifespan are kept in the memorial."
 end
-function P.Adopt()
-  local s=P.state
-  if s.battle then return false,"Finish or retreat from the battle first." end
-  if #s.pets>=128 then return false,"The collection and memorial are full (128 records)." end
-  local living=0;for _,pet in ipairs(s.pets)do if not pet.deadAt then living=living+1 end end
-  if living>=24 then return false,"Your stable holds 24 living pets." end
-  local cost=living==0 and 0 or 25
-  if s.tokens<cost then return false,"Adoption costs 25 pet tokens." end
-  local roll=P.random(1,100);local rarity=roll<=55 and 1 or roll<=80 and 2 or roll<=94 and 3 or roll<=99 and 4 or 5
-  local pet={id=s.nextID,species=P.random(1,4),rarity=rarity,level=1,xp=0,health=100,food=100,happy=100,energy=100,born=F.Now(),age=0,best=0,wins=0}
-  s.nextID=s.nextID+1;s.tokens=s.tokens-cost;s.pets[#s.pets+1]=pet;s.active=pet.id
-  P.notice="Adopted a "..P.rarities[rarity].." "..P.species[pet.species].."!";return true
-end
 function P.Select(id)
   if P.state.battle then return false,"Finish or retreat from the battle first." end
-  for _,pet in ipairs(P.state.pets)do if pet.id==id and not pet.deadAt then P.state.active=id;return true end end
+  for _,pet in ipairs(P.state.pets)do if pet.id==id and not pet.deadAt then P.state.active=id;P.floor=math.min(100,pet.best+1);P.notice="Equipped "..P.species[pet.species]..".";return true end end
   return false,"This pet is in the memorial. Death is permanent."
 end
 function P.Buy(item)
@@ -113,9 +106,10 @@ function P.Tick(seconds)
   local s=P.state
   seconds=math.max(0,math.min(5,seconds)) -- No offline catch-up or long loading-screen penalties.
   local pet=P.Active()
+  s.rewardSeconds=s.rewardSeconds+seconds
+  if s.rewardSeconds>=300 then s.tokens=s.tokens+math.floor(s.rewardSeconds/300)*2;s.rewardSeconds=s.rewardSeconds%300 end
   if pet then
-    s.playSeconds=s.playSeconds+seconds;s.rewardSeconds=s.rewardSeconds+seconds
-    if s.rewardSeconds>=300 then s.tokens=s.tokens+math.floor(s.rewardSeconds/300);s.rewardSeconds=s.rewardSeconds%300 end
+    s.playSeconds=s.playSeconds+seconds
     pet.age=pet.age+seconds
     if not s.battle then
       pet.food=clamp(pet.food-seconds/300);pet.happy=clamp(pet.happy-seconds/450)
@@ -125,14 +119,6 @@ function P.Tick(seconds)
       if pet.health<=0 then P.Die(pet,"Neglect")end
     end
   end
-end
-function P.Enemy(floor)
-  if not whole(floor,1,100)then return end
-  local boss=floor%10==0
-  return {floor=floor,maxHP=math.floor((30+floor*6)*(boss and 1.25 or 1)),attack=4+math.floor(floor*1.5),boss=boss,species=(floor-1)%4+1}
-end
-function P.Stats(pet)
-  return 30+pet.level*6+pet.rarity*4,6+math.floor(pet.level*1.7)+pet.rarity*2
 end
 function P.AddXP(pet,amount)
   if not pet or pet.deadAt or pet.level>=100 then return 0 end
@@ -167,50 +153,6 @@ function P.CombatKill(event,sourceGUID,destGUID)
   P.AddXP(pet,amount)
   P.notice="+"..amount.." pet XP: "..(isPlayer and "PvP kill" or "NPC kill").."."
 end
-function P.StartBattle(floor)
-  local pet=P.Active();local enemy=P.Enemy(floor)
-  if not pet or not enemy then return false,"Select a living pet and a floor from 1 to 100." end
-  if P.state.battle then return false,"A battle is already active." end
-  if floor>pet.best+1 then return false,"Clear the previous floor first." end
-  if pet.health<40 or pet.energy<15 or pet.food<15 then return false,"Prepare your pet: 40 health, 15 energy and 15 food required." end
-  local hp,attack=P.Stats(pet);pet.energy=pet.energy-15;pet.food=clamp(pet.food-5);pet.resting=false
-  enemy.hp=enemy.maxHP
-  P.state.battle={petID=pet.id,enemy=enemy,hp=math.ceil(hp*pet.health/100),maxHP=hp,attack=attack,turn=0,cooldown=0,elapsed=0,paused=false}
-  P.lastRound=nil
-  P.notice="Battle started. Your companion fights automatically. Retreat is always available.";return true
-end
-function P.BattleAction(action)
-  local s=P.state;local b=s.battle;local pet=P.Active()
-  if not b or not pet or pet.id~=b.petID then return false,"No active battle." end
-  if action=="retreat" then s.battle=nil;P.notice="Retreated safely. Spent energy and supplies are not refunded.";return true end
-  if action~="strike" and action~="guard" and action~="burst" and action~="heal" then return false,"Unknown action." end
-  if action=="burst" and b.cooldown>0 then return false,"Special attack is cooling down." end
-  if action=="heal" and s.inventory.medicine<1 then return false,"No healing herbs." end
-  local round={at=P.sceneClock or 0,action=action,enemy=b.enemy,pet=pet,beforeHP=b.hp,beforeEnemyHP=b.enemy.hp,maxHP=b.maxHP}
-  P.lastRound=round
-  local charging=(b.turn+1)%3==0
-  b.cooldown=math.max(0,b.cooldown-1)
-  if action=="heal" then s.inventory.medicine=s.inventory.medicine-1;b.hp=math.min(b.maxHP,b.hp+math.ceil(b.maxHP*0.4))
-  elseif action~="guard" then
-    b.enemy.hp=math.max(0,b.enemy.hp-math.floor(b.attack*(action=="burst" and 1.7 or 1)*(0.85+P.random(0,30)/100)))
-    if action=="burst" then b.cooldown=3 end
-  end
-  b.turn=b.turn+1
-  round.hit=math.max(0,round.beforeEnemyHP-b.enemy.hp);round.heal=math.max(0,b.hp-round.beforeHP)
-  if b.enemy.hp<=0 then
-    local first=b.enemy.floor>pet.best;pet.best=math.max(pet.best,b.enemy.floor);pet.wins=pet.wins+1
-    P.AddXP(pet,math.floor((15+b.enemy.floor*3)*(first and 1 or 0.35)))
-    s.tokens=s.tokens+(first and 8+math.floor(b.enemy.floor/10) or 1);pet.happy=clamp(pet.happy+8)
-    pet.health=clamp(b.hp/b.maxHP*100);s.battle=nil
-    P.notice=pet.best==100 and "Tower conquered! All 100 floors cleared." or "Victory! Earned pet XP and tokens.";return true
-  end
-  local damage=math.max(1,math.floor(b.enemy.attack*(charging and 1.7 or 1)*(action=="guard" and 0.3 or 1)))
-  b.hp=math.max(0,b.hp-damage);pet.health=b.hp/b.maxHP*100
-  round.hurt=damage
-  P.notice="Enemy hit for "..damage..". "..((b.turn+1)%3==0 and "Heavy attack next turn: consider Guard!" or "Choose your next action.")
-  if b.hp<=0 then P.Die(pet,"Tower floor "..b.enemy.floor)end
-  return true
-end
 function P.UseCare(item)
   if not P.Active() or P.state.battle then return P.Care(item)end
   if P.items[item] and P.state.inventory[item]<1 then
@@ -223,16 +165,6 @@ end
 function P.PauseBattle()
   if not P.state.battle then return false,"Start a battle first." end
   P.state.battle.paused=not P.state.battle.paused;return true
-end
-function P.AdvanceBattle(dt,visible)
-  local b=P.state and P.state.battle
-  if not b or b.paused or not visible then return end
-  b.elapsed=(b.elapsed or 0)+math.min(dt,0.25)
-  if b.elapsed<1.6 then return end
-  b.elapsed=0 -- Never fast-forward unseen turns after a loading screen.
-  local action=(b.turn+1)%3==0 and "guard" or b.hp<b.maxHP*0.5 and P.state.inventory.medicine>0 and "heal" or b.cooldown==0 and "burst" or "strike"
-  P.BattleAction(action)
-  if P.Render then P.Render()end
 end
 function P.Age(seconds)
   return string.format("%dh %02dm",math.floor(seconds/3600),math.floor(seconds/60)%60)
@@ -258,7 +190,7 @@ function P.SetSharing(enabled)
 end
 function P.Packet()
   local p=P.Active();if not p then return end
-  return table.concat({"2",p.species,p.rarity,p.level,math.floor(p.age),p.best,p.wins},",")
+  return table.concat({"3",p.species,p.rarity,p.level,math.floor(p.age),p.best,p.wins},",")
 end
 function P.InspectTarget()
   if not P.state.share then return false,"Enable pet sharing before inspecting another player." end
@@ -267,7 +199,7 @@ function P.InspectTarget()
   if not name or name=="" or not P.RegisterSharing() then return false,"Pet inspection is unavailable." end
   if P.nextInspect and F.Now()<P.nextInspect then return false,"Wait a few seconds before inspecting again." end
   P.nextInspect=F.Now()+5;P.pendingInspect={name=peerKey(name),expires=F.Now()+10}
-  local ok=pcall(C_ChatInfo.SendAddonMessage,prefix,"ASK2","WHISPER",name)
+  local ok=pcall(C_ChatInfo.SendAddonMessage,prefix,"ASK3","WHISPER",name)
   if not ok then P.pendingInspect=nil;return false,"Could not request this player's pet." end
   P.notice="Requested pet from "..name..". They need pet sharing enabled.";return true
 end
@@ -277,20 +209,20 @@ function P.Receive(message,channel,sender)
   if sender==(UnitName and UnitName("player"))then return end
   local now=F.Now()
   if channel=="WHISPER" then
-    if message=="ASK2" then
+    if message=="ASK3" then
       if not P.RegisterSharing() or now<(P.nextReply or 0) or now-(P.replyTimes[sender] or -1000)<30 then return end
       P.replyTimes[sender]=now;P.nextReply=now+1
-      pcall(C_ChatInfo.SendAddonMessage,prefix,P.Packet() or "NONE2","WHISPER",sender);return
+      pcall(C_ChatInfo.SendAddonMessage,prefix,P.Packet() or "NONE3","WHISPER",sender);return
     end
     if not P.pendingInspect or now>P.pendingInspect.expires or peerKey(sender)~=P.pendingInspect.name then return end
-    if message=="NONE2" then P.pendingInspect=nil;P.notice=sender.." has no active companion.";return end
+    if message=="NONE3" then P.pendingInspect=nil;P.notice=sender.." has no active companion.";return end
   elseif channel~="PARTY" and channel~="RAID" and channel~="GUILD" then return end
   local prior=P.peers[sender]
   if channel~="WHISPER" and prior and now-prior.seen<30 then return end
   local version,sp,rar,lv,age,best,wins=message:match("^(%d+),(%d+),(%d+),(%d+),(%d+),(%d+),(%d+)$")
-  if version~="2" then return end
+  if version~="3" then return end
   sp,rar,lv,age,best,wins=tonumber(sp),tonumber(rar),tonumber(lv),tonumber(age),tonumber(best),tonumber(wins)
-  if not (whole(sp,1,4) and whole(rar,1,5) and whole(lv,1,100) and whole(age,0,315360000) and whole(best,0,100) and whole(wins,0,10000000)) then return end
+  if not (whole(sp,1,100) and whole(rar,1,5) and whole(lv,1,100) and whole(age,0,315360000) and whole(best,0,100) and whole(wins,0,10000000)) then return end
   local count=0;for _ in pairs(P.peers)do count=count+1 end
   if count>=40 and not prior then
     if channel~="WHISPER" then return end

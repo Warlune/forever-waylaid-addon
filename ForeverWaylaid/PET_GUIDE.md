@@ -1,0 +1,61 @@
+# Waylaid companions — 0.13.0 preview
+
+Open **Pets → Adopt**, choose a pack, then select the new companion in the stable and click **Equip**. Browsing a pet does not change the equipped companion. The first living companion is equipped automatically. The compass and large window share the same pet and battle.
+
+## Packs and collection
+
+All 100 species are Warcraft creatures. The 84 regular species are equally likely within every pack. The remaining 16 are raid rewards. Rarity is rolled separately from species; duplicates are possible. Packs use only virtual pet tokens, never real money or in-game gold.
+
+| Pack | Tokens | Common | Uncommon | Rare | Epic | Legendary |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Traveler's Satchel | 25 | 90% | 10% | — | — | — |
+| Scout's Satchel | 40 | 75% | 20% | 5% | — | — |
+| Adventurer's Crate | 55 | 50% | 35% | 10% | 5% | — |
+| Veteran's Cache | 70 | 25% | 45% | 20% | 9% | 1% |
+| Champion's Cache | 85 | 10% | 40% | 30% | 17% | 3% |
+| Azeroth's Reliquary | 100 | — | 30% | 40% | 25% | 5% |
+
+Earned packs are opened free before charging tokens for that pack type. If no living pets remain, **Free common rescue** supplies a common companion without spending tokens. Old pets, rarity, progress and memorial records are preserved. The stable holds 100 living pets and 512 total living/memorial records.
+
+## Stats and abilities
+
+Every pet has max HP, attack, armor (percentage damage reduction), and speed. These depend on its creature family, rarity and level; reopening the addon never rerolls them. Higher speed acts first; ties favor the pet. Common and Uncommon pets only have basic attacks, guard and supplies. Rare, Epic and Legendary pets also use their family's ability automatically, with a three-round cooldown:
+
+| Family | Ability | Effect |
+| --- | --- | --- |
+| Beast / Demon | Savage Bite / Fel Strike | 180% attack damage |
+| Swift | Flurry | 165% attack damage |
+| Dragon / Elemental | Dragon Breath / Elemental Nova | 90% attack damage to every enemy |
+| Nature | Wild Growth | 80% attack damage, restore 18% maximum HP |
+| Undead | Life Drain | 110% attack damage, heal for 60% of the hit |
+| Guardian / Mechanical | Iron Hide / Emergency Plating | Strike, reduce subsequent hits that round by 55% |
+
+## Tower and income
+
+Each pet starts with only floor 1 open. Defeat that floor to unlock the next, up to 100. Floors 1–33 have one opponent, 34–66 have two, and 67–100 have three. Every tenth floor has a boss. Enemy health and attack are split across the group rather than multiplied by its size. Each living actor gets a speed-ordered turn. The battle display animates those turns in sequence.
+
+The auto strategy guards each third round's heavy attacks, uses healing herbs below half HP, uses an available special, otherwise strikes. It does not start the next floor. You can pause or retreat. Hidden tower views pause combat; reloading retreats. **Defeat and starvation are permanent death.** Stabled and offline pets do not decay.
+
+- Starting wallet: 25 tokens (existing wallets unchanged).
+- Time online: 2 tokens per five minutes, even with an empty stable. Loading-screen gaps are capped, and offline time earns nothing.
+- First floor clear: `5 + floor(floor number / 10)` tokens and `30 + 6 × floor number` XP.
+- Repeated floor: 1 token and 40% of the first-clear XP.
+- Treats: 2 tokens; toys: 3; healing herbs: 4. Prepare between floors rather than entering injured.
+- Player killing blows: 3 XP for NPCs, 10 for players. Targets must be non-gray and within five character levels. Existing observation, repeat-target and rate limits still apply.
+
+Automated preview checks cover all 500 species/rarity combinations at level 100 on floor 100, plus a common Murloc's full first-clear climb with full care between floors. The deterministic final-floor checks used at most three herbs per encounter. These checks establish viability, not a guarantee of survival or final tuning.
+
+## Dungeon and raid rewards
+
+These are **virtual addon rewards**, separate from WoW loot. A matching `ENCOUNTER_START` and successful `ENCOUNTER_END` in a dungeon or raid are required. Wipes, outdoor elites, unpaired events and changing instances do not count.
+
+- Dungeon boss: 3 tokens, with a 20% chance for a free pack. That pack is Scout's (60%), Adventurer's (30%), or Veteran's (10%). One reward roll per boss per 24 hours.
+- Raid boss: 10 tokens, with a 5% chance for that boss's **Epic** companion when it is in the supported roster. One reward roll per boss per seven days.
+- The local reward cooldown is independent of the game's raid reset. Successful and failed rolls both consume it. It survives reload.
+- Boss companions wait in **Adopt → Claim raid companion** until claimed, including if the stable was full or a tower fight was active. Hover the button for the next waiting boss's name.
+
+Supported raid companions: Ragnaros, Onyxia, Nefarian, C'Thun, Kel'Thuzad, Hakkar, Ossirian the Unscarred, Lucifron, Magmadar, Gehennas, Garr, Baron Geddon, Shazzrah, Sulfuron Harbinger, Golemagg the Incinerator, and Majordomo Executus. These use English encounter names. Unknown encounters can earn tokens but never award a guessed boss pet. Forever must emit those encounter events; live dungeon/raid verification is still needed.
+
+## Sharing
+
+Opt-in inspection shows the equipped pet's species, rarity, level, stats, lifespan and tower progress. Both players need 0.13.0 or later. This is a personal collection game: no leaderboard, anti-cheat claims or real-game combat automation.

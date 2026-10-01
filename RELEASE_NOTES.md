@@ -1,10 +1,13 @@
-# Forever Waylaid 0.12.0 preview
+# Forever Waylaid 0.13.0 preview
 
-- Redesigned the companion game around illustrated pixel scenes, with separate Horde and Alliance camps and tower arenas. The faction debug preview also switches the scene.
-- Replaced the care button grid with four icon controls, hover details and supply costs. Empty supplies can be replenished with pet tokens directly from a care action; no real gold is used.
-- Added animated automatic tower fights in both compass and large views: lunging sprites, hit feedback, damage numbers and health bars. Choose a floor and Fight; Pause and Retreat are always available. One floor per click, no automatic next floor. Hidden tower views pause combat; long loading gaps never fast-forward it. Defeat remains permanent death.
-- Added a strict combat-XP level gate: enemy must be within five levels of your character and not gray. Unknown, stale or restricted levels are skipped. Kill XP still uses the supported standalone Forever event, not the restricted combat log.
-- Kept the personal stable, memorial and opt-in pet inspection. No leaderboard.
-- Tested gray/out-of-range boundaries, unknown and restricted levels, automatic boss combat, hidden/explicit pause, loading gaps, faction scenes and both UI sizes. Live client layout, animation and XP testing still needed.
+- Added 100 Warcraft creature designs, including 16 supported raid bosses, with transparent pixel sprites.
+- Added an Adopt screen with six 25–100 token packs, visible exact odds, free earned packs and a common rescue when no pets survive.
+- Stable clicks now preview; Equip explicitly selects the traveling pet. HP, attack, armor, speed and rare-or-higher family abilities are visible.
+- Tower floors unlock sequentially. Higher floors have up to three opponents, with speed-ordered turns animated in the compass and large arena.
+- Retuned XP, token income, family stats and encounter budgets. Permanent death remains; prepare between floors and retreat when needed.
+- Added virtual dungeon pack rewards and supported raid-boss companion rewards from successful paired encounter events, with persistent reward cooldowns.
+- Preserved existing companions and memorials. Expanded stable limits and updated opt-in inspection for the new roster.
 
-After updating, use `/reload`, then **Pet** on the compass or **Pets** in the ledger. This is still a **0.x preview**, not 1.0.
+Run `/reload`, then `/fwl pets` and choose Adopt. Selecting a pet previews it; Equip makes it the active companion. Boss drops depend on Forever emitting encounter events and still need live dungeon/raid testing. See `ForeverWaylaid/PET_GUIDE.md` for odds, costs and limitations.
+
+Validation: Lua 5.1 syntax, addon regression suite, all six pack boundaries, 500 level-100 species/rarity final-floor matchups, a 100-floor common-pet climb with care, multi-enemy turn ordering, boss event/cooldown tests, and UI smoke checks. Live animation/layout and reward pacing still need player testing. This remains a preview, not a 1.0 release.
