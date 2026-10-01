@@ -1,9 +1,8 @@
-# Forever Waylaid 0.13.9 preview
+# Forever Waylaid 0.13.10 preview
 
-- Rebuilt tower health displays with Forever's native target-frame artwork: colored nameplates, round pet portraits, level badges, green health bars, percentage and actual current HP.
-- Elite enemies use the full native gold dragon around their portrait. Their health stays green, and the lower strip identifies them as ELITE. Enemy badges show the tower floor; pet badges show the pet level.
-- Hover a frame for the full creature name and current / maximum HP. The pet's lower strip shows its energy; enemies do not display a fake mana bar.
-- Supporting enemies get separate frames in a second row. The compass grows only in Tower view to leave room for the frames and battle animation; Camp keeps its compact layout.
-- Damage and defeated-enemy visibility follow the displayed battle turns. Elite difficulty, rewards, manual healing and permanent death are unchanged.
+- Both tower views now show whether the pet is ready to fight, or the exact missing health, energy and food requirements.
+- Hover Fight for recovery guidance. A rejected click explains what to do instead of only listing generic minimums.
+- Fight still requires 40 health, 15 energy and 15 food; starting costs 15 energy and 5 food. Rest in Camp to restore energy. Balance and saved pets are unchanged.
+- Regression checks exercise the actual Fight handlers in the large window and compass, including insufficient energy, exact-threshold starts, no resource cost on rejection and automatic battle turns.
 
-Run `/reload` after updating. Addon tests, Lua 5.1 syntax and runtime packaging checks pass. Native artwork positioning still needs an in-game visual check. This remains a 0.x preview, not a 1.0 release.
+Run `/reload` after updating. This remains a 0.x preview release.

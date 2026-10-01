@@ -1,4 +1,4 @@
-# Waylaid companions — 0.13.9 preview
+# Waylaid companions — 0.13.10 preview
 
 Open **Pets → Adopt**, choose a adoption crate, then select the new companion in the stable and click **Equip**. Browsing a pet does not change the equipped companion. The first living companion is equipped automatically. The compass and large window share the same pet and battle.
 
@@ -37,6 +37,8 @@ Every pet has max HP, attack, armor (percentage damage reduction), and speed. Th
 | Guardian / Mechanical | Iron Hide / Emergency Plating | Strike, reduce subsequent hits that round by 55% |
 
 ## Tower and income
+
+Starting a fight requires at least 40 health, 15 energy and 15 food. Both tower views show what is missing next to the Fight controls; hover Fight for recovery instructions. Rest in Camp to restore energy, feed for food, and heal or rest for health. Starting a fight spends 15 energy and 5 food.
 
 Each pet starts with only floor 1 open. Defeat that floor to unlock the next, up to 100. Floors 1–33 have one opponent, 34–66 have two, and 67–100 have three. Every tenth floor (10 through 100) has an elite leader: its encounter gets 55% more health and 25% more attack than the ordinary formula for that floor. The leader has 3 extra armor and a 185% heavy attack every third round (ordinary enemies use 160%). Later elite floors include one or two weaker supporting enemies. Health and attack are split across the group rather than multiplied by its size, with the elite receiving the largest share. The elite is larger and has a gold dragon around its portrait and an ELITE label. Tower unit frames use the client's target-frame artwork, green health bars, percentage and current HP, round portraits and level badges (tower floor for enemies). Hover for full names and current / maximum HP. Each living actor gets a speed-ordered turn. The battle display animates those turns in sequence.
 

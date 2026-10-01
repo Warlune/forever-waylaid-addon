@@ -112,12 +112,28 @@ function P.Enemies(floor)
   return result
 end
 function P.Enemy(floor)local enemies=P.Enemies(floor);return enemies and enemies[1]end
+function P.BattleReadiness(floor)
+  local pet=P.Active()
+  if not pet or not integer(floor,1,100) then return false,"Equip a living pet and select a floor from 1 to 100.","Equip a living pet" end
+  if P.state.battle then return false,"A battle is already active.",P.state.battle.paused and "Battle paused" or "Battle in progress" end
+  if floor>P.Unlocked()then return false,"Clear the previous floor first.","Clear the previous floor first" end
+  local needs,help={},{}
+  for _,rule in ipairs({{"health",40,"Health","Heal or rest in Camp"},{"energy",15,"Energy","Rest in Camp"},{"food",15,"Food","Feed your pet"}})do
+    if pet[rule[1]]<rule[2] then
+      needs[#needs+1]=rule[3].." "..math.floor(pet[rule[1]]).."/"..rule[2]
+      help[#help+1]=rule[4]
+    end
+  end
+  if #needs>0 then
+    local summary="Need: "..table.concat(needs," | ")
+    return false,summary..". "..table.concat(help,"; ").." before fighting.",summary
+  end
+  return true,"Ready. Starting a fight costs 15 energy and 5 food. Defeat is permanent.","Ready to fight"
+end
 function P.StartBattle(floor)
+  local ready,message=P.BattleReadiness(floor)
+  if not ready then return false,message end
   local pet=P.Active();local enemies=P.Enemies(floor)
-  if not pet or not enemies then return false,"Equip a living pet and select a floor from 1 to 100." end
-  if P.state.battle then return false,"A battle is already active." end
-  if floor>P.Unlocked()then return false,"Clear the previous floor first." end
-  if pet.health<40 or pet.energy<15 or pet.food<15 then return false,"Prepare your pet: 40 health, 15 energy and 15 food required." end
   local hp,attack,armor,speed=P.Stats(pet)
   pet.energy=pet.energy-15;pet.food=clamp(pet.food-5);pet.resting=false
   for _,enemy in ipairs(enemies)do enemy.hp=enemy.maxHP end

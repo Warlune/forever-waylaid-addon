@@ -27,11 +27,11 @@ jobs:
         run: |
           node tools/package-addon.mjs
           cd release/stage
-          zip -r ../ForeverWaylaid-0.13.9.zip ForeverWaylaid README.md LICENSE RELEASE_NOTES.md
+          zip -r ../ForeverWaylaid-0.13.10.zip ForeverWaylaid README.md LICENSE RELEASE_NOTES.md
       - uses: actions/upload-artifact@v4
         with:
-          name: ForeverWaylaid-0.13.9
-          path: release/ForeverWaylaid-0.13.9.zip
+          name: ForeverWaylaid-0.13.10
+          path: release/ForeverWaylaid-0.13.10.zip
   release:
     if: startsWith(github.ref, 'refs/tags/')
     needs: verify
@@ -42,9 +42,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: ForeverWaylaid-0.13.9
+          name: ForeverWaylaid-0.13.10
           path: release
       - name: Publish preview
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" release/ForeverWaylaid-0.13.9.zip --verify-tag --title "Forever Waylaid 0.13.9 preview" --notes-file RELEASE_NOTES.md --prerelease
+        run: gh release create "$GITHUB_REF_NAME" release/ForeverWaylaid-0.13.10.zip --verify-tag --title "Forever Waylaid 0.13.10 preview" --notes-file RELEASE_NOTES.md --prerelease

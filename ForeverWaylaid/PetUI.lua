@@ -279,7 +279,10 @@ local function careIcons(parent,x,y,size,gap)
 end
 local function fightIcons(parent,x,y,size,gap)
   return {
-    icon(parent,"fight","Fight",x,y,size,function()return P.StartBattle(P.floor or 1)end,"Fight one floor automatically. Attacks and guards are automatic; healing requires your click. Defeat is permanent death."),
+    icon(parent,"fight","Fight",x,y,size,function()return P.StartBattle(P.floor or 1)end,function()
+      local _,message=P.BattleReadiness(P.floor or 1)
+      return message.."\nAttacks and guards are automatic; healing requires your click."
+    end),
     icon(parent,"pause","Pause",x+gap,y,size,P.PauseBattle,"Pause or resume this pet battle. Hidden battle views pause automatically."),
     icon(parent,"medicine","Heal",x+gap*2,y,size,P.RequestHeal,function()
       local _,description=P.HealChoice()
@@ -302,6 +305,7 @@ function P.BuildCompass(parent)
   m.scene=stage(m,8,-40,268,137)
   m.footer=CreateFrame("Frame",nil,m);m.footer:SetSize(284,356);m.footer:SetPoint("TOPLEFT")
   m.stats=text(m.footer,"",10,-182,264,20);m.stats:SetJustifyH("CENTER")
+  m.readiness=text(m.footer,"",10,-205,264,22);m.readiness:SetJustifyH("CENTER");m.readiness:SetMaxLines(1)
   m.health=meter(m.footer,10,-208,127,"",{0.25,0.65,0.4});m.food=meter(m.footer,147,-208,127,"",{0.7,0.53,0.2})
   frameHealth(m.health)
   m.happy=meter(m.footer,10,-232,127,"",{0.4,0.6,0.8});m.energy=meter(m.footer,147,-232,127,"",{0.55,0.4,0.7})
@@ -334,6 +338,8 @@ function P.RenderCompass()
   m.happy:SetShown(not tower);m.energy:SetShown(not tower)
   m.health:SetShown(not tower);m.food:SetShown(not tower);m.prev:SetShown(tower);m.next:SetShown(tower);m.floor:SetShown(tower)
   m.floor:SetText("Floor "..(b and b.floor or P.floor).." | "..P.FloorStatus(b and b.floor or P.floor))
+  local ready,_,summary=P.BattleReadiness(P.floor or 1)
+  m.readiness:SetShown(tower);m.readiness:SetText(summary);S.TextColor(m.readiness,ready and {0.4,1,0.4} or S.gold)
   for _,control in ipairs(m.care)do shown(control,not tower and pet~=nil)end
   for _,control in ipairs(m.battle)do shown(control,tower and pet~=nil)end
   m.enter:SetEnabled(not b);m.battle[2].label:SetText(b and b.paused and "Resume" or "Pause")
@@ -360,6 +366,7 @@ function P.BuildUI()
   frameHealth(w.health)
   w.happy=meter(w,20,-414,220,"",{0.4,0.6,0.8});w.energy=meter(w,256,-414,220,"",{0.55,0.4,0.7})
   w.care=careIcons(w,50,-454,45,112);w.fight=fightIcons(w,75,-454,45,145)
+  w.readiness=text(w,"",20,-433,456,20);w.readiness:SetJustifyH("CENTER");w.readiness:SetMaxLines(1)
   w.side=S.Panel(w,492,-94,268,424)
   w.name=text(w.side,"",14,-14,240,46);w.meta=text(w.side,"",14,-60,240,82,S.muted)
   tip(w.side,"Pet progression","Tower victories earn XP. Your NPC kills give 3 XP; PvP kills give 10. Enemy levels must be within five of your character and not gray. Unknown or restricted levels give no XP. Up to 60 combat XP per minute; repeat target cooldown: five minutes.")
@@ -512,6 +519,8 @@ function P.Render()
   for _,b in ipairs({w.health,w.food,w.happy,w.energy})do b:SetShown(not social and viewed==pet)end
   for _,b in ipairs(w.care)do shown(b,not tower and not social and viewed==pet and pet~=nil)end
   for _,b in ipairs(w.fight)do shown(b,tower)end
+  local ready,_,summary=P.BattleReadiness(P.floor or 1)
+  w.readiness:SetShown(tower);w.readiness:SetText(summary);S.TextColor(w.readiness,ready and {0.4,1,0.4} or S.gold)
   w.fight[1]:SetEnabled(not s.battle and pet~=nil);w.fight[2].label:SetText(s.battle and s.battle.paused and "Resume" or "Pause")
   w.fight[1].label:SetText(P.FloorStatus(P.floor)=="Completed" and "Replay" or "Fight")
   w.fight[2]:SetEnabled(s.battle~=nil);w.fight[3]:SetEnabled(s.battle~=nil)

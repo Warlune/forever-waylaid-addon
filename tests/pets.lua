@@ -291,6 +291,33 @@ assert(P.window.scene.leftHP.amount.text==tostring(event.hp),'Pet frame follows 
 for i=1,3 do assert(P.window.scene.enemyHP[i].amount.text==tostring(event.enemyHP[i]),'Enemy frames follow displayed damage independently')end
 P.BattleAction('retreat')
 -- A full first-clear climb is possible with a common rescue and regular care.
+do
+  local savedHealth,savedEnergy,savedFood=pet.health,pet.energy,pet.food
+  local savedFloor,savedMode,savedMini=P.floor,P.mode,P.miniMode
+  local savedNav,savedNavigator=F.char.navPets,F.db.settings.navigator
+  local savedWindow=P.window:IsShown()
+  for _,view in ipairs({'large','compass'})do
+    P.mode='tower';P.miniMode='tower';P.floor=10
+    P.window:SetShown(view=='large');P.ToggleCompass(view=='compass')
+    pet.health=69.82456;pet.energy=6.43784;pet.food=35.93186;P.Render()
+    local button=view=='large' and P.window.fight[1] or P.mini.enter
+    local status=view=='large' and P.window.readiness or P.mini.readiness
+    assert(status.text=='Need: Energy 6/15','Readiness explains the same low-energy state in both views')
+    button.scripts.OnClick()
+    assert(not P.state.battle and pet.energy==6.43784 and pet.food==35.93186,'Rejected clicks never consume resources')
+    assert(P.notice:find('Rest in Camp',1,true),'Rejected fight tells the player how to recover')
+    pet.energy=15;P.Render();assert(status.text=='Ready to fight')
+    button.scripts.OnClick()
+    assert(P.state.battle and pet.energy==0 and pet.food==30.93186,'Real button handler starts a fight at the exact threshold')
+    for tick=1,8 do P.AdvanceBattle(0.25,P.BattleVisible())end
+    assert(P.state.battle and P.state.battle.turn>0,'Both views advance the fight after the button click')
+    P.BattleAction('retreat')
+  end
+  pet.health,pet.energy,pet.food=savedHealth,savedEnergy,savedFood
+  P.floor,P.mode,P.miniMode=savedFloor,savedMode,savedMini
+  P.window:SetShown(savedWindow);P.ToggleCompass(savedNav);F.db.settings.navigator=savedNavigator
+end
+print('PASS: large and compass Fight clicks, explicit energy requirements, exact threshold, no failed-click costs and automatic turns')
 pet.species=1;pet.level=1;pet.rarity=1;pet.best=0;pet.xp=0;pet.wins=0
 local climbHerbs=0
 for floor=1,100 do
