@@ -1,8 +1,7 @@
-## 0.8.3 — Original auction scribes restored
+## 0.8.4 — Classic XP-style scan progress
 
-- Restored the original four-frame Horde and Alliance scribe artwork from the first Scan-tab release.
-- Restored the original playback: 0.48 seconds per frame idle, 0.22 seconds during scans.
-- Removed the experimental animation renderer. The Alliance appearance preview still switches the original faction sprites immediately.
-- Kept the muted faction colors, scan statistics, manual scanning and auction-addon coexistence settings.
+- Styled scan progress with the native Classic experience-bar trim and twenty cells.
+- Kept the yellow fill and continuous progress based on auctions processed.
+- Retained the original four-frame scribes and existing scanning behavior.
 
-Reload after installing; the addon should report v0.8.3.
+Reload after installing; the addon should report v0.8.4.

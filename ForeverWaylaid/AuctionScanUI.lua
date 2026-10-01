@@ -75,6 +75,29 @@ function F.InstallAuctionScanUI()
   bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
   bar:SetStatusBarColor(unpack(S.gold));bar:SetMinMaxValues(0,1);bar:SetValue(0)
   local bg=bar:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints();bg:SetColorTexture(0.18,0.13,0.08,1)
+  -- Native Classic XP-bar trim and nineteen dividers make twenty cells.
+  local xpTexture="Interface\\MainMenuBar\\UI-XP-Bar"
+  local left=bar:CreateTexture(nil,"OVERLAY")
+  left:SetTexture(xpTexture);left:SetSize(14,14)
+  left:SetPoint("RIGHT",bar,"LEFT",11,0)
+  left:SetTexCoord(0.1875,0.4375,0.015625,0.265625)
+  local right=bar:CreateTexture(nil,"OVERLAY")
+  right:SetTexture(xpTexture);right:SetSize(14,14)
+  right:SetPoint("LEFT",bar,"RIGHT",-11,0)
+  right:SetTexCoord(0.1875,0.4375,0.296875,0.546875)
+  local middle=bar:CreateTexture(nil,"OVERLAY")
+  middle:SetTexture("Interface\\MainMenuBar\\UI-XP-Mid")
+  middle:SetHorizTile(true)
+  middle:SetPoint("TOPLEFT",left,"TOPRIGHT")
+  middle:SetPoint("BOTTOMRIGHT",right,"BOTTOMLEFT")
+  for _,trim in ipairs({left,right,middle})do trim:SetVertexColor(0.7451,0.6353,0.5176)end
+  for i=1,19 do
+    local divider=bar:CreateTexture(nil,"OVERLAY")
+    divider:SetTexture(xpTexture);divider:SetSize(9,9)
+    divider:SetTexCoord(0.015625,0.15625,0.015625,0.171875)
+    divider:SetPoint("CENTER",bar,"LEFT",624*i/20,1)
+    divider:SetVertexColor(0.7451,0.6353,0.5176)
+  end
   ui.progress=bar
   ui.status=centered(page,"",-375,710,"GameFontHighlightSmall",S.gold);ui.status:SetHeight(30)
   ui.start=S.Button(page,"Scan auction house",0,0,200,F.StartNativeScan)
