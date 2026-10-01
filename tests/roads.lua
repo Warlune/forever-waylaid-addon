@@ -72,6 +72,35 @@ roads.Path=oldPath
 
 fixture({{{1454,0,0},{1454,0,10}},{{1454,10,0},{1454,10,10}}})
 assert(roads.Path(a,b)==nil,'Disconnected roads cannot be joined by proximity')
+F.roadData=reviewedData;roads.Invalidate()
+local forecourt=R.World({mapID=1411,x=0.465,y=0.139})
+local tower=R.World({mapID=1411,x=0.507,y=0.145})
+local shortCost,shortPath=roads.Path(forecourt,tower)
+assert(shortCost and #shortPath>0,'The reported forecourt position must connect to the tower approach')
+for _,step in ipairs(shortPath)do
+  assert(step.to.y<=0.14701,'Do not send the player south around the old forecourt detour')
+end
+local oldLines={}
+for _,line in ipairs(reviewedData.lines)do if line.name~='Zeppelin forecourt approach' then oldLines[#oldLines+1]=line end end
+F.roadData={lines=oldLines};roads.Invalidate()
+local detourCost=roads.Path(forecourt,tower)
+assert(detourCost and shortCost<detourCost,'The added northern connection must beat the old southern approach')
+
+local oldUpdate,oldNavigator,oldTaxi=F.UpdateGuidance,F.UpdateNavigator,UnitOnTaxi
+local replans,redraws=0,0
+local movingPlayer=point(0,0)
+F.guidance={origin=movingPlayer}
+R.Player=function()return movingPlayer end
+UnitOnTaxi=function()return false end
+F.UpdateGuidance=function()replans=replans+1;F.guidance={origin=movingPlayer}end
+F.UpdateNavigator=function()redraws=redraws+1 end
+F.RefreshMovingGuidance();assert(replans==0,'Standing still must not replan')
+movingPlayer=point(0,2);F.RefreshMovingGuidance();assert(replans==0,'Ignore tiny position changes')
+movingPlayer=point(0,4);F.RefreshMovingGuidance();assert(replans==1 and redraws==1,'Movement replans the active leg and refreshes its display')
+F.RefreshMovingGuidance();assert(replans==1,'Do not repeatedly replan the same position')
+movingPlayer=point(0,20);UnitOnTaxi=function()return true end
+F.RefreshMovingGuidance();assert(replans==1,'Keep booked flight guidance intact')
+F.UpdateGuidance,F.UpdateNavigator,UnitOnTaxi=oldUpdate,oldNavigator,oldTaxi
 for _,line in ipairs(reviewedData.lines)do
   assert(#line.points>=2 and type(line.name)=='string')
   for _,p in ipairs(line.points)do

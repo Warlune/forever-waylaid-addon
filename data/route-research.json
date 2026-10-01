@@ -101,6 +101,11 @@
     ],
     "method": "Manually trace visible road bends, then visually compare plotted polylines against the source maps. No player exploration, walking recorder, companion addon or client terrain extraction.",
     "limitations": "Approximate centerlines, no elevation/collision proof. No mapped tower ramps or building interiors. Unknown and off-road approach lines are suppressed. Other zones remain untraced.",
-    "verification": "Synthetic U-shaped obstacle, shared overlay geometry, compass waypoint progression, disconnected roads and unused taxi-node shortcut regression. In-game walking remains unverified."
+    "verification": "Synthetic U-shaped obstacle, shared overlay geometry, compass waypoint progression, disconnected roads and unused taxi-node shortcut regression. In-game walking remains unverified.",
+    "forecourtCorrection": {
+      "version": "0.9.14",
+      "evidence": "User in-game minimap screenshot, player at Durotar 46.5,13.9, showing a shorter northern approach toward the zeppelin than the traced southern loop.",
+      "change": "Added an explicit northern forecourt connection between the Orgrimmar road and existing tower approach. Coordinates beyond the shown position remain approximate; this is not general obstacle detection."
+    }
   }
 }

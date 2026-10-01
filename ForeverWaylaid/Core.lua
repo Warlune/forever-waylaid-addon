@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.9.13"
+F.version = "0.9.14"
 F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
 
 function F.ApplySettings()
@@ -93,10 +93,14 @@ events:SetScript("OnEvent", function(_, event, name, success,spellID)
 end)
 
 -- Navigation must continue while the ledger and world map are closed.
-local poseElapsed,routeElapsed=0,0
+local poseElapsed,routeElapsed,movingElapsed=0,0,0
 events:SetScript("OnUpdate",function(_,dt)
   if not F.ready then return end
-  poseElapsed=poseElapsed+dt;routeElapsed=routeElapsed+dt
+  poseElapsed=poseElapsed+dt;routeElapsed=routeElapsed+dt;movingElapsed=movingElapsed+dt
+  if movingElapsed>=0.5 then
+    movingElapsed=0
+    if routeElapsed<5 then F.RefreshMovingGuidance()end
+  end
   if poseElapsed>=0.05 then
     poseElapsed=0;F.UpdateCompassPose();F.DrawMinimap()
   end

@@ -40,7 +40,7 @@ function F.UpdateGuidance()
       break
     end
   end
-  F.guidance={stop=chosen,target=target,action=action,travelTarget=target,travelAction=action,steps=steps,seconds=seconds,flight=flight}
+  F.guidance={stop=chosen,target=target,action=action,origin=player,travelTarget=target,travelAction=action,steps=steps,seconds=seconds,flight=flight}
   local walk={}
   for _,step in ipairs(steps)do
     if step.mode~="Travel" then break end
@@ -54,6 +54,16 @@ function F.UpdateGuidance()
   if flight then
     F.flightGuidance={stop=chosen,target=flight.to,action="In flight",steps=steps,seconds=seconds,flight=flight,nextStep=flight}
   end
+end
+function F.RefreshMovingGuidance()
+  local guide=F.guidance
+  if not guide or not guide.origin or (UnitOnTaxi and UnitOnTaxi("player")) then return end
+  local player=F.Route.Player()
+  if not player or F.Route.Distance(player,guide.origin)<3 then return end
+  -- Replan only the active leg. Full delivery ordering remains on the
+  -- normal refresh/event schedule; standing still does no extra path work.
+  F.UpdateGuidance()
+  F.UpdateNavigator()
 end
 function F.AdvanceRoadGuidance(guide,player)
   local walk=guide.walkSteps or {}

@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.9.13 preview
+# Forever Waylaid — v0.9.14 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.9.13.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.9.14.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -138,7 +138,7 @@ Waiting for a cooldown is included in the estimate; the planner uses ordinary tr
 
 The compact compass map has **+ / −** buttons to step between world, continent and your current zone. Hover a button to see the next map. Your chosen zoom level stays in place while the route updates and follows your location when you change zones.
 
-**Road navigation:** selected roads in Orgrimmar, Durotar and Tirisfal are manually traced from revealed Forever map art. Walking distance, compass bends and all three map overlays use the same road geometry. The visible walking line starts at the live player position and drops completed segments; overlays refresh up to 20 times per second without recalculating the whole itinerary. Upcoming bends remain fixed, and leaving the mapped road does not create a new straight-line shortcut. Nearby off-road approaches are not assumed to be traversable: they show **Direction only** or **Join the mapped road**, with no solid ground line. Unmapped areas retain only a direct-distance estimate and destination bearing. Flight and public-transport lines remain schematic.
+**Road navigation:** selected roads in Orgrimmar, Durotar and Tirisfal are manually traced from revealed Forever map art. Walking distance, compass bends and all three map overlays use the same road geometry. The active leg is recalculated every half-second after at least three yards of movement; standing still and booked flights skip this extra work. The visible walking line starts at the live player position and drops completed segments; overlays refresh up to 20 times per second without recalculating the whole itinerary. Upcoming bends remain fixed, and leaving the mapped road does not create a new straight-line shortcut. Nearby off-road approaches are not assumed to be traversable: they show **Direction only** or **Join the mapped road**, with no solid ground line. Unmapped areas retain only a direct-distance estimate and destination bearing. Flight and public-transport lines remain schematic.
 
 **Route limits:** road coverage is partial, not a complete terrain navigation system. Map artwork does not establish collision, floor height, tower stairs or safe access through buildings; traced roads still need in-game verification. Walking uses a base running-speed estimate, flights use distance, and public transport uses approximate leg/dock times plus an average boarding wait. These are not live departure schedules. Transport endpoints were checked against published Forever build 1.60.1.70124 data and revealed maps; complete journeys still need in-game testing. The retained tram approaches and mage landing points also need verification against expanded city maps. Missing flight data can make the suggested route slower. Navigation requires your clicks; the addon never moves your character, buys a flight, casts a spell or consumes an item for you.
 

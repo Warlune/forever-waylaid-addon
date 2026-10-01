@@ -30,12 +30,16 @@ line(1454,"Valley of Wisdom road",{
   {40.5,44.0},{42.0,41.5},{42.5,38.0},{42.0,34.0},
 })
 line(1411,"Orgrimmar approach",{
-  {45.5,11.7},{46.1,15.4},{46.7,19.8},{47.3,24.7},{48.2,27.5},
+  {45.5,11.7},{45.9,14.0},{46.1,15.4},{46.7,19.8},{47.3,24.7},{48.2,27.5},
   {51.0,30.4},{52.2,33.2},{52.5,38.2},{52.4,42.2},{52.6,43.9},
 })
 -- The city exit is the only explicit connection between these two maps.
 F.roadData.lines[#F.roadData.lines+1]={name="Orgrimmar south gate",points={{1454,48.0,94.6},{1411,45.5,11.7}}}
 line(1411,"Zeppelin tower approach",{{46.1,15.4},{47.6,16.8},{48.8,16.5},{50.0,14.7},{50.7,14.5}})
+-- The open forecourt also has a northern approach. The player's in-game
+-- screenshot at 46.5,13.9 exposed the missing connection and southward detour.
+-- Keep this explicit local connection; do not infer shortcuts elsewhere.
+line(1411,"Zeppelin forecourt approach",{{45.9,14.0},{46.5,13.9},{47.5,13.9},{48.6,14.0},{50.0,14.7}})
 -- Tower ramps are not legible in the zone artwork: the last yards to the
 -- boarding point remain an unverified approach, never a claimed stair path.
 line(1411,"Razor Hill road",{
