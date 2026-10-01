@@ -177,3 +177,5 @@ assert(loadfile('tests/auction-ui.lua'))(F)
 assert(loadfile('tests/tooltips.lua'))(F)
 assert(loadfile('tests/settings.lua'))(F)
 assert(loadfile('tests/accessibility.lua'))(F)
+
+assert(loadfile('tests/requirements.lua'))(F)

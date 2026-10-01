@@ -261,11 +261,14 @@ local function sourceText(quote)
   return quote and quote.source.." • "..S.Age(quote.time) or "No price available"
 end
 local function itemLevel(item)
-  if item.level then return "Requires level "..item.level end
+  local function requirement(level)
+    return level>0 and "Requires level "..F.RequirementNumber(level,UnitLevel and UnitLevel("player")) or "No item level requirement"
+  end
+  if item.level then return requirement(item.level) end
   local info=C_Item and C_Item.GetItemInfo or GetItemInfo
   if info then
     local name,_,_,_,level=info(item.id)
-    if name and level then return level>0 and "Requires level "..level or "No item level requirement" end
+    if name and level then return requirement(level) end
   end
   return "Required level not cached"
 end

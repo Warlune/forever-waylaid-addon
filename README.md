@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.9.5 preview
+# Forever Waylaid — v0.9.6 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.9.5.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.9.6.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -30,7 +30,7 @@ The addon has no bundled auction prices or external price service. Until you sca
 
 The top **Goods: Buy at AH / Goods: Craft** button is independent of tooltip settings. Both modes keep the auction price of the writ or crate separate from the goods cost. Every row shows **Writ/Crate, Goods, and Total**, using full purchase value even for owned items. Missing either price always places an entry after fully priced entries, including when sorting by name. Green-to-red row colors match the website's relative cost-per-reward bands; unpriced, unverified-reward, and short-stock entries stay gray. Bands are calculated before filters, so searching does not change an item's value color.
 
-Craft mode uses the website's 208 verified recipes and 143 raw materials. The selected bundle's required professions and highest skill ranks appear at the top, including specialization notes. The header shows the writ/crate's required item level from the catalogue; this is separate from a recipe's profession skill rank. Unknown recipe ranks are explicitly labeled unverified. Each option includes a raw-material shopping list, bag counts and quantities still needed, vendor or auction sources, and an ordered crafting list with profession and skill requirements. Shared intermediate ingredients are combined before rounding to whole crafts. Variable yields use the guaranteed minimum; faction-only recipes are excluded for the other faction. Alternate root recipes are compared by stock availability and cost.
+Craft mode uses the website's 208 verified recipes and 143 raw materials. The selected bundle's required professions and highest skill ranks appear at the top, including specialization notes. The header shows the writ/crate's required item level from the catalogue; this is separate from a recipe's profession skill rank. Profession requirements compare your trained skill with the required rank: green when met, red with the missing points otherwise. Required character levels use the same colors and shortfall. These refresh on skill and level changes; unlearned professions are labeled, and unavailable readings stay unknown. High contrast keeps these comparisons in white with written status. Meeting a rank does not mean the recipe is learned. Unknown recipe ranks are explicitly labeled unverified. Each option includes a raw-material shopping list, bag counts and quantities still needed, vendor or auction sources, and an ordered crafting list with profession and skill requirements. Shared intermediate ingredients are combined before rounding to whole crafts. Variable yields use the guaranteed minimum; faction-only recipes are excluded for the other faction. Alternate root recipes are compared by stock availability and cost.
 
 Hover only the **picture** of a required good, reagent, crafted step, writ, or crate to see the normal in-game item tooltip. The faction theme follows your character: warm Horde tones or Alliance blue with a native crest. **Settings → Debug: preview Alliance appearance** switches the colors, crest, heading, compass accent and scribe immediately. This preview changes appearance only; prices, recipes, routes and peer sharing still use your real faction. Turn it off to restore your character's theme.
 

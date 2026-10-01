@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.9.5"
+F.version = "0.9.6"
 F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
 
 function F.ApplySettings()
@@ -28,9 +28,13 @@ end
 
 local events = CreateFrame("Frame")
 F.events = events
-for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "QUEST_LOG_UPDATE", "BAG_UPDATE_DELAYED", "TAXIMAP_OPENED", "ZONE_CHANGED_NEW_AREA", "QUEST_COMPLETE", "GET_ITEM_INFO_RECEIVED"}) do events:RegisterEvent(event) end
+for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "QUEST_LOG_UPDATE", "BAG_UPDATE_DELAYED", "TAXIMAP_OPENED", "ZONE_CHANGED_NEW_AREA", "QUEST_COMPLETE", "GET_ITEM_INFO_RECEIVED", "SKILL_LINES_CHANGED", "PLAYER_LEVEL_UP"}) do events:RegisterEvent(event) end
 local queued = false
 events:SetScript("OnEvent", function(_, event, name, success)
+  if event=="SKILL_LINES_CHANGED" then
+    if F.readingProfessions then return end
+    F.professionRanks=nil
+  end
   if event=="GET_ITEM_INFO_RECEIVED" then
     if not success or not F.Style or not F.Style.qualityPending[name] then return end
     F.Style.qualityPending[name]=nil
@@ -51,7 +55,7 @@ events:SetScript("OnEvent", function(_, event, name, success)
     F.char.recipients = F.char.recipients or {}
     F.char.realm = GetRealmName()
   elseif event == "PLAYER_LOGIN" then
-    F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.BuildNavigator(); F.RegisterAuctionator(); F.Style.ApplyTheme(); F.ApplyAccessibility(); F.Refresh()
+    F.ReadProfessions(); F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.BuildNavigator(); F.RegisterAuctionator(); F.Style.ApplyTheme(); F.ApplyAccessibility(); F.Refresh()
     F.InitializePeers()
     F.Print("v" .. F.version .. " — /fwl to open. Scan AH prices or opt into peer sharing in Settings.")
     if F.NeedsFlightScan()then F.Print("Flight paths not scanned: open a flight master's map to learn your routes. No flight purchase needed; until then, routing uses walking estimates.")end

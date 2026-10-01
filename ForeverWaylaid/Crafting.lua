@@ -54,6 +54,73 @@ local function single(id,qty,override)
     reason=missing and "Some raw materials are unpriced" or short and "Some auction materials have short stock" or nil}
 end
 
+-- Character skills only; never inspect another player's linked profession.
+local professionIDs={Alchemy=171,Blacksmithing=164,Enchanting=333,Engineering=202,
+  Herbalism=182,Leatherworking=165,Mining=186,Skinning=393,Tailoring=197,
+  Cooking=185,["First Aid"]=129,Fishing=356}
+function F.ReadProfessions()
+  if F.readingProfessions then return end
+  local api=C_SkillInfo or {}
+  local count=api.GetNumSkillLines or GetNumSkillLines
+  local info=api.GetSkillLineInfo or GetSkillLineInfo
+  local expand=api.ExpandSkillHeader or ExpandSkillHeader
+  local collapse=api.CollapseSkillHeader or CollapseSkillHeader
+  local ranks,complete={},false
+  local names={}
+  for name,id in pairs(professionIDs)do
+    names[name]=name
+    if C_TradeSkillUI and C_TradeSkillUI.GetTradeSkillDisplayName then
+      local localized=C_TradeSkillUI.GetTradeSkillDisplayName(id)
+      if localized then names[localized]=name end
+    end
+  end
+  if count and info then
+    F.readingProfessions=true
+    local collapsed={}
+    local i=1
+    complete=count()>0
+    while i<=count()do
+      local name,header,expanded,rank=info(i)
+      if type(name)=="table" then
+        local skill=name
+        name,header,expanded,rank=skill.name,skill.isHeader,skill.isExpanded,skill.rank
+      end
+      if header and not expanded then
+        if expand and collapse then
+          collapsed[#collapsed+1]=i;expand(i)
+        else complete=false end
+      elseif not header and names[name] and type(rank)=="number" then
+        ranks[names[name]]=rank
+      end
+      i=i+1
+    end
+    -- Reverse order preserves header indexes while restoring the user's view.
+    for n=#collapsed,1,-1 do collapse(collapsed[n])end
+    C_Timer.After(0,function()F.readingProfessions=false end)
+  elseif GetProfessions and GetProfessionInfo then
+    complete=true
+    for _,index in pairs({GetProfessions()})do
+      local name,_,rank,_,_,_,id=GetProfessionInfo(index)
+      local canonical=names[name]
+      for key,skillID in pairs(professionIDs)do if id==skillID then canonical=key;break end end
+      if canonical and type(rank)=="number" then ranks[canonical]=rank end
+    end
+  end
+  F.professionRanks=ranks;F.professionsComplete=complete
+end
+function F.ProfessionRank(name)
+  if not F.professionRanks then F.ReadProfessions()end
+  if F.professionRanks[name]~=nil then return F.professionRanks[name] end
+  if F.professionsComplete and professionIDs[name] then return 0 end
+end
+function F.RequirementNumber(required,current,showCurrent)
+  if type(current)~="number" or current<0 then return tostring(required).." (yours unknown)" end
+  local met=current>=required
+  local text=showCurrent and current.." / "..required or tostring(required)
+  if not met then text=text.." ("..(required-current).." more)" end
+  if F.Style.HighContrast()then return text..(met and " (met)" or "") end
+  return (met and "|cff176b21" or "|cffa00000")..text.."|r"
+end
 function F.CraftRequirements(craft)
   local professions,notes={},{}
   for _,step in ipairs(craft.steps or {})do
@@ -68,7 +135,9 @@ function F.CraftRequirements(craft)
   table.sort(names)
   for _,name in ipairs(names)do
     local r=professions[name]
-    lines[#lines+1]=name..(r.skill>0 and " • skill "..r.skill or "")..
+    local rank=F.ProfessionRank(name)
+    lines[#lines+1]=name..(r.skill>0 and " • skill "..F.RequirementNumber(r.skill,rank,true) or "")..
+      (rank==0 and " • not learned" or "")..
       (r.unknown and (r.skill>0 and "; other steps unverified" or " • skill level unverified") or "")
   end
   for _,note in ipairs(notes)do lines[#lines+1]=note end
