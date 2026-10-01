@@ -29,7 +29,7 @@ for _,id in ipairs({1411,1454,947,1411})do
   assert(overlay.level==levels.PIN_FRAME_LEVEL_QUEST_BLOB,'Keep routes below normal POI/player icons')
   assert(#overlay.lines==2 and overlay.lines[1].shown and overlay.lines[2].shown,
     'Keep mapped walking and clipped transport lines when changing map views; do not draw unknown ground')
-  assert(#overlay.pins==1 and overlay.pins[1].shown,'Local departure marker stays visible')
+  assert(#overlay.pins==3 and overlay.pins[2].shown,'Numbered walking and transport departure markers stay visible')
 end
 levels.PIN_FRAME_LEVEL_MAP_EXPLORATION=2102
 levels.PIN_FRAME_LEVEL_FOG_OF_WAR=2106

@@ -3,18 +3,19 @@ local G,S=F.Geometry,F.Style
 function F.CreateRouteOverlay(parent)
   local overlay=CreateFrame("Frame",nil,parent);overlay:SetAllPoints(parent)
   overlay:SetFrameLevel(parent:GetFrameLevel()+5);overlay:EnableMouse(false);overlay:SetClipsChildren(true)
-  overlay.lines={};overlay.pins={};return overlay
+  overlay.lines={};overlay.pins={};overlay.showJourneyStages=false;return overlay
 end
 function F.ClearRouteOverlay(overlay)
   for _,line in ipairs(overlay.lines)do line:Hide()end
   for _,pin in ipairs(overlay.pins)do pin:Hide()end
 end
-function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small,player)
+function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small,player,overview)
   F.ClearRouteOverlay(overlay)
   if not F.DisplayRoute then return end
   player=player or F.Route.Player()
   local segments,stops=F.DisplayRoute(player);local lineIndex,pinIndex=0,0
-  local function pin(point,text,kind,stop)
+  local stages=overlay.showJourneyStages and F.BuildJourney(segments) or {};overlay.journey=stages;overlay.journeyStops=stops
+  local function pin(point,text,kind,stop,stage)
     local x,y=project(point);if not x or not inside(x,y)then return end
     pinIndex=pinIndex+1;local p=overlay.pins[pinIndex]
     if not p then
@@ -26,47 +27,74 @@ function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small,player)
       overlay.pins[pinIndex]=p
     end
     p:ClearAllPoints();p:SetPoint("CENTER",overlay,"TOPLEFT",x,-y);p:Show()
-    p.icon:SetShown(kind~="stop");p.text:SetText(kind=="stop" and text or "")
+    p.icon:SetShown(kind~="stop" and kind~="stage");p.text:SetText((kind=="stop" or kind=="stage") and text or "")
     p.icon:SetTexture(kind=="player" and "Interface\\Minimap\\MinimapArrow" or kind=="transport" and "Interface\\Icons\\INV_Misc_Map_01" or S.icons.flight)
     p:SetBackdropColor(0.13,0.09,0.04,kind=="player" and 0 or 0.95)
     p:SetBackdropBorderColor(0.94,0.73,0.28,kind=="player" and 0 or 1)
+    if stage and stage.mode~="Travel" then
+      if stage.mode=="Fly" then p:SetBackdropBorderColor(0.25,0.8,1,1)
+      else p:SetBackdropBorderColor(0.8,0.55,1,1)end
+    end
     p.icon:SetRotation(kind=="player" and (GetPlayerFacing and GetPlayerFacing()or 0)or 0)
     p:SetScript("OnEnter",function(self)
+      if stage then F.JourneyTooltip(stage,self);return end
       GameTooltip:SetOwner(self,"ANCHOR_RIGHT");GameTooltip:SetText(text)
       if stop then GameTooltip:AddLine(stop.npc or stop.deliveryText or F.DestinationText(stop.point),1,0.85,0.5,true)end
       GameTooltip:Show()
     end)
     p:SetScript("OnLeave",function()GameTooltip:Hide()end)
-    p:SetScript("OnClick",function()if stop then F.TrackDelivery(stop.questID)end end)
+    p:SetScript("OnClick",function()
+      if stage and WorldMapFrame then
+        local id=F.JourneyMap({stage});if id then WorldMapFrame:SetMapID(id)end
+      elseif stop then F.TrackDelivery(stop.questID)end
+    end)
+  end
+  local function line(x,y,u,v,mode,dashed)
+    lineIndex=lineIndex+1;local stroke=overlay.lines[lineIndex]
+    if not stroke then stroke=overlay:CreateLine(nil,"ARTWORK");stroke:SetThickness(small and 2 or 3);overlay.lines[lineIndex]=stroke end
+    if mode=="Fly" then stroke:SetColorTexture(0.25,0.8,1,0.95)
+    elseif mode~="Travel" then stroke:SetColorTexture(0.8,0.55,1,0.95)
+    else stroke:SetColorTexture(1,0.73,0.2,dashed and 0.65 or 0.95)end
+    stroke:SetStartPoint("TOPLEFT",overlay,x,-y);stroke:SetEndPoint("TOPLEFT",overlay,u,-v);stroke:Show()
   end
   for _,step in ipairs(segments)do
     -- A direct bearing is not a traversable path. Do not draw unknown ground
     -- or off-road approaches as a solid line through walls and mountains.
-    local draw=step.mode~="Travel" or step.road=="mapped"
+    local dashed=step.mode=="Travel" and step.road~="mapped"
+    local draw=not dashed or overview
     local ax,ay,bx,by
     if draw then ax,ay=project(step.from);bx,by=project(step.to)end
     if ax and bx then
       local x,y,u,v=clip(ax,ay,bx,by)
       if x and (math.abs(x-u)+math.abs(y-v))>0.1 then
-        lineIndex=lineIndex+1;local line=overlay.lines[lineIndex]
-        if not line then line=overlay:CreateLine(nil,"ARTWORK");line:SetThickness(small and 2 or 3);overlay.lines[lineIndex]=line end
-        if step.mode=="Fly" then line:SetColorTexture(0.25,0.8,1,0.95)
-        elseif step.mode~="Travel" then line:SetColorTexture(0.8,0.55,1,0.95)
-        else line:SetColorTexture(1,0.73,0.2,0.95)end
-        line:SetStartPoint("TOPLEFT",overlay,x,-y);line:SetEndPoint("TOPLEFT",overlay,u,-v);line:Show()
+        if dashed then
+          local dx,dy=u-x,v-y;local length=math.sqrt(dx*dx+dy*dy)
+          local count=math.min(80,math.max(1,math.ceil(length/12)))
+          for i=0,count-1 do
+            local a,b=i/count,(i+0.5)/count
+            line(x+dx*a,y+dy*a,x+dx*b,y+dy*b,step.mode,true)
+          end
+        else line(x,y,u,v,step.mode)end
       end
     end
-    if step.mode=="Fly" then pin(step.from,step.from.name or "Flight master","flight");pin(step.to,step.to.name or "Arrival flight master","flight")end
-    if step.mode~="Fly" and step.mode~="Travel" then pin(step.from,step.mode..": "..(step.to.name or "Destination"),"transport");pin(step.to,step.to.name or "Arrival","transport")end
+    if not overlay.showJourneyStages then
+      if step.mode=="Fly" then pin(step.from,step.from.name or "Flight master","flight");pin(step.to,step.to.name or "Arrival flight master","flight")end
+      if step.mode~="Fly" and step.mode~="Travel" then pin(step.from,step.mode..": "..(step.to.name or "Destination"),"transport");pin(step.to,step.to.name or "Arrival","transport")end
+    end
   end
-  for _,stop in ipairs(stops)do pin(stop.point,tostring(stop.number),"stop",stop.stop)end
+  if overlay.showJourneyStages then
+    for _,stage in ipairs(stages)do pin(stage.from,tostring(stage.number),"stage",nil,stage)end
+  end
+  for _,stop in ipairs(stops)do pin(stop.point,(overlay.showJourneyStages and "D" or "")..stop.number,"stop",stop.stop)end
   if showPlayer and player then pin(player,"You","player")end
 end
 local function drawMap(overlay,map,showPlayer)
   local w,h=overlay:GetWidth(),overlay:GetHeight()
   local function project(point)local x,y=G.Project(point,map);if x then return x*w,y*h end end
+  local info=C_Map.GetMapInfo(map)
+  local overview=info and (info.mapType==1 or info.mapType==2)
   F.DrawRouteOverlay(overlay,project,function(a,b,c,d)return G.Rect(a,b,c,d,2,2,w-2,h-2)end,
-    function(x,y)return x>=8 and x<=w-8 and y>=8 and y<=h-8 end,showPlayer)
+    function(x,y)return x>=8 and x<=w-8 and y>=8 and y<=h-8 end,showPlayer,nil,nil,overview)
 end
 function F.UpdateWorldRouteLayer(overlay,map)
   local manager=map.GetPinFrameLevelsManager and map:GetPinFrameLevelsManager()
@@ -83,14 +111,18 @@ function F.InstallMap()
   if F.worldOverlay or not WorldMapFrame or not WorldMapFrame.ScrollContainer then return end
   local canvas=WorldMapFrame.ScrollContainer.Child;if not canvas then return end
   local overlay=F.CreateRouteOverlay(canvas);F.worldOverlay=overlay
+  overlay.showJourneyStages=true
+  local journey=F.CreateJourneyPanel(WorldMapFrame,overlay);F.journeyPanel=journey
   F.UpdateWorldRouteLayer(overlay,WorldMapFrame)
-  local elapsed=0
+  local elapsed,panelElapsed=0,0
   overlay:SetScript("OnUpdate",function(_,dt)
+    panelElapsed=panelElapsed+dt
     elapsed=elapsed+dt;if elapsed<0.05 or not F.ready then return end;elapsed=0
     if F.db.settings.worldRoute then
       F.UpdateWorldRouteLayer(overlay,WorldMapFrame)
       drawMap(overlay,WorldMapFrame:GetMapID(),false)
-    else F.ClearRouteOverlay(overlay)end
+    else F.ClearRouteOverlay(overlay);journey:Hide()end
+    if panelElapsed>=0.25 then panelElapsed=0;F.UpdateJourneyPanel(journey,WorldMapFrame,overlay)end
   end)
 end
 function F.CreateTravelMap(parent,x,y,w,h)
@@ -142,19 +174,7 @@ function F.ZoomTravelMap(map,delta)
   F.UpdateTravelMap(map)
 end
 local function commonMap(a,b)
-  if not b then return a end
-  local ancestors={};local current=a
-  for _=1,15 do
-    if not current or current==0 then break end
-    ancestors[current]=true;local info=C_Map.GetMapInfo(current);current=info and info.parentMapID
-  end
-  current=b
-  for _=1,15 do
-    if not current or current==0 then break end
-    if ancestors[current]then return current end
-    local info=C_Map.GetMapInfo(current);current=info and info.parentMapID
-  end
-  return a
+  return F.CommonRouteMap(a,b)
 end
 function F.UpdateTravelMap(map)
   local player=F.Route.Player();local target=F.guidance and F.guidance.target

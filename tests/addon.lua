@@ -31,7 +31,7 @@ C_QuestLog={IsOnQuest=function()return false end,IsComplete=function()return fal
 C_Item={GetItemCount=function()return 0 end}
 Enum={}
 local function load(name) assert(loadfile('ForeverWaylaid/'..name..'.lua'))('ForeverWaylaid',F) end
-for _,name in ipairs({'Catalog','Recipes','Core','Pricing','Scanner','Peers','Crafting','Style','Accessibility','AuctionScanUI','Geometry','Routing','RoadData','WorldRoadData','Roads','TransportData','Travel','Tracking','Tooltips','UI','Map','Navigator'}) do load(name) end
+for _,name in ipairs({'Catalog','Recipes','Core','Pricing','Scanner','Peers','Crafting','Style','Accessibility','AuctionScanUI','Geometry','Routing','RoadData','WorldRoadData','Roads','TransportData','Travel','Tracking','Tooltips','UI','Journey','Map','Navigator'}) do load(name) end
 local roadData=F.roadData;F.roadData={lines={}} -- Generic fixtures have no real map scale.
 F.events.scripts.OnEvent(nil,'ADDON_LOADED','ForeverWaylaid')
 F.events.scripts.OnEvent(nil,'PLAYER_LOGIN')
@@ -124,7 +124,7 @@ F.UpdateTracking();F.tab='Route';F.Render()
 WorldMapFrame=object();WorldMapFrame.ScrollContainer={Child=object()}
 WorldMapFrame.GetMapID=function()return 1454 end
 C_Map.GetMapPosFromWorldPos=function(_,v,map)return map,v end
-F.InstallMap();local overlay=frames[#frames];overlay.scripts.OnUpdate(nil,2)
+F.InstallMap();local overlay=F.worldOverlay;overlay.scripts.OnUpdate(nil,2)
 print('PASS: known/unknown flight filtering, directed routes, populated route UI and map overlay')
 
 local G=F.Geometry
@@ -220,3 +220,4 @@ assert(loadfile('tests/reroute.lua'))(F)
 assert(loadfile('tests/roads.lua'))(F,roadData)
 assert(loadfile('tests/world-roads.lua'))(F,roadData)
 assert(loadfile('tests/map-layers.lua'))(F)
+assert(loadfile('tests/journey.lua'))(F)

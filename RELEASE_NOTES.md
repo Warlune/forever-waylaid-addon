@@ -1,4 +1,13 @@
-# Forever Waylaid 0.10.1 preview
+# Forever Waylaid 0.10.2 preview
+
+- Added a collapsible **Full journey** panel to the main map: numbered walk, boat/zeppelin, flight and personal-travel stages for all remaining writs. Road bends are grouped into walking stages; intermediate boat ports are retained.
+- **Overview** opens the map containing the entire journey. Click a stage row or numbered marker to view that section; hover for departure, destination and writ details. Delivery markers are labeled **D1, D2…**.
+- World/continent overviews show unmapped walking as dashed direction-only links. Local zone maps and the minimap continue to hide these unverified ground links. Mapped road bends and schematic transport connections remain visible.
+- Added mixed-transport, multiple-writ, completed-walking, removal, overview, stage-focus and display regression tests.
+
+Use `/reload`, open the main map, then click **Overview** in **Full journey**. Automated checks cover mixed journeys; live multi-writ travel testing is still needed. This remains a **0.x preview**, not a 1.0 release.
+
+## Included from 0.10.1
 
 - Fixed routes and departure markers being covered by zone-map exploration artwork and fog. The overlay now follows the map's layer ordering, above terrain and below normal POI/player icons.
 - Added regression coverage for zone/city/world view changes, changing provider layers, transport markers and the route visibility setting.

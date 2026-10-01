@@ -97,16 +97,18 @@ function F.AdvanceRoadGuidance(guide,player)
 end
 function F.DisplayRoute(player)
   local segments,stops={},{}
+  local delivery,recipient
   player=player or F.Route.Player()
   local function append(step)
     local from=step.from
     for _,via in ipairs(step.detail and step.detail.via or {})do
-      segments[#segments+1]={from=from,to=via,mode=step.mode,detail=step.detail}
+      segments[#segments+1]={from=from,to=via,mode=step.mode,detail=step.detail,delivery=delivery,recipient=recipient}
       from=via
     end
-    segments[#segments+1]={from=from,to=step.to,mode=step.mode,detail=step.detail,road=step.road}
+    segments[#segments+1]={from=from,to=step.to,mode=step.mode,detail=step.detail,road=step.road,delivery=delivery,recipient=recipient}
   end
   for i,leg in ipairs(F.route or {})do
+    delivery,recipient=i,leg.stop
     local guide=i==1 and F.guidance and F.guidance.stop.questID==leg.stop.questID and F.guidance
     local steps=guide and guide.steps or leg.steps
     if guide and guide.walkSteps and player then F.AdvanceRoadGuidance(guide,player)end
@@ -187,7 +189,7 @@ function F.BuildNavigator()
     button:SetScript("OnLeave",function()GameTooltip:Hide()end)
   end
   c.map=F.CreateTravelMap(c,8,-129,284,189)
-  c.legend=S.Text(c,"Gold: mapped road • Blue/purple: transport",11,-324,280,"GameFontDisableSmall")
+  c.legend=S.Text(c,"Gold: walk • Dashed: direction only",11,-324,280,"GameFontDisableSmall")
   c.map:EnableMouse(true);c.map:SetScript("OnMouseUp",function(_,button)
     if button=="LeftButton" and F.guidance then F.Navigate(F.guidance.stop.point,F.guidance.stop.questID)end
   end)
