@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.4.1 preview
+# Forever Waylaid — v0.5.0 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.4.1.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.5.0.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -38,7 +38,11 @@ Craft costs value the full batch, including materials you already own; bag count
 
 ## Built-in auction scanner
 
-The built-in scanner controls appear when neither Auctionator nor Auctioneer Advanced is enabled for your character. Installed but disabled copies do not hide the scanner. With both disabled or absent, open an auction house in your faction capital, then choose **Settings → Scan AH prices**. Keep the AH open until the progress text reports completion. **Cancel** or closing the AH discards any unfinished scan. The scanner requests one full snapshot, reads it in small batches, and saves the lowest unit buyout and total buyout stock for relevant items. It makes no purchases and does not run automatically.
+The built-in **Scan** tab appears along the bottom of the auction house, beside Buy / Sell / Auctions, when neither Auctionator nor Auctioneer Advanced is enabled for your character. Installed but disabled copies do not hide it. Open an auction house in your faction capital, choose **Scan**, then click **Scan auction house**. Opening the tab never starts a scan. The original **Settings → Scan AH prices** control remains available too.
+
+An animated orc (Horde) or human (Alliance) scribe copies prices into a ledger. Beneath the scribe, live counters show auctions read, distinct relevant items with buyouts, prices saved, and elapsed time. The progress bar reflects records processed, not a simulated timer. Prices saved stays at zero until a complete snapshot is committed; the final report remains visible until the next scan. Keep the AH open until completion. **Cancel** or closing the AH discards any unfinished scan. The scanner requests one full snapshot, reads it in small batches, and saves the lowest unit buyout and total buyout stock for relevant items. It makes no purchases and does not run automatically.
+
+The v0.5.0 Horde page and animation were checked in the Forever client, including a complete manual scan of 76,812 auctions that saved 273 relevant item prices in 11 seconds. Alliance artwork selection, tab switching, cancellation, cooldowns, and disabled-scanner detection also have automated coverage; the Alliance page has not yet been checked on a live Alliance character.
 
 Full snapshots have a 15-minute local cooldown, including a known Auctionator snapshot cooldown. Server throttling can also delay a response. Missing listings retain their previous price and original age; incomplete rows do not replace valid prices. Newer eligible peer observations can win while sharing is enabled. Personal scan prices must be enabled in Settings. Opening or closing the AH never initiates a scan.
 

@@ -1,8 +1,10 @@
-## 0.4.1 — Show the scanner when other scanners are disabled
+## 0.5.0 — The Auction Scribe
 
-- The built-in scanner is visible when Auctionator and Auctioneer Advanced are disabled or absent.
-- It stays hidden when either scanner is enabled for the current character.
-- Known disabled states take precedence over globals left in memory before a reload.
-- Scanning remains manual. Opening or closing the auction house never starts a scan.
+- Added a native bottom Scan tab beside Buy, Sell, and Auctions.
+- An animated Horde orc or Alliance human copies auction prices into a book, framed by Classic gold trim and parchment counters.
+- Shows real auctions read, relevant items, committed prices, elapsed time, and snapshot progress.
+- Scanning is manual: open Scan and click Scan auction house. Tab switching never requests a snapshot.
+- Preserves the 15-minute cooldown, cancellation, atomic price saves, and existing price history.
+- Uses the same character identifier as Blizzard's AddOnList to detect disabled Auctionator/Auctioneer installations correctly.
 
 Install the ForeverWaylaid folder in Interface/AddOns, then /reload.

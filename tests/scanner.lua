@@ -69,9 +69,10 @@ assert(not F.StartNativeScan() and not F.nativeScanActive,'Rejected API call rel
 C_AuctionHouse=nil;assert(not F.StartNativeScan(),'Unsupported client degrades safely')
 event('AUCTION_HOUSE_CLOSED')
 local oldAddons=C_AddOns
-local oldUnitName=UnitName;UnitName=function()return 'CurrentCharacter' end
+local oldUnitName,oldGUID=UnitName,UnitGUID;UnitName=function()return 'Display Name' end
+UnitGUID=function()return 'Player-Test-123' end
 local states={Auctionator=0,['Auc-Advanced']=0}
-C_AddOns={GetAddOnEnableState=function(name,character)assert(character=='CurrentCharacter');return states[name]end}
+C_AddOns={GetAddOnEnableState=function(name,character)assert(character=='Player-Test-123');return states[name]end}
 Auctionator={};AucAdvanced={}
 F.UpdateScanUI();assert(F.scanButton.shown and F.cancelScanButton.shown and F.scanStatus.shown,'Disabled installations must expose native controls, including before reload')
 states.Auctionator=1
@@ -80,7 +81,7 @@ states.Auctionator=0;states['Auc-Advanced']=2
 F.UpdateScanUI();assert(not F.scanButton.shown,'Enabled Auctioneer hides native controls')
 states['Auc-Advanced']=0;Auctionator=nil;AucAdvanced=nil
 F.UpdateScanUI();assert(F.scanButton.shown,'Both disabled exposes native controls')
-UnitName=oldUnitName
+UnitName=oldUnitName;UnitGUID=oldGUID
 C_AddOns=nil;F.UpdateScanUI();assert(F.scanButton.shown,'No third-party scanner exposes native controls')
 C_AddOns=oldAddons
 C_AuctionHouse,Auctionator,AuctionHouseFrame=oldAH,oldAuctionator,oldFrame

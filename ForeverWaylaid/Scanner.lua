@@ -3,11 +3,14 @@ local cooldown=15*60
 local frame=CreateFrame("Frame")
 F.scanFrame=frame
 local state,opened
+local lastReport={}
 local status="Open a faction-capital AH to scan."
 
 function F.HasAuctionScanner()
   local enabled=C_AddOns and C_AddOns.GetAddOnEnableState
-  local character=UnitName and UnitName("player")
+  -- Match Blizzard's AddOnList: Forever display names need not identify the
+  -- character's saved addon overrides. The GUID does.
+  local character=(UnitGUID and UnitGUID("player")) or (UnitName and UnitName("player"))
   for _,name in ipairs({"Auctionator","Auc-Advanced"})do
     local checked=false
     if enabled then
@@ -36,19 +39,38 @@ local function remaining()
   if type(external)=="number" then last=math.max(last,external)end
   return math.max(0,cooldown-(F.Now()-last))
 end
-function F.UpdateScanUI()
-  if not F.scanButton then return end
-  local available=not F.HasAuctionScanner()
-  F.scanButton:SetShown(available);F.cancelScanButton:SetShown(available);F.scanStatus:SetShown(available)
-  if not available then return end
-  F.scanButton:SetText(state and "Scanning…" or "Scan AH prices")
-  F.scanButton:SetEnabled(not state and isOpen() and supported() and F.db.settings.personal and F.PersonalScanScope()~=nil and remaining()==0)
-  F.cancelScanButton:SetEnabled(state~=nil)
+function F.GetScanProgress()
+  local report=state or lastReport
   local text=status
-  if not state and remaining()>0 then text=text.." Next scan in "..math.ceil(remaining()/60).."m." end
-  F.scanStatus:SetText(text)
+  local wait=remaining()
+  if not state then
+    if not isOpen() then text="Open a faction-capital AH to scan."
+    elseif not supported() then text="This client's auction snapshot API is unavailable."
+    elseif not F.db.settings.personal then text="Enable personal scan prices in Waylaid Settings first."
+    elseif not F.PersonalScanScope() then text="Visit your faction's capital auction house to scan."
+    elseif wait>0 then text=text.." Next scan in "..math.ceil(wait/60).."m." end
+  end
+  local available=not F.HasAuctionScanner()
+  return {active=state~=nil,available=available,status=text,phase=report.phase,
+    processed=report.index or 0,total=report.total,matched=report.matched or 0,
+    saved=report.saved or 0,elapsed=report.elapsed or 0,cooldown=wait,
+    canStart=not not (available and not state and isOpen() and supported() and F.db.settings.personal and F.PersonalScanScope() and wait==0)}
 end
-local function finish(message)
+function F.UpdateScanUI()
+  if not F.db then return end
+  local info=F.GetScanProgress()
+  if F.scanButton then
+    F.scanButton:SetShown(info.available);F.cancelScanButton:SetShown(info.available);F.scanStatus:SetShown(info.available)
+    F.scanButton:SetText(info.active and "Scanning…" or "Scan AH prices")
+    F.scanButton:SetEnabled(info.canStart);F.cancelScanButton:SetEnabled(info.active)
+    F.scanStatus:SetText(info.status)
+  end
+  if F.UpdateAuctionScanUI then F.UpdateAuctionScanUI(info)end
+end
+local function finish(message,saved)
+  if state then
+    lastReport={index=state.index,total=state.total,matched=state.matched,elapsed=state.elapsed,saved=saved or 0,phase=saved and "complete" or "stopped"}
+  end
   state=nil;F.nativeScanActive=false;status=message;F.UpdateScanUI()
 end
 function F.CancelNativeScan(message)
@@ -57,6 +79,7 @@ function F.CancelNativeScan(message)
 end
 function F.StartNativeScan()
   if state then return false end
+  if F.HasAuctionScanner() then status="Use your enabled auction scanner.";F.UpdateScanUI();return false end
   if not isOpen() then status="Open a faction-capital AH to scan.";F.UpdateScanUI();return false end
   if not supported() then status="This client's auction snapshot API is unavailable.";F.UpdateScanUI();return false end
   if not F.db.settings.personal then status="Enable personal scan prices above first.";F.UpdateScanUI();return false end
@@ -68,7 +91,7 @@ function F.StartNativeScan()
     status="Wait for the other auction scan to finish.";F.UpdateScanUI();return false
   end
   local now=F.Now()
-  state={scope=scope,city=city,observed=now,elapsed=0,phase="waiting",snapshot={},incomplete={}}
+  state={scope=scope,city=city,observed=now,elapsed=0,matched=0,phase="waiting",snapshot={},incomplete={}}
   F.nativeScanActive=true
   local ok=pcall(C_AuctionHouse.ReplicateItems)
   if not ok then finish("The AH could not start a snapshot. Previous prices kept.");return false end
@@ -116,7 +139,7 @@ frame:SetScript("OnUpdate",function(_,dt)
       elseif F.Positive(buyout) then
         local row=state.snapshot[id]
         if row then row.price=math.min(row.price,buyout/count);row.quantity=row.quantity+count
-        else state.snapshot[id]={price=buyout/count,quantity=count}end
+        else state.snapshot[id]={price=buyout/count,quantity=count};state.matched=state.matched+1 end
       end
     end
   end
@@ -131,6 +154,6 @@ frame:SetScript("OnUpdate",function(_,dt)
     local count=F.SaveNativeSnapshot(state.snapshot,state.scope,state.observed)
     local text="Saved "..count.." item prices. Missing listings keep older prices."
     if skipped>0 then text=text.." "..skipped.." incomplete items skipped."end
-    finish(text);F.Refresh()
+    finish(text,count);F.Refresh()
   end
 end)
