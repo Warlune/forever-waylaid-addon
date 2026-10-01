@@ -10,6 +10,7 @@ IsInGuild=function()return true end;IsInGroup=function()return false end;IsInRai
 F.Refresh=function()end
 local scope=GetRealmName()..':Horde'
 F.char.localPrices={[scope]={[2840]={price=15,quantity=30,time=now-10,source='Forever Waylaid'}}};F.char.peerPrices={}
+F.char.localPrices[scope][999999]={price=25,quantity=3,time=now-10,source='Forever Waylaid'}
 local function tick()F.peerFrame.scripts.OnUpdate(nil,1)end
 local function receive(msg,channel,sender)F.peerFrame.scripts.OnEvent(nil,'CHAT_MSG_ADDON','FWLPrice1',msg,channel or 'WHISPER',sender or 'Other-TestRealm')end
 F.SetPeerSharing(false);now=now+60;tick();assert(#sent==0,'Default/disabled sharing sends nothing')
@@ -33,6 +34,7 @@ receive('1|testrealm|Horde|Q|123-456','GUILD','Requestor-TestRealm');tick()
 assert(#sent==before+1 and sent[#sent].channel=='WHISPER' and sent[#sent].target=='Requestor-TestRealm')
 assert(sent[#sent].msg:find('2840,15,30,'..now..';',1,true))
 assert(not sent[#sent].msg:find('2589',1,true),'Received prices are not relayed as personal observations')
+assert(not sent[#sent].msg:find('999999',1,true),'Full-market local prices do not expand the Waylaid peer protocol')
 receive('1|testrealm|Horde|Q|123-456','GUILD','Requestor-TestRealm');tick();assert(#sent==before+1,'Repeated requests are rate limited')
 F.SetPeerSharing(false);before=#sent;receive(packet('2840,1,20,'..(now+1)..';'));tick()
 assert(#sent==before and F.Price(2840).price==15,'Opt-out stops sending, receiving and use of peer prices')

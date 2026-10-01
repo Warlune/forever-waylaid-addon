@@ -30,15 +30,15 @@ ui.tab.scripts.OnClick()
 local coords
 ui.art.SetTexCoord=function(_,...)coords={...}end
 local poses={}
-for _=1,8 do
-  ui.page.scripts.OnUpdate(nil,0.24)
-  assert(coords[3]<0.5 and coords[4]<=0.5,'Horde uses the upper two rows')
+for _=1,4 do
+  ui.page.scripts.OnUpdate(nil,0.48)
+  assert(coords[3]==0 and coords[4]==0.5,'Horde uses the original upper row')
   poses[coords[1]..':'..coords[3]]=true
 end
 local count=0;for _ in pairs(poses)do count=count+1 end
-assert(count==8,'All eight distinct writing poses are animated')
+assert(count==4,'The original four writing poses animate at the slower cadence')
 local oldFaction=UnitFactionGroup;UnitFactionGroup=function()return 'Alliance'end
-ui.page.scripts.OnUpdate(nil,0.24);assert(coords[3]>=0.5 and coords[4]<=1,'Alliance uses the lower two rows')
+ui.page.scripts.OnUpdate(nil,0.48);assert(coords[3]==0.5 and coords[4]==1,'Alliance uses the original lower row')
 UnitFactionGroup=oldFaction
 ui.start.scripts.OnClick();assert(calls==1 and F.GetScanProgress().phase=='waiting')
 F.scanFrame.scripts.OnEvent(nil,'REPLICATE_ITEM_LIST_UPDATE')

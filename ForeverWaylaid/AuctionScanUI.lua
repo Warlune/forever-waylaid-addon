@@ -48,23 +48,19 @@ function F.InstallAuctionScanUI()
   centered(page,"THE AUCTION SCRIBE",-15,600,"GameFontNormalLarge",S.gold)
   ui.caption=centered(page,"Your faction's auction scribe",-40,600,"GameFontHighlightSmall",S.muted)
   local art=page:CreateTexture(nil,"ARTWORK")
-  art:SetSize(260,209);art:SetPoint("TOP",0,-64)
-  art:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\AuctionScribes8.tga")
+  art:SetSize(218,218);art:SetPoint("TOP",0,-55)
+  art:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\AuctionScribes.tga")
   ui.art=art
   local phase,elapsed=0,0
-  -- The source sheet has different transparent padding between its rows.
-  -- Equal-height UV windows align each desk baseline through the loop.
-  local rowTop={58,346,652,937}
   local function pose()
-    local row=(UnitFactionGroup("player")=="Alliance" and 2 or 0)+math.floor(phase/4)
-    local column=phase%4
-    art:SetTexCoord(column/4,(column+1)/4,rowTop[row+1]/1254,(rowTop[row+1]+252)/1254)
+    local row=UnitFactionGroup("player")=="Alliance" and 1 or 0
+    art:SetTexCoord(phase/4,(phase+1)/4,row/2,(row+1)/2)
   end
   pose()
   page:SetScript("OnUpdate",function(_,dt)
     elapsed=elapsed+dt
-    local interval=ui.active and 0.11 or 0.24
-    if elapsed>=interval then phase=(phase+math.floor(elapsed/interval))%8;elapsed=elapsed%interval;pose()end
+    local interval=ui.active and 0.22 or 0.48
+    if elapsed>=interval then phase=(phase+math.floor(elapsed/interval))%4;elapsed=elapsed%interval;pose()end
   end)
   local labels={"Auctions read","All item types","Relevant items","Prices saved","Time elapsed"}
   local strip=CreateFrame("Frame",nil,page);strip:SetSize(742,62);strip:SetPoint("TOP",0,-280)

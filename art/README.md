@@ -1,6 +1,6 @@
 # Auction scribe artwork
 
-## Current eight-frame sprites (v0.5.1)
+## Archived eight-frame sprites (v0.5.1)
 
 - Source: `auction-scribes-8.png` (1254 × 1254 transparent RGBA).
 - Runtime: `../ForeverWaylaid/Art/AuctionScribes8.tga` (1024 × 1024 uncompressed RGBA TGA).
@@ -16,7 +16,7 @@ Use case: identity-preserve. Edit the supplied game sprite atlas into a smoother
 
 Edit this sprite atlas for production use. Preserve these exact Warcraft orc and Alliance human scribes and all sixteen poses. CRITICAL layout repair: output SQUARE canvas, strict FOUR columns by FOUR rows of equally sized SQUARE cells. Each individual sprite must be smaller inside its cell: maximum 80 percent of cell width and 80 percent cell height. At least 10 percent fully transparent margin on ALL FOUR sides of EACH sprite. No pixels touch any cell boundary. Same baseline and desk size in every cell. Top two rows = 8 orc frames; bottom two rows = 8 human frames. Read order left to right then down. Preserve gradual quill writing and glance animation; keep bodies and desks consistently anchored. Transparent RGBA background. No gridlines, lettering or labels. Layout and padding correction only, do not redesign characters. Exact 2048x2048 preferred.
 
-## Original four-frame sprites (v0.5.0)
+## Current four-frame sprites (restored in v0.6.0)
 
 - Source: `auction-scribes.png` (transparent RGBA, 1774 × 887).
 - Runtime: `../ForeverWaylaid/Art/AuctionScribes.tga` (1024 × 512 RGBA, uncompressed TGA).

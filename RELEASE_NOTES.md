@@ -1,11 +1,11 @@
-## 0.5.1 — Smoother scribes and clearer scan counts
+## 0.6.0 — Full-market prices and item tooltips
 
-- Doubled both faction scribes from four to eight animation frames.
-- Fixed the bottom Scan tab overlapping the Auctions tab by matching native tab spacing.
-- Added an All item types counter alongside auctions read, relevant items, prices saved, and elapsed time.
-- Re-read unidentified auction rows locally before committing prices. If item IDs remain missing, keep the previous prices and report an incomplete snapshot.
-- Scanning remains manual, with one server snapshot request and the existing 15-minute cooldown.
+- Built-in manual scans now retain lowest unit buyouts and total buyout stock for all items, including unrelated equipment and trade goods.
+- Item tooltips show AH buyout per item, source, and scan age when available.
+- When Auctionator or Auctioneer is enabled, our unrelated-item tooltip additions are hidden. Waylaid crates, writs, goods, and ingredients retain their information.
+- Restored the original scribe artwork, size, and slower four-frame animation for both factions. The fixed bottom tab spacing remains.
+- Existing cooldowns, cancellation, incomplete-record checks, and manual-only scanning are preserved. Peer sharing remains opt-in and limited to Waylaid prices.
 
-The earlier verified scan read 76,812 auction rows and saved 273 relevant item prices. Saved prices only cover writs, crates, goods, and crafting ingredients; they are not a count of all items scanned. No matched-snapshot comparison with Auctionator or Auctioneer has been performed.
+Run a new manual scan after the cooldown to populate prices for unrelated items. No purchase is needed. Prices group variants by base item ID and are lowest-buyout estimates, not historical valuations.
 
 Install the ForeverWaylaid folder in Interface/AddOns, then /reload.

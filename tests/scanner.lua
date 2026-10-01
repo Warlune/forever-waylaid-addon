@@ -42,7 +42,9 @@ now=now+5;response()
 local scope=GetRealmName()..':Horde'
 local prices=F.char.localPrices[scope]
 assert(prices[2840].price==11 and prices[2840].quantity==15 and prices[2840].time==100000 and prices[2840].source=='Forever Waylaid')
-assert(not prices[2589] and not prices[999999],'Ignore bid-only and unrelated auctions')
+assert(not prices[2589],'Bid-only auctions do not invent buyout values')
+assert(prices[999999].price==40 and prices[999999].quantity==5,'Save buyouts for unrelated items too')
+assert(F.GetScanProgress().saved==2,'Saved prices include every item with a valid buyout')
 assert(F.GetScanProgress().unique==3 and F.GetScanProgress().matched==1,'All distinct item IDs include unrelated and bid-only items; retained prices are separate')
 assert(F.Price(2840).source=='Forever Waylaid')
 F.char.peerPrices[scope]={[2840]={time=now+1,price=8,quantity=50,source='Peer scan (unverified)'}}
@@ -84,7 +86,12 @@ rows[251]={id=2840,qty=4,buyout=120};rows[501]={id=2840,qty=3,buyout=60}
 assert(F.StartNativeScan());response()
 for i=0,750 do assert(reads[i]==1,'Every snapshot row is read exactly once across batch boundaries')end
 assert(F.GetScanProgress().processed==751 and F.GetScanProgress().unique==750 and F.GetScanProgress().matched==1)
+assert(F.GetScanProgress().saved==750 and prices[900751].price==100,'All-market prices survive the final batch')
 assert(prices[2840].price==20 and prices[2840].quantity==7,'Relevant rows across separate batches contribute to the same quote')
+local unrelated=prices[900751]
+now=now+901;rows={{id=900751,qty=2,buyout=40},{id=900751,qty=0,buyout=10}}
+assert(F.StartNativeScan());response()
+assert(prices[900751]==unrelated,'Invalid unrelated rows preserve the previous quote too')
 now=now+901;C_AuctionHouse.ReplicateItems=function()error('unavailable')end
 assert(not F.StartNativeScan() and not F.nativeScanActive,'Rejected API call releases active state')
 C_AuctionHouse=nil;assert(not F.StartNativeScan(),'Unsupported client degrades safely')

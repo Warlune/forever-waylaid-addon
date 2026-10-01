@@ -1,11 +1,18 @@
 local _, F = ...
 local function append(tooltip, id)
+  if not F.db or not F.char then return end
   local crate, writ = F.cratesByID[id], F.writsByID[id]
-  if not crate and not writ then return end
+  if F.HasAuctionScanner() and not F.catalogIDs[id] then return end
+  local market=F.Price(id)
+  if not crate and not writ and not market then return end
   if tooltip.fwlItem == id then return end
   tooltip.fwlItem = id
   tooltip:AddLine(" ")
   tooltip:AddLine("Forever Waylaid", 0.87, 0.74, 0.39)
+  if market then
+    tooltip:AddDoubleLine("AH buyout (each)",F.Money(market.price),1,1,1,1,0.82,0)
+    tooltip:AddLine(market.source.." · "..F.Style.Age(market.time),0.65,0.65,0.65)
+  end
   if crate then
     local rows, best = F.CrateCosts(crate)
     if F.db.settings.cheapest then
@@ -22,7 +29,7 @@ local function append(tooltip, id)
       end
     end
     if best and best.quote then tooltip:AddLine("Source: " .. best.quote.source, 0.65,0.65,0.65) end
-  else
+  elseif writ then
     local quote = F.Price(writ.targetId)
     tooltip:AddDoubleLine(writ.qty .. " × " .. writ.targetName, F.Money(quote and quote.price * writ.qty), 1,1,1, 1,0.82,0)
     tooltip:AddLine(writ.rep .. " reputation · keep the writ for delivery", 0.8,0.8,0.8)

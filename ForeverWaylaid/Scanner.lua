@@ -121,13 +121,14 @@ local function readRow(index)
   local _,_,count,_,_,_,_,_,_,buyout,_,_,_,_,_,_,id=C_AuctionHouse.GetReplicateItemInfo(index)
   if not F.Positive(id) or id~=math.floor(id) then return false end
   if not state.seen[id] then state.seen[id]=true;state.unique=state.unique+1 end
-  if F.catalogIDs[id] then
-    if not F.Positive(count) or type(buyout)~="number" or buyout<0 or buyout~=buyout or buyout==math.huge then
-      state.incomplete[id]=true
-    elseif F.Positive(buyout) then
-      local row=state.snapshot[id]
-      if row then row.price=math.min(row.price,buyout/count);row.quantity=row.quantity+count
-      else state.snapshot[id]={price=buyout/count,quantity=count};state.matched=state.matched+1 end
+  if not F.Positive(count) or type(buyout)~="number" or buyout<0 or buyout~=buyout or buyout==math.huge then
+    state.incomplete[id]=true
+  elseif F.Positive(buyout) then
+    local row=state.snapshot[id]
+    if row then row.price=math.min(row.price,buyout/count);row.quantity=row.quantity+count
+    else
+      state.snapshot[id]={price=buyout/count,quantity=count}
+      if F.catalogIDs[id] then state.matched=state.matched+1 end
     end
   end
   return true

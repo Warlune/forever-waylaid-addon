@@ -34,11 +34,12 @@ function F.CrateCosts(crate, includeCrate)
   return rows, best
 end
 
-local function save(target, id, price, observed, source, quantity)
-  if not F.catalogIDs[id] or not F.Positive(price) then return end
+local function save(target, id, price, observed, source, quantity, allItems)
+  if not F.Positive(id) or id~=math.floor(id) or (not allItems and not F.catalogIDs[id]) or not F.Positive(price) then return end
   if observed and (not F.Positive(observed) or observed > F.Now() + 300) then return end
   local row = { price = math.ceil(price), time = observed, source = source, quantity = quantity }
   target[id] = F.SelectPrice(target[id], row)
+  return target[id]==row
 end
 function F.ImportPersonal(silent)
   local scope = F.char.realm .. ":" .. UnitFactionGroup("player")
@@ -96,8 +97,7 @@ function F.SaveNativeSnapshot(snapshot,scope,observed)
   local target=F.char.localPrices[scope] or {};F.char.localPrices[scope]=target
   local count=0
   for id,row in pairs(snapshot)do
-    save(target,id,row.price,observed,"Forever Waylaid",row.quantity)
-    count=count+1
+    if save(target,id,row.price,observed,"Forever Waylaid",row.quantity,true) then count=count+1 end
   end
   return count
 end
