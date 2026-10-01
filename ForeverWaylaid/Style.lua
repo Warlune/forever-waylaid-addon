@@ -59,8 +59,6 @@ function F.SearchAuctionItem(id)
     F.Print("No supported auction search box is available.");return false
   end
   GameTooltip:Hide()
-  -- The ledger overlays the auction UI; expose the filled search immediately.
-  if F.window then F.window:Hide()end
   return true
 end
 function F.ItemClick(id,button)

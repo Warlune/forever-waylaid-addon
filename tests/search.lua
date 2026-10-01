@@ -11,9 +11,10 @@ AuctionatorShoppingFrame={SearchOptions={SetSearchTerm=function(_,term)search=te
 local icon=F.detailRows[1].icon
 F.Style.SetIcon(icon,2840)
 local selected=false;icon.selectItem=function()selected=true end
+F.window:Show()
 icon.scripts.OnMouseUp(icon,'LeftButton')
 assert(tab and search=='"Localized Copper Bar"' and not submitted,'Shift-click must fill Auctionator without submitting')
-assert(not selected and not F.window.shown,'Shift-click must reveal auction UI without selecting another entry')
+assert(not selected and F.window.shown,'Shift-click must keep the ledger open without selecting another entry')
 IsShiftKeyDown=function()return false end
 icon.scripts.OnMouseUp(icon,'LeftButton');assert(selected,'Normal icon click still selects its entry after rebinding')
 selected=false;IsShiftKeyDown=function()return true end
@@ -23,9 +24,11 @@ BrowseName={SetText=function(_,term)search=term end}
 AuctionFrameTab1={Click=function()tab=true end}
 BrowseResetButton={Click=function()search=nil end}
 assert(F.SearchAuctionItem(2840) and search=='Localized Copper Bar','Legacy AH search should fill after resetting filters')
+assert(F.window.shown,'Legacy AH search must keep the ledger open')
 AuctionFrame=nil;BrowseName=nil;AuctionFrameTab1=nil;BrowseResetButton=nil
 AuctionHouseFrame={IsShown=function()return true end,SetSearchText=function(_,term)search=term end}
 assert(F.SearchAuctionItem(2840) and search=='Localized Copper Bar','Modern native AH search should fill')
+assert(F.window.shown,'Modern AH search must keep the ledger open')
 C_Item.GetItemInfo=function()end
 assert(F.SearchAuctionItem(2840) and search=='Copper Bar','Uncached goods must use catalogue names')
 AuctionHouseFrame=nil;search=nil;F.window:Show()
