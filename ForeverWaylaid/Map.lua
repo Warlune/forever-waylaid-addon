@@ -50,20 +50,21 @@ function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small,player)
     stroke:SetStartPoint("TOPLEFT",overlay,x,-y);stroke:SetEndPoint("TOPLEFT",overlay,u,-v);stroke:Show()
   end
   for _,step in ipairs(segments)do
-    -- Every remaining walk stays visible, including later arrival-to-customer
-    -- walks. Unknown terrain is explicitly dashed, never a claimed road.
-    local dashed=step.mode=="Travel" and step.road~="mapped"
+    -- Simple dotted walking guides retain all known gate/pass bends. Fainter,
+    -- wider-spaced dots mark unverified approaches rather than claimed roads.
+    local walking=step.mode=="Travel"
+    local unverified=walking and step.road~="mapped"
     local ax,ay,bx,by
     ax,ay=project(step.from);bx,by=project(step.to)
     if ax and bx then
       local x,y,u,v=clip(ax,ay,bx,by)
       if x and (math.abs(x-u)+math.abs(y-v))>0.1 then
-        if dashed then
+        if walking then
           local dx,dy=u-x,v-y;local length=math.sqrt(dx*dx+dy*dy)
-          local count=math.min(80,math.max(1,math.ceil(length/12)))
+          local count=math.min(80,math.max(1,math.ceil(length/(unverified and 12 or 8))))
           for i=0,count-1 do
-            local a,b=i/count,(i+0.5)/count
-            line(x+dx*a,y+dy*a,x+dx*b,y+dy*b,step.mode,true)
+            local a,b=i/count,(i+0.18)/count
+            line(x+dx*a,y+dy*a,x+dx*b,y+dy*b,step.mode,unverified)
           end
         else line(x,y,u,v,step.mode)end
       end

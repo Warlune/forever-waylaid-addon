@@ -44,7 +44,7 @@ local overlay=F.CreateRouteOverlay(UIParent)
 local function project(p)return p.wx+20,p.wy+20 end
 local function clip(x,y,u,v)return x,y,u,v end
 F.DrawRouteOverlay(overlay,project,clip,function()return true end,false)
-assert(#overlay.lines==3,'Shared world/compass/minimap renderer must draw every road bend')
+assert(#overlay.lines>3,'Shared world/compass/minimap renderer must dot every road bend')
 F.route={{steps=unknown,stop={point=b}}}
 F.DrawRouteOverlay(overlay,project,clip,function()return true end,false)
 assert(#overlay.lines>3 and overlay.lines[1].shown,'Keep unknown walking visible as separate direction-only dashes')

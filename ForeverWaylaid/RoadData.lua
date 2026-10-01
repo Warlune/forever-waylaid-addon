@@ -5,6 +5,14 @@ local _,F=...
 -- Identical coordinates mark intentional junctions. Never join nearby
 -- points merely because they look close across a wall or mountain.
 F.roadData={lines={},coverage={1454,1411,1420}}
+-- Reuse the reviewed gate crossings as coarse waypoints when an endpoint
+-- misses the street network. Do not infer gates from nearby coordinates.
+F.roadData.cityExits={
+  [1454]="Orgrimmar south gate",
+  [1453]="Stormwind - Elwynn gate",
+  [1455]="Dun Morogh - Ironforge gate",
+  [1457]="Darnassus - Teldrassil gate",
+}
 local function line(map,name,points)
   local result={name=name,points={},faction=map==1454 and "Horde" or "Both"}
   for _,p in ipairs(points)do result.points[#result.points+1]={map,p[1],p[2]}end

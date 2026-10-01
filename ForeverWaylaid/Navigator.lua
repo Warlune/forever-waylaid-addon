@@ -93,10 +93,10 @@ function F.AdvanceRoadGuidance(guide,player)
       guide.roadWarning=step.terrain=="corridor" and "Approximate open-ground route. Enemies and small obstacles are not tracked." or nil
     elseif step.road=="transition" then
       guide.target=step.to;guide.action="Continue through the pass"
-      guide.roadWarning="Zone handoff: the passage itself is not traced. The dashed line shows direction only; follow the entrance and terrain."
+      guide.roadWarning="Zone handoff: the passage itself is not traced. Faint dots show direction only; follow the entrance and terrain."
     else
-      guide.target=step.to;guide.action=step.road=="approach" and walk[index+1] and walk[index+1].road=="mapped" and "Join the mapped road" or "Direction only"
-      guide.roadWarning="This approach has no mapped walking path. The dashed line shows direction only; follow the terrain."
+      guide.target=step.to;guide.action=step.to.cityGate and "Go to city gate" or step.road=="approach" and walk[index+1] and walk[index+1].road=="mapped" and "Join the mapped road" or "Direction only"
+      guide.roadWarning="This approach has no mapped walking path. Faint dots show direction only; follow the terrain around obstacles."
     end
   elseif guide.travelTarget then
     guide.target=guide.travelTarget;guide.action=guide.travelAction;guide.roadWarning=nil
@@ -196,7 +196,7 @@ function F.BuildNavigator()
     button:SetScript("OnLeave",function()GameTooltip:Hide()end)
   end
   c.map=F.CreateTravelMap(c,8,-129,284,189)
-  c.legend=S.Text(c,"Gold: walk • Dashed: direction only",11,-324,280,"GameFontDisableSmall")
+  c.legend=S.Text(c,"Dots: walk • Faint dots: unverified",11,-324,280,"GameFontDisableSmall")
   c.map:EnableMouse(true);c.map:SetScript("OnMouseUp",function(_,button)
     if button=="LeftButton" and F.guidance then F.Navigate(F.guidance.stop.point,F.guidance.stop.questID)end
   end)

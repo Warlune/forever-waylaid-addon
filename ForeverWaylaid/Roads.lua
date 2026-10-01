@@ -17,7 +17,7 @@ function R.Graph()
   local context=faction()..":"..R.Mode()
   if R.context~=context then R.Invalidate();R.context=context end
   if R.graph then return R.graph end
-  local g={nodes={},edges={},adj={},buckets={},grid={},components={}}
+  local g={nodes={},edges={},adj={},buckets={},grid={},components={},exits={}}
   local function node(p)
     local k=bucket(p.instance,math.floor(p.wx),math.floor(p.wy))
     for _,i in ipairs(g.buckets[k] or {})do if distance(p,g.nodes[i])<0.1 and sameFloor(p,g.nodes[i])then return i end end
@@ -48,6 +48,20 @@ function R.Graph()
         local world=F.Route.World({mapID=p[1],x=p[2]/100,y=p[3]/100,name=line.name})
         if previous and world then edge(previous,world,line.kind or "road")end
         previous=world
+      end
+      for city,name in pairs(F.roadData.cityExits or {})do
+        if name==line.name and #line.points==2 then
+          local a,b=line.points[1],line.points[2]
+          if b[1]==city then a,b=b,a end
+          if a[1]==city then
+            local inside=F.Route.World({mapID=a[1],x=a[2]/100,y=a[3]/100,name=name})
+            local outside=F.Route.World({mapID=b[1],x=b[2]/100,y=b[3]/100,name=name})
+            if inside and outside then
+              inside.cityGate=true;outside.cityGate=true
+              g.exits[city]={inside=inside,outside=outside}
+            end
+          end
+        end
       end
     end
   end
@@ -154,11 +168,37 @@ local function findPath(a,b,g)
   segment(last.point,b,"approach")
   return total,segments
 end
+local function throughCityGates(a,b,g)
+  if a.mapID==b.mapID then return end
+  local departure,arrival=g.exits[a.mapID],g.exits[b.mapID]
+  if not departure and not arrival then return end
+  local anchors={a}
+  if departure then anchors[#anchors+1]=departure.inside;anchors[#anchors+1]=departure.outside end
+  if arrival then anchors[#anchors+1]=arrival.outside;anchors[#anchors+1]=arrival.inside end
+  anchors[#anchors+1]=b
+  local total,segments=0,{}
+  for index=2,#anchors do
+    local from,to=anchors[index-1],anchors[index]
+    local gap=distance(from,to)
+    if gap==math.huge then return end
+    if gap>0.2 then
+      local d,part,blocked=findPath(from,to,g)
+      if blocked then return nil,nil,true end
+      if not d then
+        d=gap;part={{from=from,to=to,mode="Travel",road="unknown",distance=gap}}
+      end
+      total=total+d
+      for _,step in ipairs(part)do segments[#segments+1]=step end
+    end
+  end
+  return total,segments
+end
 function R.Path(a,b)
   if not a or not b then return nil end
   local g=R.Graph();local k=key(a)..":"..key(b)
   local cached=R.cache[k];if cached then return cached[1],cached[2],cached[3]end
   local d,segments,blocked=findPath(a,b,g)
+  if not d and not blocked then d,segments,blocked=throughCityGates(a,b,g)end
   if R.cacheSize>=256 then R.cache={};R.cacheSize=0 end
   R.cache[k]={d,segments,blocked};R.cacheSize=R.cacheSize+1
   return d,segments,blocked
