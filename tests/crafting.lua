@@ -20,13 +20,15 @@ local entry={item=first,owned=0,goods=F.CraftQuote(first.targetId,first.qty)}
 F.RenderDetail(entry)
 local found=false
 for _,row in ipairs(F.detailRows)do
-  if row.itemID==first.targetId then
+  assert(not row.scripts.OnEnter,'Detail text must not have an item tooltip')
+  if row.shown and row.icon.itemID==first.targetId then
     found=true;local link
     GameTooltip.SetHyperlink=function(_,value)link=value end
-    row.scripts.OnEnter(row);assert(link=='item:'..first.targetId)
+    row.icon.scripts.OnEnter(row.icon);assert(link=='item:'..first.targetId)
   end
 end
-assert(found,'Required goods must expose item hover tooltip')
+assert(found,'Required goods icon must expose item hover tooltip')
+for _,row in ipairs(F.rows)do assert(not row.scripts.OnEnter,'List text must not have an item tooltip')end
 local scroll=0
 F.detailChild.GetHeight=function()return 900 end
 F.detailScroll.GetHeight=function()return 300 end

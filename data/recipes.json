@@ -754,7 +754,7 @@
       "name": "Dark Leather Tunic",
       "spellId": 2169,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 100,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -774,7 +774,8 @@
           "name": "Gray Dye"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=2169"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=2169",
+      "skillSource": "https://www.wowhead.com/forever/spell=2169"
     },
     "2318": {
       "itemId": 2318,
@@ -815,7 +816,7 @@
       "name": "Swiftness Potion",
       "spellId": 2335,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 60,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -835,7 +836,8 @@
           "name": "Empty Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=2335"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=2335",
+      "skillSource": "https://www.wowhead.com/forever/spell=2335"
     },
     "2840": {
       "itemId": 2840,
@@ -898,7 +900,7 @@
       "name": "Rough Bronze Leggings",
       "spellId": 2668,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 105,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -908,7 +910,8 @@
           "name": "Bronze Bar"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=2668"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=2668",
+      "skillSource": "https://www.wowhead.com/forever/spell=2668"
     },
     "2996": {
       "itemId": 2996,
@@ -949,7 +952,7 @@
       "name": "Elixir of Wisdom",
       "spellId": 3171,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 90,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -969,14 +972,15 @@
           "name": "Empty Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3171"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3171",
+      "skillSource": "https://www.wowhead.com/forever/spell=3171"
     },
     "3385": {
       "itemId": 3385,
       "name": "Lesser Mana Potion",
       "spellId": 3173,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 120,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -996,14 +1000,15 @@
           "name": "Empty Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3173"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3173",
+      "skillSource": "https://www.wowhead.com/forever/spell=3173"
     },
     "3387": {
       "itemId": 3387,
       "name": "Limited Invulnerability Potion",
       "spellId": 3175,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 250,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1023,14 +1028,15 @@
           "name": "Crystal Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3175"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3175",
+      "skillSource": "https://www.wowhead.com/forever/spell=3175"
     },
     "3388": {
       "itemId": 3388,
       "name": "Lesser Troll's Blood Elixir",
       "spellId": 3176,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 125,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1050,14 +1056,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3176"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3176",
+      "skillSource": "https://www.wowhead.com/forever/spell=3176"
     },
     "3390": {
       "itemId": 3390,
       "name": "Elixir of Lesser Agility",
       "spellId": 2333,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 140,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1077,14 +1084,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=2333"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=2333",
+      "skillSource": "https://www.wowhead.com/forever/spell=2333"
     },
     "3391": {
       "itemId": 3391,
       "name": "Elixir of Ogre Strength",
       "spellId": 3188,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1104,14 +1112,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3188"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3188",
+      "skillSource": "https://www.wowhead.com/forever/spell=3188"
     },
     "3470": {
       "itemId": 3470,
       "name": "Rough Grinding Stone",
       "spellId": 3320,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 25,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1121,14 +1130,15 @@
           "name": "Rough Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3320"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3320",
+      "skillSource": "https://www.wowhead.com/forever/spell=3320"
     },
     "3478": {
       "itemId": 3478,
       "name": "Coarse Grinding Stone",
       "spellId": 3326,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 75,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1138,14 +1148,15 @@
           "name": "Coarse Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3326"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3326",
+      "skillSource": "https://www.wowhead.com/forever/spell=3326"
     },
     "3484": {
       "itemId": 3484,
       "name": "Green Iron Boots",
       "spellId": 3334,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 145,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1170,14 +1181,15 @@
           "name": "Green Dye"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3334"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3334",
+      "skillSource": "https://www.wowhead.com/forever/spell=3334"
     },
     "3485": {
       "itemId": 3485,
       "name": "Green Iron Gauntlets",
       "spellId": 3336,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1202,14 +1214,15 @@
           "name": "Green Dye"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3336"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3336",
+      "skillSource": "https://www.wowhead.com/forever/spell=3336"
     },
     "3486": {
       "itemId": 3486,
       "name": "Heavy Grinding Stone",
       "spellId": 3337,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 125,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1219,14 +1232,15 @@
           "name": "Heavy Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3337"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3337",
+      "skillSource": "https://www.wowhead.com/forever/spell=3337"
     },
     "3491": {
       "itemId": 3491,
       "name": "Heavy Bronze Mace",
       "spellId": 3296,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 130,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1261,7 +1275,8 @@
           "name": "Medium Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3296"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3296",
+      "skillSource": "https://www.wowhead.com/forever/spell=3296"
     },
     "3575": {
       "itemId": 3575,
@@ -1319,7 +1334,7 @@
       "name": "Lesser Invisibility Potion",
       "spellId": 3448,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 165,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1339,14 +1354,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3448"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3448",
+      "skillSource": "https://www.wowhead.com/forever/spell=3448"
     },
     "3824": {
       "itemId": 3824,
       "name": "Shadow Oil",
       "spellId": 3449,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 165,
       "outputMin": 2,
       "outputMax": 2,
       "reagents": [
@@ -1366,14 +1382,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3449"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3449",
+      "skillSource": "https://www.wowhead.com/forever/spell=3449"
     },
     "3827": {
       "itemId": 3827,
       "name": "Mana Potion",
       "spellId": 3452,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 160,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1393,14 +1410,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3452"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3452",
+      "skillSource": "https://www.wowhead.com/forever/spell=3452"
     },
     "3837": {
       "itemId": 3837,
       "name": "Golden Scale Coif",
       "spellId": 3503,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 190,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1420,14 +1438,15 @@
           "name": "Heavy Grinding Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3503"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3503",
+      "skillSource": "https://www.wowhead.com/forever/spell=3503"
     },
     "3848": {
       "itemId": 3848,
       "name": "Big Bronze Knife",
       "spellId": 3491,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 105,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1457,14 +1476,15 @@
           "name": "Medium Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3491"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3491",
+      "skillSource": "https://www.wowhead.com/forever/spell=3491"
     },
     "3853": {
       "itemId": 3853,
       "name": "Moonsteel Broadsword",
       "spellId": 3496,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 180,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1494,7 +1514,8 @@
           "name": "Heavy Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3496"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3496",
+      "skillSource": "https://www.wowhead.com/forever/spell=3496"
     },
     "3859": {
       "itemId": 3859,
@@ -1584,7 +1605,7 @@
       "name": "Heavy Leather",
       "spellId": 20649,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1594,7 +1615,8 @@
           "name": "Medium Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=20649"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=20649",
+      "skillSource": "https://www.wowhead.com/forever/spell=20649"
     },
     "4236": {
       "itemId": 4236,
@@ -1623,7 +1645,7 @@
       "name": "Small Silk Pack",
       "spellId": 3813,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1643,14 +1665,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3813"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3813",
+      "skillSource": "https://www.wowhead.com/forever/spell=3813"
     },
     "4252": {
       "itemId": 4252,
       "name": "Dark Leather Shoulders",
       "spellId": 3769,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 140,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1675,14 +1698,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3769"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3769",
+      "skillSource": "https://www.wowhead.com/forever/spell=3769"
     },
     "4254": {
       "itemId": 4254,
       "name": "Barbaric Gloves",
       "spellId": 3771,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1702,14 +1726,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3771"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3771",
+      "skillSource": "https://www.wowhead.com/forever/spell=3771"
     },
     "4304": {
       "itemId": 4304,
       "name": "Thick Leather",
       "spellId": 20650,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 200,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1719,7 +1744,8 @@
           "name": "Heavy Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=20650"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=20650",
+      "skillSource": "https://www.wowhead.com/forever/spell=20650"
     },
     "4305": {
       "itemId": 4305,
@@ -1743,7 +1769,7 @@
       "name": "Red Woolen Boots",
       "spellId": 3847,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 95,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1768,14 +1794,15 @@
           "name": "Red Dye"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3847"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3847",
+      "skillSource": "https://www.wowhead.com/forever/spell=3847"
     },
     "4317": {
       "itemId": 4317,
       "name": "Phoenix Pants",
       "spellId": 3851,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 125,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1795,14 +1822,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3851"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3851",
+      "skillSource": "https://www.wowhead.com/forever/spell=3851"
     },
     "4321": {
       "itemId": 4321,
       "name": "Spider Silk Slippers",
       "spellId": 3856,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 140,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1822,14 +1850,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3856"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3856",
+      "skillSource": "https://www.wowhead.com/forever/spell=3856"
     },
     "4329": {
       "itemId": 4329,
       "name": "Star Belt",
       "spellId": 3864,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 200,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1859,7 +1888,8 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3864"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3864",
+      "skillSource": "https://www.wowhead.com/forever/spell=3864"
     },
     "4339": {
       "itemId": 4339,
@@ -1949,7 +1979,7 @@
       "name": "Flying Tiger Goggles",
       "spellId": 3934,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 100,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -1964,7 +1994,8 @@
           "name": "Tigerseye"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3934"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3934",
+      "skillSource": "https://www.wowhead.com/forever/spell=3934"
     },
     "4371": {
       "itemId": 4371,
@@ -1993,7 +2024,7 @@
       "name": "Shadow Goggles",
       "spellId": 3940,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 120,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2008,7 +2039,8 @@
           "name": "Shadowgem"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3940"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3940",
+      "skillSource": "https://www.wowhead.com/forever/spell=3940"
     },
     "4375": {
       "itemId": 4375,
@@ -2037,7 +2069,7 @@
       "name": "Heavy Blasting Powder",
       "spellId": 3945,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 125,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2047,14 +2079,15 @@
           "name": "Heavy Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3945"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3945",
+      "skillSource": "https://www.wowhead.com/forever/spell=3945"
     },
     "4380": {
       "itemId": 4380,
       "name": "Big Bronze Bomb",
       "spellId": 3950,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 140,
       "outputMin": 2,
       "outputMax": 4,
       "reagents": [
@@ -2074,14 +2107,15 @@
           "name": "Silver Contact"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3950"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3950",
+      "skillSource": "https://www.wowhead.com/forever/spell=3950"
     },
     "4381": {
       "itemId": 4381,
       "name": "Minor Recombobulator",
       "spellId": 3952,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 140,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2106,7 +2140,8 @@
           "name": "Moss Agate"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3952"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3952",
+      "skillSource": "https://www.wowhead.com/forever/spell=3952"
     },
     "4382": {
       "itemId": 4382,
@@ -2140,7 +2175,7 @@
       "name": "Moonsight Rifle",
       "spellId": 3954,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 145,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2165,14 +2200,15 @@
           "name": "Lesser Moonstone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3954"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3954",
+      "skillSource": "https://www.wowhead.com/forever/spell=3954"
     },
     "4384": {
       "itemId": 4384,
       "name": "Explosive Sheep",
       "spellId": 3955,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2197,14 +2233,15 @@
           "name": "Wool Cloth"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3955"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3955",
+      "skillSource": "https://www.wowhead.com/forever/spell=3955"
     },
     "4385": {
       "itemId": 4385,
       "name": "Green Tinted Goggles",
       "spellId": 3956,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2224,7 +2261,8 @@
           "name": "Flying Tiger Goggles"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3956"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3956",
+      "skillSource": "https://www.wowhead.com/forever/spell=3956"
     },
     "4387": {
       "itemId": 4387,
@@ -2248,7 +2286,7 @@
       "name": "Gyrochronatom",
       "spellId": 3961,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 170,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2263,14 +2301,15 @@
           "name": "Gold Power Core"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3961"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3961",
+      "skillSource": "https://www.wowhead.com/forever/spell=3961"
     },
     "4392": {
       "itemId": 4392,
       "name": "Advanced Target Dummy",
       "spellId": 3965,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 185,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2295,14 +2334,15 @@
           "name": "Heavy Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3965"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3965",
+      "skillSource": "https://www.wowhead.com/forever/spell=3965"
     },
     "4393": {
       "itemId": 4393,
       "name": "Craftsman's Monocle",
       "spellId": 3966,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 185,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2317,14 +2357,15 @@
           "name": "Citrine"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3966"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3966",
+      "skillSource": "https://www.wowhead.com/forever/spell=3966"
     },
     "4395": {
       "itemId": 4395,
       "name": "Goblin Land Mine",
       "spellId": 3968,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 195,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2344,14 +2385,15 @@
           "name": "Gyrochronatom"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3968"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3968",
+      "skillSource": "https://www.wowhead.com/forever/spell=3968"
     },
     "4396": {
       "itemId": 4396,
       "name": "Mechanical Dragonling",
       "spellId": 3969,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 200,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2381,14 +2423,15 @@
           "name": "Fused Wiring"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3969"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3969",
+      "skillSource": "https://www.wowhead.com/forever/spell=3969"
     },
     "4404": {
       "itemId": 4404,
       "name": "Silver Contact",
       "spellId": 3973,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 90,
       "outputMin": 5,
       "outputMax": 5,
       "reagents": [
@@ -2398,14 +2441,15 @@
           "name": "Silver Bar"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3973"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3973",
+      "skillSource": "https://www.wowhead.com/forever/spell=3973"
     },
     "4623": {
       "itemId": 4623,
       "name": "Lesser Stoneshield Potion",
       "spellId": 4942,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 215,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2425,14 +2469,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=4942"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=4942",
+      "skillSource": "https://www.wowhead.com/forever/spell=4942"
     },
     "4852": {
       "itemId": 4852,
       "name": "Flash Bomb",
       "spellId": 8243,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 185,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2452,14 +2497,15 @@
           "name": "Silk Cloth"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=8243"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=8243",
+      "skillSource": "https://www.wowhead.com/forever/spell=8243"
     },
     "5507": {
       "itemId": 5507,
       "name": "Ornate Spyglass",
       "spellId": 6458,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 135,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2484,14 +2530,15 @@
           "name": "Moss Agate"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=6458"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=6458",
+      "skillSource": "https://www.wowhead.com/forever/spell=6458"
     },
     "5540": {
       "itemId": 5540,
       "name": "Pearl-handled Dagger",
       "spellId": 6517,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 110,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2516,14 +2563,15 @@
           "name": "Coarse Grinding Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=6517"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=6517",
+      "skillSource": "https://www.wowhead.com/forever/spell=6517"
     },
     "5541": {
       "itemId": 5541,
       "name": "Iridescent Hammer",
       "spellId": 6518,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 140,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2553,14 +2601,15 @@
           "name": "Medium Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=6518"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=6518",
+      "skillSource": "https://www.wowhead.com/forever/spell=6518"
     },
     "5633": {
       "itemId": 5633,
       "name": "Great Rage Potion",
       "spellId": 6618,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 175,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2580,14 +2629,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=6618"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=6618",
+      "skillSource": "https://www.wowhead.com/forever/spell=6618"
     },
     "5634": {
       "itemId": 5634,
       "name": "Free Action Potion",
       "spellId": 6624,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2607,14 +2657,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=6624"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=6624",
+      "skillSource": "https://www.wowhead.com/forever/spell=6624"
     },
     "5766": {
       "itemId": 5766,
       "name": "Lesser Wizard's Robe",
       "spellId": 6690,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 135,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2634,14 +2685,15 @@
           "name": "Spider's Silk"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=6690"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=6690",
+      "skillSource": "https://www.wowhead.com/forever/spell=6690"
     },
     "5958": {
       "itemId": 5958,
       "name": "Fine Leather Pants",
       "spellId": 7133,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 105,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2661,14 +2713,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7133"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7133",
+      "skillSource": "https://www.wowhead.com/forever/spell=7133"
     },
     "5965": {
       "itemId": 5965,
       "name": "Guardian Cloak",
       "spellId": 7153,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 185,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2688,14 +2741,15 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7153"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7153",
+      "skillSource": "https://www.wowhead.com/forever/spell=7153"
     },
     "5996": {
       "itemId": 5996,
       "name": "Draught of Water Breathing",
       "spellId": 7179,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 90,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2715,7 +2769,8 @@
           "name": "Empty Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7179"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7179",
+      "skillSource": "https://www.wowhead.com/forever/spell=7179"
     },
     "6037": {
       "itemId": 6037,
@@ -2739,7 +2794,7 @@
       "name": "Steel Weapon Chain",
       "spellId": 7224,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 190,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2759,14 +2814,15 @@
           "name": "Heavy Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7224"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7224",
+      "skillSource": "https://www.wowhead.com/forever/spell=7224"
     },
     "6048": {
       "itemId": 6048,
       "name": "Shadow Protection Potion",
       "spellId": 7256,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 135,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2786,14 +2842,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7256"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7256",
+      "skillSource": "https://www.wowhead.com/forever/spell=7256"
     },
     "6049": {
       "itemId": 6049,
       "name": "Fire Protection Potion",
       "spellId": 7257,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 165,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2813,14 +2870,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7257"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7257",
+      "skillSource": "https://www.wowhead.com/forever/spell=7257"
     },
     "6050": {
       "itemId": 6050,
       "name": "Frost Protection Potion",
       "spellId": 7258,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 190,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2840,14 +2898,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7258"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7258",
+      "skillSource": "https://www.wowhead.com/forever/spell=7258"
     },
     "6052": {
       "itemId": 6052,
       "name": "Nature Protection Potion",
       "spellId": 7259,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 190,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2867,14 +2926,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7259"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7259",
+      "skillSource": "https://www.wowhead.com/forever/spell=7259"
     },
     "6263": {
       "itemId": 6263,
       "name": "Blue Overalls",
       "spellId": 7639,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 100,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2894,14 +2954,15 @@
           "name": "Blue Dye"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7639"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7639",
+      "skillSource": "https://www.wowhead.com/forever/spell=7639"
     },
     "6264": {
       "itemId": 6264,
       "name": "Greater Adept's Robe",
       "spellId": 7643,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 115,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2921,14 +2982,15 @@
           "name": "Red Dye"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7643"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7643",
+      "skillSource": "https://www.wowhead.com/forever/spell=7643"
     },
     "6370": {
       "itemId": 6370,
       "name": "Blackmouth Oil",
       "spellId": 7836,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 80,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2943,14 +3005,15 @@
           "name": "Empty Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7836"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7836",
+      "skillSource": "https://www.wowhead.com/forever/spell=7836"
     },
     "6371": {
       "itemId": 6371,
       "name": "Fire Oil",
       "spellId": 7837,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 130,
       "outputMin": 2,
       "outputMax": 2,
       "reagents": [
@@ -2965,14 +3028,15 @@
           "name": "Empty Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=7837"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=7837",
+      "skillSource": "https://www.wowhead.com/forever/spell=7837"
     },
     "6712": {
       "itemId": 6712,
       "name": "Practice Lock",
       "spellId": 8334,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 100,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -2992,14 +3056,15 @@
           "name": "Weak Flux"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=8334"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=8334",
+      "skillSource": "https://www.wowhead.com/forever/spell=8334"
     },
     "7048": {
       "itemId": 7048,
       "name": "Azure Silk Hood",
       "spellId": 8760,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 145,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3019,14 +3084,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=8760"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=8760",
+      "skillSource": "https://www.wowhead.com/forever/spell=8760"
     },
     "7061": {
       "itemId": 7061,
       "name": "Earthen Silk Belt",
       "spellId": 8797,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 195,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3056,14 +3122,15 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=8797"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=8797",
+      "skillSource": "https://www.wowhead.com/forever/spell=8797"
     },
     "7063": {
       "itemId": 7063,
       "name": "Crimson Silk Robe",
       "spellId": 8802,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 205,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3093,14 +3160,15 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=8802"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=8802",
+      "skillSource": "https://www.wowhead.com/forever/spell=8802"
     },
     "7071": {
       "itemId": 7071,
       "name": "Iron Buckle",
       "spellId": 8768,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 2,
       "outputMax": 2,
       "reagents": [
@@ -3110,14 +3178,15 @@
           "name": "Iron Bar"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=8768"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=8768",
+      "skillSource": "https://www.wowhead.com/forever/spell=8768"
     },
     "7284": {
       "itemId": 7284,
       "name": "Red Whelp Gloves",
       "spellId": 9072,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 120,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3137,14 +3206,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9072"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9072",
+      "skillSource": "https://www.wowhead.com/forever/spell=9072"
     },
     "7349": {
       "itemId": 7349,
       "name": "Herbalist's Gloves",
       "spellId": 9146,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 135,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3164,14 +3234,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9146"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9146",
+      "skillSource": "https://www.wowhead.com/forever/spell=9146"
     },
     "7358": {
       "itemId": 7358,
       "name": "Pilferer's Gloves",
       "spellId": 9148,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 140,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3191,14 +3262,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9148"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9148",
+      "skillSource": "https://www.wowhead.com/forever/spell=9148"
     },
     "7371": {
       "itemId": 7371,
       "name": "Heavy Quiver",
       "spellId": 9193,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3213,14 +3285,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9193"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9193",
+      "skillSource": "https://www.wowhead.com/forever/spell=9193"
     },
     "7378": {
       "itemId": 7378,
       "name": "Dusky Bracers",
       "spellId": 9201,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 185,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3240,14 +3313,15 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9201"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9201",
+      "skillSource": "https://www.wowhead.com/forever/spell=9201"
     },
     "7391": {
       "itemId": 7391,
       "name": "Swift Boots",
       "spellId": 9208,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 200,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3272,14 +3346,15 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9208"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9208",
+      "skillSource": "https://www.wowhead.com/forever/spell=9208"
     },
     "7506": {
       "itemId": 7506,
       "name": "Gnomish Universal Remote",
       "spellId": 9269,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 125,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3309,14 +3384,15 @@
           "name": "Malachite"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9269"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9269",
+      "skillSource": "https://www.wowhead.com/forever/spell=9269"
     },
     "7922": {
       "itemId": 7922,
       "name": "Steel Plate Helm",
       "spellId": 9935,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 215,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3331,14 +3407,15 @@
           "name": "Solid Grinding Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9935"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9935",
+      "skillSource": "https://www.wowhead.com/forever/spell=9935"
     },
     "7928": {
       "itemId": 7928,
       "name": "Ornate Mithril Shoulders",
       "spellId": 9952,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 225,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3358,14 +3435,15 @@
           "name": "Thick Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9952"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9952",
+      "skillSource": "https://www.wowhead.com/forever/spell=9952"
     },
     "7929": {
       "itemId": 7929,
       "name": "Orcish War Leggings",
       "spellId": 9957,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 230,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3384,14 +3462,15 @@
       "allowedFactions": [
         "horde"
       ],
-      "caveat": "The Orcish War Leggings plans are Horde-only."
+      "caveat": "The Orcish War Leggings plans are Horde-only.",
+      "skillSource": "https://www.wowhead.com/forever/spell=9957"
     },
     "7941": {
       "itemId": 7941,
       "name": "Heavy Mithril Axe",
       "spellId": 9993,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 210,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3416,14 +3495,15 @@
           "name": "Heavy Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9993"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9993",
+      "skillSource": "https://www.wowhead.com/forever/spell=9993"
     },
     "7942": {
       "itemId": 7942,
       "name": "Blue Glittering Axe",
       "spellId": 9995,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 220,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3448,14 +3528,15 @@
           "name": "Thick Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9995"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9995",
+      "skillSource": "https://www.wowhead.com/forever/spell=9995"
     },
     "7943": {
       "itemId": 7943,
       "name": "Wicked Mithril Blade",
       "spellId": 9997,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 225,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3480,14 +3561,15 @@
           "name": "Thick Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9997"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9997",
+      "skillSource": "https://www.wowhead.com/forever/spell=9997"
     },
     "7947": {
       "itemId": 7947,
       "name": "Ebon Shiv",
       "spellId": 10013,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 255,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3517,14 +3599,15 @@
           "name": "Thick Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=10013"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=10013",
+      "skillSource": "https://www.wowhead.com/forever/spell=10013"
     },
     "7964": {
       "itemId": 7964,
       "name": "Solid Sharpening Stone",
       "spellId": 9918,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 200,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3534,14 +3617,15 @@
           "name": "Solid Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9918"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9918",
+      "skillSource": "https://www.wowhead.com/forever/spell=9918"
     },
     "7966": {
       "itemId": 7966,
       "name": "Solid Grinding Stone",
       "spellId": 9920,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 200,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3551,14 +3635,15 @@
           "name": "Solid Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9920"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9920",
+      "skillSource": "https://www.wowhead.com/forever/spell=9920"
     },
     "7969": {
       "itemId": 7969,
       "name": "Mithril Spurs",
       "spellId": 9964,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 235,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3573,14 +3658,15 @@
           "name": "Solid Grinding Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=9964"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=9964",
+      "skillSource": "https://www.wowhead.com/forever/spell=9964"
     },
     "8069": {
       "itemId": 8069,
       "name": "Crafted Solid Shot",
       "spellId": 3947,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 125,
       "outputMin": 200,
       "outputMax": 200,
       "reagents": [
@@ -3595,14 +3681,15 @@
           "name": "Bronze Bar"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=3947"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=3947",
+      "skillSource": "https://www.wowhead.com/forever/spell=3947"
     },
     "8170": {
       "itemId": 8170,
       "name": "Rugged Leather",
       "spellId": 22331,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 250,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3612,7 +3699,8 @@
           "name": "Thick Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=22331"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=22331",
+      "skillSource": "https://www.wowhead.com/forever/spell=22331"
     },
     "8172": {
       "itemId": 8172,
@@ -3641,7 +3729,7 @@
       "name": "Comfortable Leather Hat",
       "spellId": 10490,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 200,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3661,14 +3749,15 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=10490"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=10490",
+      "skillSource": "https://www.wowhead.com/forever/spell=10490"
     },
     "8189": {
       "itemId": 8189,
       "name": "Turtle Scale Breastplate",
       "spellId": 10511,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 210,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3688,14 +3777,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=10511"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=10511",
+      "skillSource": "https://www.wowhead.com/forever/spell=10511"
     },
     "8192": {
       "itemId": 8192,
       "name": "Nightscape Shoulders",
       "spellId": 10516,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 210,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3715,14 +3805,15 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=10516"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=10516",
+      "skillSource": "https://www.wowhead.com/forever/spell=10516"
     },
     "8200": {
       "itemId": 8200,
       "name": "Big Voodoo Robe",
       "spellId": 10520,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 215,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3742,14 +3833,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=10520"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=10520",
+      "skillSource": "https://www.wowhead.com/forever/spell=10520"
     },
     "8201": {
       "itemId": 8201,
       "name": "Big Voodoo Mask",
       "spellId": 10531,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 220,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3769,14 +3861,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=10531"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=10531",
+      "skillSource": "https://www.wowhead.com/forever/spell=10531"
     },
     "8210": {
       "itemId": 8210,
       "name": "Wild Leather Shoulders",
       "spellId": 10529,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 220,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3796,14 +3889,15 @@
           "name": "Cured Thick Hide"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=10529"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=10529",
+      "skillSource": "https://www.wowhead.com/forever/spell=10529"
     },
     "8214": {
       "itemId": 8214,
       "name": "Wild Leather Helmet",
       "spellId": 10546,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 225,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3823,14 +3917,15 @@
           "name": "Cured Thick Hide"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=10546"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=10546",
+      "skillSource": "https://www.wowhead.com/forever/spell=10546"
     },
     "8217": {
       "itemId": 8217,
       "name": "Quickdraw Quiver",
       "spellId": 14930,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 225,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3855,14 +3950,15 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=14930"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=14930",
+      "skillSource": "https://www.wowhead.com/forever/spell=14930"
     },
     "8218": {
       "itemId": 8218,
       "name": "Thick Leather Ammo Pouch",
       "spellId": 14932,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 225,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3887,14 +3983,15 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=14932"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=14932",
+      "skillSource": "https://www.wowhead.com/forever/spell=14932"
     },
     "8949": {
       "itemId": 8949,
       "name": "Elixir of Agility",
       "spellId": 11449,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 185,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3914,14 +4011,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=11449"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=11449",
+      "skillSource": "https://www.wowhead.com/forever/spell=11449"
     },
     "8951": {
       "itemId": 8951,
       "name": "Elixir of Defense",
       "spellId": 11450,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 195,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3941,14 +4039,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=11450"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=11450",
+      "skillSource": "https://www.wowhead.com/forever/spell=11450"
     },
     "9060": {
       "itemId": 9060,
       "name": "Inlaid Mithril Cylinder",
       "spellId": 11454,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 200,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -3968,14 +4067,15 @@
           "name": "Truesilver Bar"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=11454"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=11454",
+      "skillSource": "https://www.wowhead.com/forever/spell=11454"
     },
     "9061": {
       "itemId": 9061,
       "name": "Goblin Rocket Fuel",
       "spellId": 11456,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 210,
       "outputMin": 2,
       "outputMax": 2,
       "reagents": [
@@ -3995,14 +4095,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=11456"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=11456",
+      "skillSource": "https://www.wowhead.com/forever/spell=11456"
     },
     "9088": {
       "itemId": 9088,
       "name": "Gift of Arthas",
       "spellId": 11466,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 240,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4022,14 +4123,15 @@
           "name": "Crystal Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=11466"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=11466",
+      "skillSource": "https://www.wowhead.com/forever/spell=11466"
     },
     "9144": {
       "itemId": 9144,
       "name": "Wildvine Potion",
       "spellId": 11458,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 225,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4049,14 +4151,15 @@
           "name": "Crystal Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=11458"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=11458",
+      "skillSource": "https://www.wowhead.com/forever/spell=11458"
     },
     "9210": {
       "itemId": 9210,
       "name": "Ghost Dye",
       "spellId": 11473,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 245,
       "outputMin": 2,
       "outputMax": 2,
       "reagents": [
@@ -4076,14 +4179,15 @@
           "name": "Crystal Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=11473"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=11473",
+      "skillSource": "https://www.wowhead.com/forever/spell=11473"
     },
     "9224": {
       "itemId": 9224,
       "name": "Potion of Demon Slaying",
       "spellId": 11477,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 250,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4103,14 +4207,15 @@
           "name": "Crystal Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=11477"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=11477",
+      "skillSource": "https://www.wowhead.com/forever/spell=11477"
     },
     "9233": {
       "itemId": 9233,
       "name": "Draught of Detect Demon",
       "spellId": 11478,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 250,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4125,14 +4230,15 @@
           "name": "Crystal Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=11478"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=11478",
+      "skillSource": "https://www.wowhead.com/forever/spell=11478"
     },
     "9366": {
       "itemId": 9366,
       "name": "Golden Scale Gauntlets",
       "spellId": 11643,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 205,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4157,14 +4263,15 @@
           "name": "Citrine"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=11643"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=11643",
+      "skillSource": "https://www.wowhead.com/forever/spell=11643"
     },
     "9998": {
       "itemId": 9998,
       "name": "Black Mageweave Vest",
       "spellId": 12048,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 205,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4179,14 +4286,15 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12048"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12048",
+      "skillSource": "https://www.wowhead.com/forever/spell=12048"
     },
     "10004": {
       "itemId": 10004,
       "name": "Shadoweave Robe",
       "spellId": 12055,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 215,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4206,14 +4314,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12055"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12055",
+      "skillSource": "https://www.wowhead.com/forever/spell=12055"
     },
     "10008": {
       "itemId": 10008,
       "name": "White Bandit Mask",
       "spellId": 12059,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 215,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4233,14 +4342,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12059"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12059",
+      "skillSource": "https://www.wowhead.com/forever/spell=12059"
     },
     "10009": {
       "itemId": 10009,
       "name": "Red Mageweave Pants",
       "spellId": 12060,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 215,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4260,14 +4370,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12060"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12060",
+      "skillSource": "https://www.wowhead.com/forever/spell=12060"
     },
     "10023": {
       "itemId": 10023,
       "name": "Shadoweave Gloves",
       "spellId": 12071,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 225,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4287,14 +4398,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12071"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12071",
+      "skillSource": "https://www.wowhead.com/forever/spell=12071"
     },
     "10025": {
       "itemId": 10025,
       "name": "Shadoweave Mask",
       "spellId": 12086,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 245,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4314,14 +4426,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12086"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12086",
+      "skillSource": "https://www.wowhead.com/forever/spell=12086"
     },
     "10036": {
       "itemId": 10036,
       "name": "Tuxedo Jacket",
       "spellId": 12093,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 250,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4336,14 +4449,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12093"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12093",
+      "skillSource": "https://www.wowhead.com/forever/spell=12093"
     },
     "10042": {
       "itemId": 10042,
       "name": "Cindercloth Robe",
       "spellId": 12069,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 225,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4363,14 +4477,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12069"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12069",
+      "skillSource": "https://www.wowhead.com/forever/spell=12069"
     },
     "10048": {
       "itemId": 10048,
       "name": "Colorful Kilt",
       "spellId": 12047,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 120,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4390,14 +4505,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12047"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12047",
+      "skillSource": "https://www.wowhead.com/forever/spell=12047"
     },
     "10050": {
       "itemId": 10050,
       "name": "Mageweave Bag",
       "spellId": 12065,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 225,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4412,14 +4528,15 @@
           "name": "Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12065"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12065",
+      "skillSource": "https://www.wowhead.com/forever/spell=12065"
     },
     "10052": {
       "itemId": 10052,
       "name": "Orange Martial Shirt",
       "spellId": 12064,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 220,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4439,14 +4556,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12064"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12064",
+      "skillSource": "https://www.wowhead.com/forever/spell=12064"
     },
     "10498": {
       "itemId": 10498,
       "name": "Gyromatic Micro-Adjustor",
       "spellId": 12590,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 175,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4456,14 +4574,15 @@
           "name": "Steel Bar"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12590"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12590",
+      "skillSource": "https://www.wowhead.com/forever/spell=12590"
     },
     "10500": {
       "itemId": 10500,
       "name": "Fire Goggles",
       "spellId": 12594,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 205,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4488,14 +4607,15 @@
           "name": "Heavy Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12594"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12594",
+      "skillSource": "https://www.wowhead.com/forever/spell=12594"
     },
     "10501": {
       "itemId": 10501,
       "name": "Catseye Ultra Goggles",
       "spellId": 12607,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 220,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4515,14 +4635,15 @@
           "name": "Catseye Draught"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12607"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12607",
+      "skillSource": "https://www.wowhead.com/forever/spell=12607"
     },
     "10504": {
       "itemId": 10504,
       "name": "Green Lens",
       "spellId": 12622,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 245,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4552,7 +4673,8 @@
           "name": "Wildvine"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12622"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12622",
+      "skillSource": "https://www.wowhead.com/forever/spell=12622"
     },
     "10505": {
       "itemId": 10505,
@@ -4576,7 +4698,7 @@
       "name": "Mithril Frag Bomb",
       "spellId": 12603,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 215,
       "outputMin": 3,
       "outputMax": 3,
       "reagents": [
@@ -4596,14 +4718,15 @@
           "name": "Solid Blasting Powder"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12603"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12603",
+      "skillSource": "https://www.wowhead.com/forever/spell=12603"
     },
     "10548": {
       "itemId": 10548,
       "name": "Sniper Scope",
       "spellId": 12620,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 240,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4623,7 +4746,8 @@
           "name": "Truesilver Bar"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12620"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12620",
+      "skillSource": "https://www.wowhead.com/forever/spell=12620"
     },
     "10558": {
       "itemId": 10558,
@@ -4708,7 +4832,7 @@
       "name": "Catseye Draught",
       "spellId": 12609,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 200,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4728,14 +4852,15 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=12609"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=12609",
+      "skillSource": "https://www.wowhead.com/forever/spell=12609"
     },
     "11128": {
       "itemId": 11128,
       "name": "Golden Rod",
       "spellId": 14379,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4750,14 +4875,15 @@
           "name": "Coarse Grinding Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=14379"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=14379",
+      "skillSource": "https://www.wowhead.com/forever/spell=14379"
     },
     "11144": {
       "itemId": 11144,
       "name": "Truesilver Rod",
       "spellId": 14380,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 200,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4772,7 +4898,8 @@
           "name": "Heavy Grinding Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=14380"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=14380",
+      "skillSource": "https://www.wowhead.com/forever/spell=14380"
     },
     "11371": {
       "itemId": 11371,
@@ -4797,7 +4924,7 @@
       "name": "Mechanical Repair Kit",
       "spellId": 15255,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 200,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4817,14 +4944,15 @@
           "name": "Solid Blasting Powder"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=15255"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=15255",
+      "skillSource": "https://www.wowhead.com/forever/spell=15255"
     },
     "12190": {
       "itemId": 12190,
       "name": "Dreamless Sleep Potion",
       "spellId": 15833,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 230,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4839,7 +4967,8 @@
           "name": "Crystal Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=15833"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=15833",
+      "skillSource": "https://www.wowhead.com/forever/spell=15833"
     },
     "12359": {
       "itemId": 12359,
@@ -4863,7 +4992,7 @@
       "name": "Radiant Belt",
       "spellId": 16645,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 260,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4878,14 +5007,15 @@
           "name": "Heart of Fire"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=16645"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=16645",
+      "skillSource": "https://www.wowhead.com/forever/spell=16645"
     },
     "12417": {
       "itemId": 12417,
       "name": "Radiant Circlet",
       "spellId": 16659,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 295,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4900,14 +5030,15 @@
           "name": "Heart of Fire"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=16659"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=16659",
+      "skillSource": "https://www.wowhead.com/forever/spell=16659"
     },
     "12422": {
       "itemId": 12422,
       "name": "Imperial Plate Chest",
       "spellId": 16663,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 300,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4922,14 +5053,15 @@
           "name": "Star Ruby"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=16663"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=16663",
+      "skillSource": "https://www.wowhead.com/forever/spell=16663"
     },
     "12644": {
       "itemId": 12644,
       "name": "Dense Grinding Stone",
       "spellId": 16639,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 250,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4939,14 +5071,15 @@
           "name": "Dense Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=16639"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=16639",
+      "skillSource": "https://www.wowhead.com/forever/spell=16639"
     },
     "12775": {
       "itemId": 12775,
       "name": "Huge Thorium Battleaxe",
       "spellId": 16971,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 280,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4966,14 +5099,15 @@
           "name": "Rugged Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=16971"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=16971",
+      "skillSource": "https://www.wowhead.com/forever/spell=16971"
     },
     "12810": {
       "itemId": 12810,
       "name": "Enchanted Leather",
       "spellId": 17181,
       "profession": "Enchanting",
-      "skill": 0,
+      "skill": 250,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -4988,14 +5122,15 @@
           "name": "Lesser Eternal Essence"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=17181"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=17181",
+      "skillSource": "https://www.wowhead.com/forever/spell=17181"
     },
     "13457": {
       "itemId": 13457,
       "name": "Greater Fire Protection Potion",
       "spellId": 17574,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 290,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5015,14 +5150,15 @@
           "name": "Crystal Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=17574"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=17574",
+      "skillSource": "https://www.wowhead.com/forever/spell=17574"
     },
     "13513": {
       "itemId": 13513,
       "name": "Flask of Chromatic Resistance",
       "spellId": 17638,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 300,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5047,14 +5183,15 @@
           "name": "Crystal Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=17638"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=17638",
+      "skillSource": "https://www.wowhead.com/forever/spell=17638"
     },
     "13864": {
       "itemId": 13864,
       "name": "Runecloth Boots",
       "spellId": 18423,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 280,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5079,14 +5216,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=18423"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=18423",
+      "skillSource": "https://www.wowhead.com/forever/spell=18423"
     },
     "14046": {
       "itemId": 14046,
       "name": "Runecloth Bag",
       "spellId": 18405,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 260,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5116,7 +5254,8 @@
           "name": "Cerulean Dye"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=18405"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=18405",
+      "skillSource": "https://www.wowhead.com/forever/spell=18405"
     },
     "14048": {
       "itemId": 14048,
@@ -5140,7 +5279,7 @@
       "name": "Felcloth Boots",
       "spellId": 18437,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 285,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5165,14 +5304,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=18437"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=18437",
+      "skillSource": "https://www.wowhead.com/forever/spell=18437"
     },
     "14130": {
       "itemId": 14130,
       "name": "Wizardweave Turban",
       "spellId": 18450,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 300,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5197,14 +5337,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=18450"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=18450",
+      "skillSource": "https://www.wowhead.com/forever/spell=18450"
     },
     "14141": {
       "itemId": 14141,
       "name": "Ghostweave Vest",
       "spellId": 18416,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 275,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5229,14 +5370,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=18416"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=18416",
+      "skillSource": "https://www.wowhead.com/forever/spell=18416"
     },
     "15053": {
       "itemId": 15053,
       "name": "Volcanic Breastplate",
       "spellId": 19076,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 285,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5261,14 +5403,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19076"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19076",
+      "skillSource": "https://www.wowhead.com/forever/spell=19076"
     },
     "15071": {
       "itemId": 15071,
       "name": "Frostsaber Boots",
       "spellId": 19066,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 275,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5288,14 +5431,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19066"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19066",
+      "skillSource": "https://www.wowhead.com/forever/spell=19066"
     },
     "15075": {
       "itemId": 15075,
       "name": "Chimeric Vest",
       "spellId": 19081,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 290,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5315,14 +5459,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19081"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19081",
+      "skillSource": "https://www.wowhead.com/forever/spell=19081"
     },
     "15080": {
       "itemId": 15080,
       "name": "Heavy Scorpid Helm",
       "spellId": 19088,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 295,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5347,14 +5492,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19088"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19088",
+      "skillSource": "https://www.wowhead.com/forever/spell=19088"
     },
     "15084": {
       "itemId": 15084,
       "name": "Wicked Leather Bracers",
       "spellId": 19052,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 265,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5374,14 +5520,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19052"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19052",
+      "skillSource": "https://www.wowhead.com/forever/spell=19052"
     },
     "15087": {
       "itemId": 15087,
       "name": "Wicked Leather Pants",
       "spellId": 19083,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 290,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5406,14 +5553,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19083"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19083",
+      "skillSource": "https://www.wowhead.com/forever/spell=19083"
     },
     "15092": {
       "itemId": 15092,
       "name": "Runic Leather Bracers",
       "spellId": 19065,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 275,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5438,14 +5586,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19065"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19065",
+      "skillSource": "https://www.wowhead.com/forever/spell=19065"
     },
     "15094": {
       "itemId": 15094,
       "name": "Runic Leather Headband",
       "spellId": 19082,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 290,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5465,14 +5614,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19082"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19082",
+      "skillSource": "https://www.wowhead.com/forever/spell=19082"
     },
     "15407": {
       "itemId": 15407,
       "name": "Cured Rugged Hide",
       "spellId": 19047,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 250,
       "outputMin": 2,
       "outputMax": 2,
       "reagents": [
@@ -5487,14 +5637,15 @@
           "name": "Refined Deeprock Salt"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19047"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19047",
+      "skillSource": "https://www.wowhead.com/forever/spell=19047"
     },
     "15869": {
       "itemId": 15869,
       "name": "Silver Skeleton Key",
       "spellId": 19666,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 100,
       "outputMin": 2,
       "outputMax": 2,
       "reagents": [
@@ -5509,14 +5660,15 @@
           "name": "Rough Grinding Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19666"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19666",
+      "skillSource": "https://www.wowhead.com/forever/spell=19666"
     },
     "15872": {
       "itemId": 15872,
       "name": "Arcanite Skeleton Key",
       "spellId": 19669,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 275,
       "outputMin": 2,
       "outputMax": 2,
       "reagents": [
@@ -5531,14 +5683,15 @@
           "name": "Dense Grinding Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19669"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19669",
+      "skillSource": "https://www.wowhead.com/forever/spell=19669"
     },
     "15992": {
       "itemId": 15992,
       "name": "Dense Blasting Powder",
       "spellId": 19788,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 250,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5548,7 +5701,8 @@
           "name": "Dense Stone"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19788"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19788",
+      "skillSource": "https://www.wowhead.com/forever/spell=19788"
     },
     "15994": {
       "itemId": 15994,
@@ -5577,7 +5731,7 @@
       "name": "Lifelike Mechanical Toad",
       "spellId": 19793,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 265,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5602,7 +5756,8 @@
           "name": "Rugged Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19793"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19793",
+      "skillSource": "https://www.wowhead.com/forever/spell=19793"
     },
     "16000": {
       "itemId": 16000,
@@ -5626,7 +5781,7 @@
       "name": "Dark Iron Bomb",
       "spellId": 19799,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 285,
       "outputMin": 3,
       "outputMax": 3,
       "reagents": [
@@ -5651,14 +5806,15 @@
           "name": "Runecloth"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19799"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19799",
+      "skillSource": "https://www.wowhead.com/forever/spell=19799"
     },
     "16023": {
       "itemId": 16023,
       "name": "Masterwork Target Dummy",
       "spellId": 19814,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 275,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5693,14 +5849,15 @@
           "name": "Runecloth"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=19814"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=19814",
+      "skillSource": "https://www.wowhead.com/forever/spell=19814"
     },
     "18232": {
       "itemId": 18232,
       "name": "Field Repair Bot 74A",
       "spellId": 22704,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 300,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5731,14 +5888,15 @@
         }
       ],
       "sourceUrl": "https://www.wowhead.com/forever/spell=22704",
-      "caveat": "The Field Repair Bot schematic is found in Blackrock Depths."
+      "caveat": "The Field Repair Bot schematic is found in Blackrock Depths.",
+      "skillSource": "https://www.wowhead.com/forever/spell=22704"
     },
     "18253": {
       "itemId": 18253,
       "name": "Major Rejuvenation Potion",
       "spellId": 22732,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 300,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5763,7 +5921,8 @@
           "name": "Imbued Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=22732"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=22732",
+      "skillSource": "https://www.wowhead.com/forever/spell=22732"
     },
     "18258": [
       {
@@ -5771,7 +5930,7 @@
         "name": "Gordok Ogre Suit",
         "spellId": 22813,
         "profession": "Tailoring",
-        "skill": 0,
+        "skill": 285,
         "outputMin": 1,
         "outputMax": 1,
         "reagents": [
@@ -5796,14 +5955,15 @@
             "name": "Rune Thread"
           }
         ],
-        "sourceUrl": "https://www.wowhead.com/forever/spell=22813"
+        "sourceUrl": "https://www.wowhead.com/forever/spell=22813",
+        "skillSource": "https://www.wowhead.com/forever/spell=22813"
       },
       {
         "itemId": 18258,
         "name": "Gordok Ogre Suit",
         "spellId": 22815,
         "profession": "Leatherworking",
-        "skill": 0,
+        "skill": 285,
         "outputMin": 1,
         "outputMax": 1,
         "reagents": [
@@ -5828,7 +5988,8 @@
             "name": "Rune Thread"
           }
         ],
-        "sourceUrl": "https://www.wowhead.com/forever/spell=22815"
+        "sourceUrl": "https://www.wowhead.com/forever/spell=22815",
+        "skillSource": "https://www.wowhead.com/forever/spell=22815"
       }
     ],
     "18587": {
@@ -5836,7 +5997,7 @@
       "name": "Goblin Jumper Cables XL",
       "spellId": 23078,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 265,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5867,7 +6028,8 @@
         }
       ],
       "sourceUrl": "https://www.wowhead.com/forever/spell=23078",
-      "caveat": "Requires Goblin Engineering specialization."
+      "caveat": "Requires Goblin Engineering specialization.",
+      "skillSource": "https://www.wowhead.com/forever/spell=23078"
     },
     "18631": {
       "itemId": 18631,
@@ -5901,7 +6063,7 @@
       "name": "Gnomish Alarm-O-Bot",
       "spellId": 23096,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 265,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5932,14 +6094,15 @@
         }
       ],
       "sourceUrl": "https://www.wowhead.com/forever/spell=23096",
-      "caveat": "Requires Gnomish Engineering specialization."
+      "caveat": "Requires Gnomish Engineering specialization.",
+      "skillSource": "https://www.wowhead.com/forever/spell=23096"
     },
     "18662": {
       "itemId": 18662,
       "name": "Heavy Leather Ball",
       "spellId": 23190,
       "profession": "Leatherworking",
-      "skill": 0,
+      "skill": 150,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5954,14 +6117,15 @@
           "name": "Fine Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=23190"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=23190",
+      "skillSource": "https://www.wowhead.com/forever/spell=23190"
     },
     "20549": {
       "itemId": 20549,
       "name": "Darkrune Gauntlets",
       "spellId": 24912,
       "profession": "Blacksmithing",
-      "skill": 0,
+      "skill": 300,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -5986,14 +6150,15 @@
           "name": "Enchanted Leather"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=24912"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=24912",
+      "skillSource": "https://www.wowhead.com/forever/spell=24912"
     },
     "21277": {
       "itemId": 21277,
       "name": "Tranquil Mechanical Yeti",
       "spellId": 26011,
       "profession": "Engineering",
-      "skill": 0,
+      "skill": 250,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -6024,14 +6189,15 @@
         }
       ],
       "sourceUrl": "https://www.wowhead.com/forever/spell=26011",
-      "caveat": "The Tranquil Mechanical Yeti schematic is learned from a quest."
+      "caveat": "The Tranquil Mechanical Yeti schematic is learned from a quest.",
+      "skillSource": "https://www.wowhead.com/forever/spell=26011"
     },
     "21340": {
       "itemId": 21340,
       "name": "Soul Pouch",
       "spellId": 26085,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 260,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -6056,14 +6222,15 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=26085"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=26085",
+      "skillSource": "https://www.wowhead.com/forever/spell=26085"
     },
     "22246": {
       "itemId": 22246,
       "name": "Enchanted Mageweave Pouch",
       "spellId": 27658,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 225,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -6083,14 +6250,15 @@
           "name": "Heavy Silken Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=27658"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=27658",
+      "skillSource": "https://www.wowhead.com/forever/spell=27658"
     },
     "22251": {
       "itemId": 22251,
       "name": "Cenarion Herb Bag",
       "spellId": 27724,
       "profession": "Tailoring",
-      "skill": 0,
+      "skill": 275,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -6115,7 +6283,8 @@
           "name": "Rune Thread"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=27724"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=27724",
+      "skillSource": "https://www.wowhead.com/forever/spell=27724"
     },
     "246948": {
       "itemId": 246948,
@@ -6149,7 +6318,7 @@
       "name": "Cerulean Dye",
       "spellId": 1249630,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 50,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -6164,14 +6333,15 @@
           "name": "Empty Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=1249630"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=1249630",
+      "skillSource": "https://www.wowhead.com/forever/spell=1249630"
     },
     "249430": {
       "itemId": 249430,
       "name": "Magenta Dye",
       "spellId": 1249631,
       "profession": "Alchemy",
-      "skill": 0,
+      "skill": 130,
       "outputMin": 1,
       "outputMax": 1,
       "reagents": [
@@ -6186,7 +6356,8 @@
           "name": "Leaded Vial"
         }
       ],
-      "sourceUrl": "https://www.wowhead.com/forever/spell=1249631"
+      "sourceUrl": "https://www.wowhead.com/forever/spell=1249631",
+      "skillSource": "https://www.wowhead.com/forever/spell=1249631"
     }
   }
 }

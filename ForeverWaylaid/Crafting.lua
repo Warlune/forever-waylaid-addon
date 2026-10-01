@@ -29,7 +29,7 @@ local function single(id,qty,override)
     if r then
       local crafts=math.ceil((demand[key] or 0)/r.outputMin)
       steps[#steps+1]={itemId=key,name=r.name,crafts=crafts,profession=r.profession,skill=r.skill,
-        outputMin=r.outputMin,outputMax=r.outputMax,spellId=r.spellId}
+        outputMin=r.outputMin,outputMax=r.outputMax,spellId=r.spellId,caveat=r.caveat}
       variable=variable or r.outputMin~=r.outputMax
       for _,mat in ipairs(r.reagents)do demand[mat.itemId]=(demand[mat.itemId] or 0)+crafts*mat.qty end
     end
@@ -52,6 +52,27 @@ local function single(id,qty,override)
   local reverse={};for i=#steps,1,-1 do reverse[#reverse+1]=steps[i]end
   return {cost=not missing and cost or nil,enough=enough,materials=materials,steps=reverse,variableYield=variable,
     reason=missing and "Some raw materials are unpriced" or short and "Some auction materials have short stock" or nil}
+end
+
+function F.CraftRequirements(craft)
+  local professions,notes={},{}
+  for _,step in ipairs(craft.steps or {})do
+    local name=step.profession or "Profession unverified"
+    local requirement=professions[name] or {skill=0};professions[name]=requirement
+    if step.skill and step.skill>0 then requirement.skill=math.max(requirement.skill,step.skill)
+    else requirement.unknown=true end
+    if step.caveat then notes[#notes+1]=step.caveat end
+  end
+  local names,lines={},{}
+  for name in pairs(professions)do names[#names+1]=name end
+  table.sort(names)
+  for _,name in ipairs(names)do
+    local r=professions[name]
+    lines[#lines+1]=name..(r.skill>0 and " • skill "..r.skill or "")..
+      (r.unknown and (r.skill>0 and "; other steps unverified" or " • skill level unverified") or "")
+  end
+  for _,note in ipairs(notes)do lines[#lines+1]=note end
+  return #lines>0 and table.concat(lines,"\n") or "Gather or buy this good; no crafting recipe."
 end
 function F.CraftQuote(id,qty)
   local r=F.recipeData.recipes[tostring(id)]

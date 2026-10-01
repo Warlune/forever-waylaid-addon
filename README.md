@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.3.0 preview
+# Forever Waylaid — v0.3.1 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.3.0.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.3.1.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, choose PvP, Normal, or RP to match your realm. The faction comes from your character. No market is guessed automatically.
@@ -14,7 +14,7 @@ The folder includes an AHledger snapshot. Its actual observation date appears in
 ## What is in this version
 
 - A merchant's field ledger with native Classic borders, red buttons, gold headings, item portraits, and parchment detail pages.
-- Search crates and writs by name or material; filter crate tiers or owned cargo; sort by value, fill cost, or name. Inspect required materials, bag counts, observed auction stock, price source/age, favor, reputation, and purchase totals.
+- Search crates and writs by name or material; filter crate tiers or owned cargo; sort by value, total cost, or name. Inspect required materials, bag counts, observed auction stock, price source/age, favor, reputation, and purchase totals.
 - All 30 crates and 150 writs from the existing [Forever Waylaid Ledger](https://warlune.github.io/forever-waylaid-ledger/).
 - Tooltips with configurable **cheapest fill**, **include crate purchase price**, and **all material fill costs**. Known low-stock options cannot win cheapest-fill selection. Prices are estimates: quantity is total observed stock, not a guarantee that every unit can be bought at the minimum price.
 - Personal Auctionator full/incremental scans captured while this addon is enabled at recognized faction capitals. Neutral and unidentified auction houses are excluded. Older Auctionator history is not relabeled as a fresh scan.
@@ -28,11 +28,11 @@ The folder includes an AHledger snapshot. Its actual observation date appears in
 
 ## Buy or craft your cargo
 
-The top **Goods: Buy at AH / Goods: Craft** button is independent of tooltip settings. Both modes keep the auction price of the writ or crate separate from the goods cost. The detail sheet shows the full combined purchase value; a crate already in your bags also has an owned-crate total.
+The top **Goods: Buy at AH / Goods: Craft** button is independent of tooltip settings. Both modes keep the auction price of the writ or crate separate from the goods cost. Every row shows **Writ/Crate, Goods, and Total**, using full purchase value even for owned items. Missing either price always places an entry after fully priced entries, including when sorting by name. Green-to-red row colors match the website's relative cost-per-reward bands; unpriced, unverified-reward, and short-stock entries stay gray. Bands are calculated before filters, so searching does not change an item's value color.
 
-Craft mode uses the website's 208 verified recipes and 143 raw materials. Each option includes a raw-material shopping list, bag counts and quantities still needed, vendor or auction sources, and an ordered crafting list with profession and skill requirements. Shared intermediate ingredients are combined before rounding to whole crafts. Variable yields use the guaranteed minimum; faction-only recipes are excluded for the other faction. Alternate root recipes are compared by stock availability and cost.
+Craft mode uses the website's 208 verified recipes and 143 raw materials. The selected bundle's required professions and highest skill ranks appear at the top, including specialization notes. The header shows the writ/crate's required item level from the catalogue; this is separate from a recipe's profession skill rank. Unknown recipe ranks are explicitly labeled unverified. Each option includes a raw-material shopping list, bag counts and quantities still needed, vendor or auction sources, and an ordered crafting list with profession and skill requirements. Shared intermediate ingredients are combined before rounding to whole crafts. Variable yields use the guaranteed minimum; faction-only recipes are excluded for the other faction. Alternate root recipes are compared by stock availability and cost.
 
-Hover the required good, any reagent, crafted step, writ, or crate icon to see the normal in-game item tooltip. The faction theme follows your character: warm Horde tones or Alliance blue with a native crest.
+Hover only the **picture** of a required good, reagent, crafted step, writ, or crate to see the normal in-game item tooltip. The faction theme follows your character: warm Horde tones or Alliance blue with a native crest.
 
 Craft costs value the full batch, including materials you already own; bag counts are shown separately. Vendor values are undiscounted base prices, and recipes are not assumed to be learned. These are planning lists: the addon does not craft, buy, or consume items for you. Gathered goods keep their purchase cost instead of inventing a recipe.
 

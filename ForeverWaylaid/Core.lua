@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.3.0"
+F.version = "0.3.1"
 F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false }
 
 function F.Now() return GetServerTime and GetServerTime() or time() end

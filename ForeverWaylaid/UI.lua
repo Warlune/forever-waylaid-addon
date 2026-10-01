@@ -5,23 +5,55 @@ local tiers={"All tiers","Apprentice","Journeyman","Expert","Artisan"}
 local function short(name) return name:gsub("^Waylaid Crate: ",""):gsub("^Craftsman's Writ: ","") end
 local function match(text,query) return query=="" or text:lower():find(query,1,true) end
 
+-- Match the website's five relative value bands, including identical-price ties.
+F.valueLabels={"Best value","Good value","Middle","Low value","High cost"}
+F.valueColors={{88/255,215/255,165/255},{166/255,216/255,111/255},{241/255,207/255,114/255},{239/255,164/255,108/255},{241/255,133/255,131/255}}
+local neutral={129/255,145/255,163/255}
+function F.PriceEntry(entry)
+  entry.purchase=F.Price(entry.item.id)
+  entry.total=entry.purchase and entry.cost and entry.purchase.price+entry.cost or nil
+  entry.fullyPriced=entry.total~=nil
+  local goods=entry.goods or entry.best
+  entry.stockReady=goods and goods.enough and entry.purchase and (not entry.purchase.quantity or entry.purchase.quantity>=1) or false
+end
+function F.ScoreEntries(entries)
+  local ranked={}
+  for _,entry in ipairs(entries)do
+    entry.band=nil
+    if entry.total and entry.stockReady and (entry.reward or 0)>0 then ranked[#ranked+1]=entry end
+  end
+  table.sort(ranked,function(a,b)return a.total/a.reward<b.total/b.reward end)
+  local previous,first
+  for index,entry in ipairs(ranked)do
+    local value=entry.total/entry.reward
+    if value~=previous then first=index end
+    entry.band=#ranked==1 and 1 or math.floor((first-1)*4/(#ranked-1)+0.5)+1
+    previous=value
+  end
+end
+
 function F.LedgerEntries()
-  local entries={};local query=(F.searchText or ""):lower();local active={}
+  local entries,all={},{};local query=(F.searchText or ""):lower();local active={}
   for _,stop in ipairs(F.active or {}) do active[stop.questID]=stop end
   if F.tab=="Crates" then
     for _,item in ipairs(F.catalog.crates) do
       local rows,best=F.LedgerCrateCosts(item);local hay=item.name
       for _,o in ipairs(item.options) do hay=hay.." "..o.name end
+      local chosen=best or rows[1]
+      local entry={item=item,rows=rows,best=chosen,cost=chosen and chosen.cost,reward=item.favor,owned=S.Count(item.id)}
+      all[#all+1]=entry
       if match(hay,query) and (not F.tierIndex or F.tierIndex==1 or item.tier==tiers[F.tierIndex]) and
         (not F.onlyOwned or S.Count(item.id)>0) then
-        entries[#entries+1]={item=item,rows=rows,best=best,cost=best and best.cost,reward=item.favor,owned=S.Count(item.id)}
+        entries[#entries+1]=entry
       end
     end
   elseif F.tab=="Writs" then
     for _,item in ipairs(F.catalog.writs) do
+      local goods,quote=F.GoodsQuote(item.targetId,item.qty)
+      local entry={item=item,cost=goods.cost,goods=goods,reward=item.rep,quote=quote,stop=active[item.questId],owned=S.Count(item.id)}
+      all[#all+1]=entry
       if match(item.name.." "..item.targetName,query) and (not F.onlyOwned or active[item.questId] or S.Count(item.id)>0) then
-        local goods,quote=F.GoodsQuote(item.targetId,item.qty)
-        entries[#entries+1]={item=item,cost=goods.cost,goods=goods,reward=item.rep,quote=quote,stop=active[item.questId],owned=S.Count(item.id)}
+        entries[#entries+1]=entry
       end
     end
   elseif F.tab=="Route" then
@@ -29,20 +61,20 @@ function F.LedgerEntries()
     for _,stop in ipairs(F.unresolved or {}) do entries[#entries+1]={item=stop.writ,stop=stop} end
     return entries
   end
+  for _,entry in ipairs(all)do F.PriceEntry(entry)end
+  F.ScoreEntries(all)
   table.sort(entries,function(a,b)
+    if a.fullyPriced~=b.fullyPriced then return a.fullyPriced end
     if F.tab=="Writs" and (a.stop~=nil)~=(b.stop~=nil) then return a.stop~=nil end
     if F.sortIndex==3 then return a.item.name<b.item.name end
-    local av,bv=a.cost or math.huge,b.cost or math.huge
-    if F.sortIndex~=2 then av=av/(a.reward or 1);bv=bv/(b.reward or 1) end
+    local av,bv=a.total or math.huge,b.total or math.huge
+    if F.sortIndex~=2 then av=av/math.max(1,a.reward or 0);bv=bv/math.max(1,b.reward or 0) end
     if av==bv then return a.item.id<b.item.id end
     return av<bv
   end)
   return entries
 end
 
-local function showItem(row)
-  if row.itemID then GameTooltip:SetOwner(row,"ANCHOR_RIGHT");GameTooltip:SetHyperlink("item:"..row.itemID) end
-end
 function F.BuildUI()
   local w=CreateFrame("Frame","ForeverWaylaidFrame",UIParent,"BackdropTemplate");F.window=w
   w:SetSize(1040,704);w:SetPoint("CENTER");w:SetFrameStrata("HIGH")
@@ -89,15 +121,17 @@ function F.BuildUI()
   for i=1,pageSize do
     local row=CreateFrame("Button",nil,F.body);row:SetPoint("TOPLEFT",7,-31-(i-1)*62);row:SetSize(574,60)
     row.bg=row:CreateTexture(nil,"BACKGROUND");row.bg:SetAllPoints();row.bg:SetColorTexture(1,0.78,0.34,0.035)
+    row.stripe=row:CreateTexture(nil,"ARTWORK");row.stripe:SetPoint("TOPLEFT");row.stripe:SetPoint("BOTTOMLEFT");row.stripe:SetWidth(3)
     row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight","ADD")
     row.icon=S.Icon(row,5,-5,48)
     row.text=S.Text(row,"",64,-8,295,"GameFontNormal",S.gold)
-    row.detail=S.Text(row,"",64,-28,295,"GameFontHighlightSmall",S.muted)
-    row.text:SetMaxLines(1);row.detail:SetMaxLines(2)
-    row.reward=S.Text(row,"",421,-43,144,"GameFontHighlightSmall",S.muted);row.reward:SetJustifyH("RIGHT")
+    row.detail=S.Text(row,"",64,-26,295,"GameFontHighlightSmall",S.muted)
+    row.text:SetMaxLines(1);row.detail:SetMaxLines(1)
+    row.reward=S.Text(row,"",64,-43,295,"GameFontHighlightSmall",S.muted);row.reward:SetMaxLines(1)
     row.cost=S.Text(row,"",370,-6,195,"GameFontHighlightSmall");row.cost:SetJustifyH("RIGHT")
     row:SetScript("OnClick",function(self)F.selected[F.tab]=self.entry.item.id;F.Render()end)
-    row:SetScript("OnEnter",showItem);row:SetScript("OnLeave",function()GameTooltip:Hide()end)
+    row.cost:SetSpacing(3)
+    row.icon:EnableMouse(true);row.icon:SetScript("OnMouseUp",function()F.selected[F.tab]=row.entry.item.id;F.Render()end)
     F.rows[i]=row
   end
   F.empty=S.Text(F.body,"",30,-160,520,"GameFontNormalLarge",S.gold);F.empty:SetJustifyH("CENTER")
@@ -163,86 +197,98 @@ local function detailWriter()
       row.amount=S.Text(row,"",222,-5,112,"GameFontHighlight",S.ink);row.amount:SetJustifyH("RIGHT")
       F.detailRows[index]=row
     end
-    local height=heading and 67 or (description and description:find("\n",1,true) and 69 or 51)
+    local height=heading and 58 or (icon and 43 or description and 42 or 25)
     row:ClearAllPoints();row:SetPoint("TOPLEFT",0,-y);row:SetHeight(height);row:Show();row.icon:SetShown(icon~=nil)
     row.title:ClearAllPoints();row.title:SetPoint("TOPLEFT",icon and 43 or 4,-5);row.title:SetWidth(amount and 170 or (icon and 286 or 326))
     row.title:SetFontObject(heading and "GameFontNormalLarge" or "GameFontNormal");row.title:SetTextColor(unpack(S.ink));row.title:SetText(title)
     row.description:ClearAllPoints();row.description:SetPoint("TOPLEFT",icon and 43 or 4,heading and -43 or -26);row.description:SetWidth(icon and 286 or 326);row.description:SetText(description or "")
     row.amount:SetText(amount or "");if icon then S.SetIcon(row.icon,icon)end
-    S.BindItem(row,icon)
     local titleHeight=row.title:GetStringHeight() or 16
-    local descriptionTop=math.max(heading and 43 or 26,titleHeight+10)
+    local descriptionTop=titleHeight+9
     row.description:ClearAllPoints();row.description:SetPoint("TOPLEFT",icon and 43 or 4,-descriptionTop)
-    height=math.max(height,descriptionTop+(row.description:GetStringHeight() or 14)+10)
+    height=math.max(height,description and descriptionTop+(row.description:GetStringHeight() or 14)+9 or titleHeight+10)
     row:SetHeight(height)
     y=y+height;F.detailChild:SetHeight(math.max(390,y+8))
   end
 end
+local function sourceText(quote)
+  return quote and quote.source.." • "..S.Age(quote.time) or "No price available"
+end
+local function itemLevel(item)
+  if item.level then return "Requires level "..item.level end
+  local info=C_Item and C_Item.GetItemInfo or GetItemInfo
+  if info then
+    local name,_,_,_,level=info(item.id)
+    if name and level then return level>0 and "Requires level "..level or "No item level requirement" end
+  end
+  return "Required level not cached"
+end
 function F.RenderDetail(entry)
-  local detailKey=F.tab..":"..tostring(entry and entry.item.id)
+  local craftMode=F.db.settings.craftGoods
+  local detailKey=F.tab..":"..tostring(entry and entry.item.id)..":"..tostring(craftMode)
   if F.detailKey~=detailKey then F.detailScroll:SetVerticalScroll(0);F.detailKey=detailKey end
   local add=detailWriter();F.detailEntry=entry
   F.trackButton:SetShown(entry and entry.stop~=nil);F.mapButton:SetShown(entry and entry.stop~=nil)
   F.mapButton:SetEnabled(entry and entry.stop and entry.stop.point~=nil)
   if not entry then add("A page waiting to be filled","Select a crate or writ to inspect its requirements.",nil,nil,true);return end
   local item=entry.item
-  add(short(item.name),item.questId and "CRAFTSMAN'S WRIT" or (item.tier:upper().." SUPPLY CRATE"),item.id,nil,true)
-  local purchase=F.Price(item.id)
-  add(item.questId and "Writ at auction" or "Crate at auction",purchase and purchase.source.." • "..S.Age(purchase.time) or "No auction price for this item",nil,S.Money(purchase and purchase.price))
-  local function craftDetails(id,qty)
-    if not F.db.settings.craftGoods then return end
-    local craft=F.CraftQuote(id,qty)
-    add("Crafting materials",craft.reason or (#craft.steps==0 and "Gathered / purchased goods: no crafting recipe" or "Raw materials for the full batch; bag counts shown below"),nil,S.Money(craft.cost))
-    for _,mat in ipairs(craft.materials)do
-      add(mat.qty.." × "..mat.name,"Bags: "..S.Count(mat.itemId).." • need "..math.max(0,mat.qty-S.Count(mat.itemId)).."\n"..mat.source..(mat.quantity and " • "..mat.quantity.." listed" or ""),mat.itemId,S.Money(mat.cost))
+  if item.questId and not entry.goods then
+    entry.goods,entry.quote=F.GoodsQuote(item.targetId,item.qty);entry.cost=entry.goods.cost
+  end
+  F.PriceEntry(entry)
+  local craft=craftMode and (item.questId and entry.goods or entry.best and entry.best.craft)
+  local reward=(item.rep or item.favor or 0)..(item.questId and " reputation" or " favor")
+  add(short(item.name),reward.." • "..itemLevel(item),item.id,nil,true)
+  if craft then add(#craft.steps>0 and "To craft" or "Sourcing",F.CraftRequirements(craft))end
+  add(item.questId and "Writ" or "Crate",nil,nil,S.Money(entry.purchase and entry.purchase.price))
+  add(craftMode and "Goods (craft)" or "Goods (AH)",nil,nil,S.Money(entry.cost))
+  add("Total",nil,nil,S.Money(entry.total))
+  local value=entry.band and F.valueLabels[entry.band] or entry.fullyPriced and "Stock incomplete / value unverified" or "Missing price"
+  add(value,entry.total and "Full purchase value • "..S.Money(entry.total/math.max(1,item.rep or item.favor or 1))..(item.questId and " / rep" or " / favor") or "Both the writ/crate and goods need a price.")
+  local function craftDetails(quote)
+    if not quote then return end
+    if quote.reason then add("Availability",quote.reason)end
+    if #quote.steps==0 then return end
+    add("Materials to source",nil)
+    for _,mat in ipairs(quote.materials)do
+      local count=S.Count(mat.itemId)
+      add(mat.qty.." × "..mat.name,"Bags "..count.." • need "..math.max(0,mat.qty-count).." • "..mat.source,mat.itemId,S.Money(mat.cost))
     end
-    if #craft.steps>0 then
-      add("Craft in this order","Recipe ownership is not assumed. Full material value is shown; owned materials are not free.")
-      for n,step in ipairs(craft.steps)do
-        add(n..". "..step.name,step.crafts.." crafts • "..step.profession.." "..step.skill.."\nMakes "..step.crafts*step.outputMin..(step.outputMax~=step.outputMin and "+ (minimum yield)" or ""),step.itemId)
-      end
+    add("Craft in order","Requires learned recipes"..(quote.variableYield and " • minimum yields used" or ""))
+    for n,step in ipairs(quote.steps)do
+      add(n..". "..step.crafts.." × "..step.name,step.profession.." • makes "..step.crafts*step.outputMin,step.itemId)
     end
-    if craft.alternativeCount then add("Alternate recipes",craft.alternativeCount.." recipes compared; cheapest sufficiently stocked path shown.")end
   end
   if not item.questId then
-    add("Merchant's Favor",(item.favor or 0).." favor per turn-in • requires level "..(item.level or "?"))
-    local crate=F.Price(item.id);local total=entry.cost and (entry.owned>0 and entry.cost or crate and entry.cost+crate.price)
-    add(F.db.settings.craftGoods and "Best crafted fill" or "Best auction fill",entry.best and (entry.best.option.qty.." × "..entry.best.option.name) or "No fully priced, sufficiently stocked option",nil,S.Money(entry.cost))
-    add(entry.owned>0 and "Total • crate in your bags" or "Total • buy crate + fill",entry.cost and "Fill / favor: "..S.Money(entry.cost/item.favor) or "Some prices are unavailable",nil,S.Money(total))
-    add("Choose your cargo","Each option below fills this crate on its own.")
-    for _,row in ipairs(entry.rows) do
-      local quote=row.quote;local status=quote and (quote.quantity and quote.quantity.." listed" or "stock unknown") or "No market price"
-      add(row.option.qty.." × "..row.option.name,"Bags: "..S.Count(row.option.itemId).." • "..status..(row==entry.best and " • BEST FILL" or ""),row.option.itemId,S.Money(row.cost))
-      if quote and not row.craft then add(quote.source,S.Age(quote.time)..(row.enough and " • observed stock covers this fill" or " • not enough observed stock"))end
-      if row.craft then
-        add("Buy finished goods",nil,nil,S.Money(quote and quote.price*row.option.qty))
-        craftDetails(row.option.itemId,row.option.qty)
+    add("Choose one bundle",entry.best and "Total uses the selected bundle below." or "No bundle is priced yet.")
+    for _,row in ipairs(entry.rows)do
+      local option=row.option
+      add(option.qty.." × "..option.name,(row==entry.best and "SELECTED • " or "").."Bags "..S.Count(option.itemId).." / "..option.qty..(row.enough and "" or " • price / stock incomplete"),option.itemId,S.Money(row.cost))
+      if craftMode then
+        if row~=entry.best and #row.craft.steps>0 then add("To craft this bundle",F.CraftRequirements(row.craft))end
+        craftDetails(row.craft)
       end
     end
   else
-    add("Reputation reward",item.rep.." reputation • keep the writ in your bags")
-    local goods=entry.goods or F.GoodsQuote(item.targetId,item.qty)
-    local auction=F.Price(item.targetId)
-    add(item.qty.." × "..item.targetName,"Required goods • "..S.Count(item.targetId).." / "..item.qty.." in bags",item.targetId,S.Money(goods.cost))
-    add("Buy finished goods",auction and auction.source or "Auction price unavailable",nil,S.Money(auction and auction.price*item.qty))
-    add(F.db.settings.craftGoods and "Writ + craft materials" or "Writ + finished goods","Full purchase value; writ owned: "..S.Count(item.id),nil,S.Money(purchase and goods.cost and purchase.price+goods.cost))
-    craftDetails(item.targetId,item.qty)
-    local quote=entry.quote or F.Price(item.targetId)
-    if quote then add("Market estimate",quote.source.." • "..S.Age(quote.time).."\n"..(quote.quantity and quote.quantity.." units listed" or "Stock unknown"),nil,S.Money(quote.price*item.qty/item.rep).." / rep")end
+    add(item.qty.." × "..item.targetName,"Deliver • bags "..S.Count(item.targetId).." / "..item.qty,item.targetId)
+    if craftMode then craftDetails(craft)
+    elseif entry.goods.reason then add("Availability",entry.goods.reason)end
     if entry.stop then
       local stop=entry.stop
-      add(stop.ready and "Ready for delivery" or "Gather the requested goods",stop.ready and "Your customer is waiting." or "The route stays in your ledger while you prepare.")
-      add("Recipient",stop.npc or stop.deliveryText or "Customer name not supplied by this quest")
-      add("Destination",F.DestinationText(stop.point))
+      add(stop.ready and "Ready for delivery" or "Accepted • gather goods",(stop.npc or stop.deliveryText or "Recipient unknown").."\n"..F.DestinationText(stop.point))
       if entry.leg then
-        add("Travel plan","~"..math.ceil(entry.leg.seconds/60).." min • estimated travel time")
-        for _,step in ipairs(entry.leg.steps) do
-          if step.mode=="Fly" then add("Take a flight",(step.from.name or "Flight master").." → "..(step.to.name or "Destination"))end
+        add("Travel plan","~"..math.ceil(entry.leg.seconds/60).." min • estimate")
+        for _,step in ipairs(entry.leg.steps)do
+          if step.mode=="Fly" then add("Fly",(step.from.name or "Flight master").." → "..(step.to.name or "Destination"))end
         end
       end
-      if not stop.point then add("Set the customer pin","/fwl pin "..stop.questID.." MAP_ID X Y\nUse the delivery location shown by your quest.")end
-    else add("Not accepted yet","Open this writ in your bags to add its delivery to the route.") end
+      if not stop.point then add("Set the customer pin","/fwl pin "..stop.questID.." MAP_ID X Y")end
+    else add("Not accepted","Open the writ in your bags to start its route.")end
   end
+  local quote=entry.quote or entry.best and entry.best.quote
+  local sources=(item.questId and "Writ: " or "Crate: ")..sourceText(entry.purchase)
+  if not craftMode then sources=sources.."\nGoods: "..sourceText(quote)end
+  add("Price sources",sources)
 end
 
 function F.Render()
@@ -262,7 +308,7 @@ function F.Render()
   for i,stat in ipairs(stats)do F.stats[i].caption:SetText(stat[1]);F.stats[i].value:SetText(stat[2])end
   if settings then F.trackButton:Hide();F.mapButton:Hide();return end
   F.tierButton:SetShown(F.tab=="Crates");F.tierButton:SetText("Tier: "..(tiers[F.tierIndex or 1] or "All"))
-  F.sortButton:SetText("Sort: "..({"Best value","Lowest fill","Name"})[F.sortIndex or 1])
+  F.sortButton:SetText("Sort: "..({"Best value","Lowest total","Name"})[F.sortIndex or 1])
   F.ownedButton:SetText(F.onlyOwned and "Show: My cargo" or "Show: All")
   local entries=F.LedgerEntries();F.entries=entries
   F.lastPage=math.max(0,math.floor((#entries-1)/pageSize)*pageSize);F.offset=math.min(F.offset or 0,F.lastPage)
@@ -274,17 +320,21 @@ function F.Render()
     local entry=entries[F.offset+i];row:SetShown(entry~=nil)
     if entry then
       row.entry=entry;row.itemID=entry.item.id;S.SetIcon(row.icon,entry.item.id)
-      row.bg:SetColorTexture(1,0.72,0.23,entry==selected and 0.19 or (i%2==0 and 0.045 or 0.018))
+      local color=entry.band and F.valueColors[entry.band] or neutral
+      row.bg:SetColorTexture(color[1],color[2],color[3],entry==selected and 0.27 or 0.11)
+      row.stripe:SetColorTexture(color[1],color[2],color[3],1)
       row.text:SetText((entry.index and entry.index..". " or "")..short(entry.item.name))
       if F.tab=="Route" then
+        row.reward:SetTextColor(unpack(S.muted))
         row.cost:SetText(entry.leg and "~"..math.ceil(entry.leg.seconds/60).." min" or "Needs location")
         row.detail:SetText(entry.stop.npc or entry.stop.deliveryText or F.DestinationText(entry.stop.point))
         row.reward:SetText(entry.stop.ready and "|cff88cc77Ready|r" or "Preparing")
       else
-        local purchase=F.Price(entry.item.id)
-        row.cost:SetText((entry.item.questId and "Writ " or "Crate ")..S.Money(purchase and purchase.price).."\n"..(F.db.settings.craftGoods and "Craft " or "Goods ")..S.Money(entry.cost))
+        row.cost:SetText((entry.item.questId and "Writ " or "Crate ")..S.Money(entry.purchase and entry.purchase.price).."\nGoods "..S.Money(entry.cost).."\nTotal "..S.Money(entry.total))
         row.detail:SetText(entry.best and entry.best.option.qty.." × "..entry.best.option.name or entry.item.questId and entry.item.qty.." × "..entry.item.targetName or "Price missing / short stock")
-        row.reward:SetText(entry.stop and (entry.stop.ready and "|cff88cc77Ready to deliver|r" or "|cffffd36aAccepted|r") or (entry.reward or 0)..(F.tab=="Crates" and " favor" or " reputation"))
+        local status=entry.stop and (entry.stop.ready and " • Ready" or " • Accepted") or ""
+        row.reward:SetText((entry.reward or 0)..(F.tab=="Crates" and " favor" or " rep").." • "..(entry.band and F.valueLabels[entry.band] or entry.fullyPriced and "Stock / value unverified" or "Unpriced")..status)
+        row.reward:SetTextColor(unpack(entry.band and F.valueColors[entry.band] or neutral))
       end
     end
   end
