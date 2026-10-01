@@ -223,19 +223,25 @@ end
 local function detailWriter()
   for _,row in ipairs(F.detailRows) do row:Hide() end
   local index,y=0,0
-  return function(title,description,icon,amount,heading)
+  return function(title,description,icon,amount,heading,bestValue)
     index=index+1;local row=F.detailRows[index]
     if not row then
       row=CreateFrame("Frame",nil,F.detailChild);row:SetWidth(340)
+      row.bestBorder=S.InnerBorder(row,1)
       row.icon=S.Icon(row,0,-3,34)
       row.title=S.Text(row,"",43,-5,286,"GameFontNormal",S.ink)
       row.description=S.Text(row,"",43,-25,288,"GameFontHighlightSmall",{0.36,0.26,0.14})
       row.amount=S.Text(row,"",222,-5,112,"GameFontHighlight",S.ink);row.amount:SetJustifyH("RIGHT")
       F.detailRows[index]=row
     end
+    local padding=bestValue and 4 or 0
+    for _,line in ipairs(row.bestBorder)do line:SetShown(bestValue or false)end
+    S.ColorBorder(row.bestBorder,unpack(S.HighContrast() and {1,1,1,1} or {0.18,0.35,0.13,1}))
+    row.icon:ClearAllPoints();row.icon:SetPoint("TOPLEFT",padding+2,-3-padding)
+    row.amount:ClearAllPoints();row.amount:SetPoint("TOPLEFT",222-padding,-5-padding)
     local height=heading and 58 or (icon and 43 or description and 42 or 25)
     row:ClearAllPoints();row:SetPoint("TOPLEFT",0,-y);row:SetHeight(height);row:Show();row.icon:SetShown(icon~=nil)
-    row.title:ClearAllPoints();row.title:SetPoint("TOPLEFT",icon and 43 or 4,-5);row.title:SetWidth(amount and 170 or (icon and 286 or 326))
+    row.title:ClearAllPoints();row.title:SetPoint("TOPLEFT",(icon and 43 or 4)+padding,-5-padding);row.title:SetWidth(amount and 170-padding*2 or (icon and 286 or 326))
     S.ReadableFont(row.title,heading and "GameFontNormalLarge" or "GameFontNormal");S.TextColor(row.title,S.ink);row.title:SetText(title)
     local cargo=icon and (F.cratesByID[icon] or F.writsByID[icon])
     row.title:SetShadowColor(0,0,0,cargo and 1 or 0);row.title:SetShadowOffset(1,-1)
@@ -243,9 +249,10 @@ local function detailWriter()
     row.description:ClearAllPoints();row.description:SetPoint("TOPLEFT",icon and 43 or 4,heading and -43 or -26);row.description:SetWidth(icon and 286 or 326);row.description:SetText(description or "")
     row.amount:SetText(amount or "");if icon then S.SetIcon(row.icon,icon)end
     local titleHeight=row.title:GetStringHeight() or 16
-    local descriptionTop=titleHeight+9
-    row.description:ClearAllPoints();row.description:SetPoint("TOPLEFT",icon and 43 or 4,-descriptionTop)
+    local descriptionTop=titleHeight+9+padding
+    row.description:ClearAllPoints();row.description:SetPoint("TOPLEFT",(icon and 43 or 4)+padding,-descriptionTop);row.description:SetWidth((icon and 286 or 326)-padding*2)
     height=math.max(height,description and descriptionTop+(row.description:GetStringHeight() or 14)+9 or titleHeight+10)
+    height=height+padding
     row:SetHeight(height)
     y=y+height;F.detailChild:SetHeight(math.max(390,y+8))
   end
@@ -299,10 +306,12 @@ function F.RenderDetail(entry)
     end
   end
   if not item.questId then
-    add("Choose one bundle",entry.best and "Total uses the selected bundle below." or "No bundle is priced yet.")
+    local hasBest=entry.best and entry.best.cost~=nil and entry.best.enough
+    add("Choose one bundle",hasBest and "Total uses the best-value bundle below." or "No complete bundle price yet.")
     for _,row in ipairs(entry.rows)do
       local option=row.option
-      add(option.qty.." × "..option.name,(row==entry.best and "SELECTED • " or "").."Bags "..S.Count(option.itemId).." / "..option.qty..(row.enough and "" or " • price / stock incomplete"),option.itemId,S.Money(row.cost))
+      local bestValue=hasBest and row.enough and row.cost==entry.best.cost
+      add(option.qty.." × "..option.name,(bestValue and "Best value • " or "").."Bags "..S.Count(option.itemId).." / "..option.qty..(row.enough and "" or " • price / stock incomplete"),option.itemId,S.Money(row.cost),nil,bestValue)
       if craftMode then
         if row~=entry.best and #row.craft.steps>0 then add("To craft this bundle",F.CraftRequirements(row.craft))end
         craftDetails(row.craft)

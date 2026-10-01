@@ -1,7 +1,7 @@
-## 0.9.4 — Large-text footer spacing
+## 0.9.5 — Best-value crate bundles
 
-- Anchored the footer note and version number inside the bottom border.
-- Added breathing room at 14- and 16-point text sizes, with or without the scan controls.
-- Shortened the footer note and widened its text area to keep it on one line.
+- Replaced SELECTED with Best value on the cheapest fully priced, in-stock crate bundle.
+- Added a border around the best-value bundle in the details panel, including equally priced options.
+- Kept unpriced and short-stock bundles from receiving the best-value highlight; buying and crafting modes use their respective costs.
 
-Reload after installing; the addon should report v0.9.4. Releases remain on 0.x until the project owner authorizes 1.0.
+Reload after installing; the addon should report v0.9.5. Releases remain on 0.x until the project owner authorizes 1.0.
