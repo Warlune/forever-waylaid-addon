@@ -40,6 +40,26 @@ local function meter(parent,x,y,width,label,color)
   local bg=b:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints();bg:SetColorTexture(0,0,0,0.9)
   b.label=text(b,label,4,0,width-8,19,{1,1,1});return b
 end
+local function frameHealth(bar,enemy)
+  local frame=CreateFrame("Frame",nil,bar,"BackdropTemplate")
+  frame:SetPoint("TOPLEFT",-4,4);frame:SetPoint("BOTTOMRIGHT",4,-4)
+  frame:SetBackdrop({edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",edgeSize=10,insets={left=3,right=3,top=3,bottom=3}})
+  frame:SetBackdropBorderColor(0.72,0.68,0.56,1);frame:EnableMouse(false)
+  bar.healthFrame=frame
+  bar.label:SetShadowColor(0,0,0,1);bar.label:SetShadowOffset(1,-1)
+  if enemy then
+    local dragon=frame:CreateTexture(nil,"OVERLAY")
+    local atlasName="UI-HUD-UnitFrame-Target-PortraitOn-Boss-Gold"
+    local info=C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlasName)
+    if info then
+      dragon:SetAtlas(atlasName);dragon:SetSize(32*info.width/info.height,32)
+    else
+      dragon:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite")
+      dragon:SetTexCoord(0.65,1,0,0.8);dragon:SetSize(28,32)
+    end
+    dragon:SetPoint("RIGHT",bar,"LEFT",-2,0);dragon:Hide();bar.eliteDragon=dragon
+  end
+end
 local function fill(bar,value,label)bar:SetValue(value or 0);bar.label:SetText(label)end
 -- Small pixel glyphs stay sharp without requiring a particular font or new artwork.
 local function pixelMark(parent,rows,color)
@@ -111,10 +131,12 @@ local function stage(parent,x,y,width,height)
   f.bg=f:CreateTexture(nil,"BORDER",nil,1);f.bg:SetPoint("TOPLEFT",6,-6);f.bg:SetPoint("BOTTOMRIGHT",-6,6)
   f.pet=sprite(f,height*0.88);f.enemies={};f.enemyHP={}
   buildNeeds(f)
-  for i=1,3 do f.enemies[i]=sprite(f,height*0.88);f.enemyHP[i]=meter(f,width*0.48+(i-1)*width*0.17,-36,width*0.15,"",{0.75,0.25,0.2})end
+  for i=1,3 do f.enemies[i]=sprite(f,height*0.88);f.enemyHP[i]=meter(f,width*0.48+(i-1)*width*0.17,-36,width*0.15-6,"",{0.75,0.25,0.2});frameHealth(f.enemyHP[i],true)end
   f.enemy=f.enemies[1]
   f.leftHP=meter(f,10,-10,(width-30)/2,"",{0.25,0.65,0.4})
+  frameHealth(f.leftHP)
   f.rightHP=meter(f,width/2+5,-10,(width-30)/2,"",{0.75,0.25,0.2})
+  f.eliteLabel=text(f,"ELITE",width/2+5,-10,(width-30)/2,20,S.gold);f.eliteLabel:SetJustifyH("CENTER");f.eliteLabel:Hide()
   f.float=text(f,"",10,-50,width-20,28,{1,0.85,0.3});f.float:SetJustifyH("CENTER")
   f.caption=text(f,"",8,-height+29,width-16,24,{1,1,1});f.caption:SetJustifyH("CENTER")
   local vw=math.min(width-16,350)
@@ -169,12 +191,18 @@ local function renderStage(f,pet,tower)
   f.pet:SetSize(f.height*(tower and 0.65 or 0.88),f.height*(tower and 0.65 or 0.88))
   for i,art in ipairs(f.enemies)do
     local e=enemies[i];showPet(art,e,true)
-    art:SetSize(f.height*(#enemies>1 and 0.44 or 0.65),f.height*(#enemies>1 and 0.44 or 0.65))
+    local size=f.height*(#enemies>1 and 0.44 or 0.65)*(e and e.elite and 1.15 or 1)
+    art:SetSize(size,size)
+    f.enemyHP[i].eliteDragon:SetShown(e and e.elite or false)
+    f.enemyHP[i].healthFrame:SetBackdropBorderColor(e and e.elite and 1 or 0.72,e and e.elite and 0.75 or 0.68,e and e.elite and 0.22 or 0.56,1)
+    if e and e.elite then f.enemyHP[i]:SetStatusBarColor(0.85,0.62,0.15)
+    else f.enemyHP[i]:SetStatusBarColor(0.75,0.25,0.2)end
     f.enemyHP[i]:SetShown(e~=nil)
     f.enemyHP[i]:ClearAllPoints();f.enemyHP[i]:SetPoint("TOPLEFT",f,"TOPLEFT",f.width*(#enemies==1 and 0.65 or 0.48+(i-1)*0.17),-36)
     if e then local value=step and step.enemyHP[i] or e.hp or e.maxHP;fill(f.enemyHP[i],value/e.maxHP*100,tostring(value))end
   end
   f.leftHP:SetShown(tower);f.rightHP:Hide()
+  f.eliteLabel:SetShown(tower and enemies[1] and enemies[1].elite or false)
   if tower then
     if step then fill(f.leftHP,step.hp/r.maxHP*100,"HP "..step.hp.." / "..r.maxHP)
     else fill(f.leftHP,b and b.hp/b.maxHP*100 or pet and pet.health or 0,"Your pet: "..math.floor(pet and pet.health or 0).."%")end
@@ -219,6 +247,7 @@ function P.BuildCompass(parent)
   m.scene=stage(m,8,-40,268,137)
   m.stats=text(m,"",10,-182,264,20);m.stats:SetJustifyH("CENTER")
   m.health=meter(m,10,-208,127,"",{0.25,0.65,0.4});m.food=meter(m,147,-208,127,"",{0.7,0.53,0.2})
+  frameHealth(m.health)
   m.happy=meter(m,10,-232,127,"",{0.4,0.6,0.8});m.energy=meter(m,147,-232,127,"",{0.55,0.4,0.7})
   for _,entry in ipairs({{m.health,"Health"},{m.food,"Food"},{m.happy,"Happiness"},{m.energy,"Energy"}})do
     entry[1]:EnableMouse(true);tip(entry[1],entry[2],"Out of 100. Use Feed, Play, Rest or Heal to care for your companion.")
@@ -266,6 +295,7 @@ function P.BuildUI()
   S.Button(w,"Compass view",616,-52,140,function()w:Hide();P.ToggleCompass(true)end)
   w.scene=stage(w,20,-94,456,272)
   w.health=meter(w,20,-381,220,"",{0.25,0.65,0.4});w.food=meter(w,256,-381,220,"",{0.7,0.53,0.2})
+  frameHealth(w.health)
   w.happy=meter(w,20,-414,220,"",{0.4,0.6,0.8});w.energy=meter(w,256,-414,220,"",{0.55,0.4,0.7})
   w.care=careIcons(w,50,-454,45,112);w.fight=fightIcons(w,75,-454,45,145)
   w.side=S.Panel(w,492,-94,268,424)
@@ -291,6 +321,10 @@ function P.BuildUI()
   S.Button(c,"Adopt",8,-230,114,function()P.OpenAdopt()end)
   c.equip=S.Button(c,"Equip",134,-230,114,function()act(function()return P.Select(P.viewID)end)end)
   w.tower=S.Panel(w.side,6,-146,256,272);local t=w.tower
+  tip(t,"Tower challenge",function()
+    local floor=P.state.battle and P.state.battle.floor or P.floor
+    return floor%10==0 and "An elite leads this fight: more health, damage and armor. Its heavy attack hits harder every third round. Prepare supplies and use Heal yourself." or "Clear this floor to unlock the next. Every tenth floor is an elite encounter."
+  end)
   t.info=text(t,"",12,-12,232,98)
   S.Button(t,"<",12,-118,40,function()if not P.state.battle then P.floor=math.max(1,P.floor-1)end;P.Render()end)
   S.Button(t,">",204,-118,40,function()if not P.state.battle then P.floor=math.min(P.Unlocked(),P.floor+1)end;P.Render()end)
@@ -431,7 +465,7 @@ function P.Render()
     end
   elseif tower then
     local b=s.battle;local floor=b and b.enemy.floor or P.floor;local e=b and b.enemy or P.Enemy(floor)
-    w.tower.info:SetText((e.boss and "BOSS CHAMBER" or "THE NEXT CHALLENGE").."\n"..P.species[e.species].." | "..e.maxHP.." HP\n"..P.FloorStatus(floor).." | Best: "..(pet and pet.best or 0))
+    w.tower.info:SetText((floor%10==0 and "ELITE CHAMBER" or "THE NEXT CHALLENGE").."\n"..P.species[e.species].." | "..e.maxHP.." HP\n"..P.FloorStatus(floor).." | Best: "..(pet and pet.best or 0))
     w.tower.floor:SetText("Floor "..floor.." / 100")
   end
   w.notice:SetText(P.notice or "Care for a companion. Explore together. Face the tower when ready.")

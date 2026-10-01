@@ -92,12 +92,21 @@ function P.Enemies(floor)
   if not integer(floor,1,100)then return end
   local count=floor<=33 and 1 or floor<=66 and 2 or 3
   local result={};local boss=floor%10==0
-  -- Split the encounter budget: extra opponents never triple the difficulty.
-  local totalHP=(42+floor*8)*(boss and 1.18 or 1)*(1+(count-1)*0.1)
-  local totalAttack=(5+floor*1.8)*(boss and 1.1 or 1)
+  -- Elite floors are a deliberate difficulty spike. Their leader holds most
+  -- of the budget; extra enemies remain a split budget, never a multiplier.
+  local totalHP=(42+floor*8)*(boss and 1.55 or 1)*(1+(count-1)*0.1)
+  local totalAttack=(5+floor*1.8)*(boss and 1.25 or 1)
   for i=1,count do
-    result[i]={floor=floor,maxHP=math.floor(totalHP/count),attack=math.max(1,math.floor(totalAttack/count)),
-      armor=math.floor(floor/12),speed=7+math.floor(floor/10)+(i-1)*3,boss=boss and i==1,
+    local elite=boss and i==1
+    local hpShare,attackShare=1/count,1/count
+    if boss and count>1 then
+      local leaderHP=count==2 and 0.65 or 0.55
+      local leaderAttack=count==2 and 0.6 or 0.5
+      hpShare=i==1 and leaderHP or (1-leaderHP)/(count-1)
+      attackShare=i==1 and leaderAttack or (1-leaderAttack)/(count-1)
+    end
+    result[i]={floor=floor,maxHP=math.floor(totalHP*hpShare),attack=math.max(1,math.floor(totalAttack*attackShare)),
+      armor=math.floor(floor/12)+(elite and 3 or 0),speed=7+math.floor(floor/10)+(i-1)*3,boss=elite,elite=elite,
       species=boss and i==1 and 85+(math.floor(floor/10)-1)%16 or 1+(floor*7+i*13)%84,index=i}
   end
   return result
@@ -115,7 +124,7 @@ function P.StartBattle(floor)
   P.state.battle={petID=pet.id,enemies=enemies,enemy=enemies[1],floor=floor,hp=math.ceil(hp*pet.health/100),
     maxHP=hp,attack=attack,armor=armor,speed=speed,turn=0,cooldown=0,elapsed=0,paused=false}
   P.lastRound=nil;P.victory=nil;P.floor=floor
-  P.notice="Floor "..floor..": 1 versus "..#enemies..". Auto battle - defeat is permanent."
+  P.notice="Floor "..floor..(enemies[1].elite and " ELITE" or "")..": 1 versus "..#enemies..". Auto battle - defeat is permanent."
   return true
 end
 local function damage(power,armor)return math.max(1,math.floor(power*(1-armor/100)))end
@@ -169,10 +178,10 @@ function P.BattleAction(action)
       local e=b.enemies[actor.index]
       if e.hp>0 then
         local heavy=(b.turn+1)%3==0
-        local hit=damage(e.attack*(heavy and 1.6 or 1)*(action=="guard" and 0.25 or shield and 0.45 or 1),b.armor)
+        local hit=damage(e.attack*(heavy and (e.elite and 1.85 or 1.6) or 1)*(action=="guard" and 0.25 or shield and 0.45 or 1),b.armor)
         b.hp=math.max(0,b.hp-hit);round.hurt=round.hurt+hit
         pet.happy=clamp(pet.happy-math.min(5,hit/b.maxHP*20))
-        record(actor.index,heavy and "Heavy attack" or "Attack",hit)
+        record(actor.index,heavy and (e.elite and "Elite heavy attack" or "Heavy attack") or "Attack",hit)
       end
     end
   end

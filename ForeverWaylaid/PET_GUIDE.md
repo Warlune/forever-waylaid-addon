@@ -1,4 +1,4 @@
-# Waylaid companions — 0.13.7 preview
+# Waylaid companions — 0.13.8 preview
 
 Open **Pets → Adopt**, choose a adoption crate, then select the new companion in the stable and click **Equip**. Browsing a pet does not change the equipped companion. The first living companion is equipped automatically. The compass and large window share the same pet and battle.
 
@@ -38,7 +38,7 @@ Every pet has max HP, attack, armor (percentage damage reduction), and speed. Th
 
 ## Tower and income
 
-Each pet starts with only floor 1 open. Defeat that floor to unlock the next, up to 100. Floors 1–33 have one opponent, 34–66 have two, and 67–100 have three. Every tenth floor has a boss. Enemy health and attack are split across the group rather than multiplied by its size. Each living actor gets a speed-ordered turn. The battle display animates those turns in sequence.
+Each pet starts with only floor 1 open. Defeat that floor to unlock the next, up to 100. Floors 1–33 have one opponent, 34–66 have two, and 67–100 have three. Every tenth floor (10 through 100) has an elite leader: its encounter gets 55% more health and 25% more attack than the ordinary formula for that floor. The leader has 3 extra armor and a 185% heavy attack every third round (ordinary enemies use 160%). Later elite floors include one or two weaker supporting enemies. Health and attack are split across the group rather than multiplied by its size, with the elite receiving the largest share. The elite is larger and has a gold health bar and an ELITE label. Each living actor gets a speed-ordered turn. The battle display animates those turns in sequence.
 
 The auto strategy guards each third round's heavy attacks, uses an available non-healing special, otherwise strikes. It never automatically heals or spends healing supplies/tokens. Click **Heal** to use a ready healing ability first, otherwise one healing herb, otherwise 4 tokens. The request replaces the next pet action, and herbs/token healing restores 40% maximum HP. Faster enemies can act first. Only one heal can be queued; supplies/tokens are consumed when the pet acts, not when queued. **Pause** lets you plan; Retreat has been removed from the controls. The next floor never starts automatically. Hidden tower views pause combat; reloading retreats. **Defeat and starvation are permanent death.** Stabled and offline pets do not decay.
 
@@ -49,7 +49,7 @@ The auto strategy guards each third round's heavy attacks, uses an available non
 - Store prices: treats 2 tokens; toys 3; healing herbs 4. Purchases add stock without using it. Prepare between floors rather than entering injured. The store is available in the compass and large pet view.
 - Player killing blows: 3 XP for NPCs, 10 for players. Targets must be non-gray and within five character levels. Existing observation, repeat-target and rate limits still apply.
 
-Automated preview checks cover all 500 species/rarity combinations at level 100 on floor 100, plus a common Murloc's full first-clear climb with full care between floors and simulated explicit Heal requests. The deterministic final-floor checks used at most three herbs per encounter. These checks establish viability, not a guarantee of survival or final tuning.
+Automated preview checks cover all 500 species/rarity combinations at level 100 on floor 100, plus a common Murloc's full first-clear climb with full care between floors and simulated explicit Heal requests. The deterministic final-floor checks used at most eleven herbs per final-floor encounter. These checks establish viability, not a guarantee of survival or final tuning.
 
 ## Dungeon and raid rewards
 

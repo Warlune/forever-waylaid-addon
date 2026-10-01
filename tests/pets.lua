@@ -37,6 +37,17 @@ assert(not P.Adopt(0) and not P.Adopt(7) and not P.Rescue())
 for floor=1,100 do
   local enemies=P.Enemies(floor);assert(#enemies==(floor<=33 and 1 or floor<=66 and 2 or 3))
   assert(enemies[1].boss==(floor%10==0))
+  local elite=floor%10==0;local count=#enemies;local hp,attack=0,0
+  for i,enemy in ipairs(enemies)do
+    assert(enemy.elite==(elite and i==1),'Only milestone leaders are elite')
+    hp=hp+enemy.maxHP;attack=attack+enemy.attack
+    if elite and i>1 then assert(enemies[1].maxHP>enemy.maxHP and enemies[1].attack>enemy.attack,'Elite leader is stronger than its support')end
+  end
+  local baseHP=(42+floor*8)*(1+(count-1)*0.1);local baseAttack=5+floor*1.8
+  if elite then
+    assert(hp>=baseHP*1.55-count and attack>=baseAttack*1.25-count)
+    assert(enemies[1].armor==math.floor(floor/12)+3)
+  else assert(hp==math.floor(baseHP/count)*count and attack==math.floor(baseAttack/count)*count,'Ordinary floors retain their tuning')end
   for _,e in ipairs(enemies)do assert(e.maxHP>0 and e.attack>0 and e.species<=100)end
 end
 assert(not P.Enemy(101) and not P.Enemy(0) and not P.Enemy(1.5))
@@ -249,6 +260,16 @@ P.window.scene.pet.SetTexCoord=function(_,left,right,top,bottom)
 end
 for species=1,100 do P.Active().species=species;P.Render()end
 P.Active().species=priorSpecies
+local oldFloor,oldMode,oldMiniMode=P.floor,P.mode,P.miniMode
+local oldBest=P.Active().best;P.Active().best=99
+P.floor=10;P.mode='tower';P.miniMode='tower';P.window:Show();P.mini:Show();P.Render()
+assert(P.window.scene.eliteLabel:IsShown() and P.mini.scene.eliteLabel:IsShown(),'Both views identify elite floors')
+assert(P.window.tower.info.text:find('ELITE CHAMBER',1,true))
+assert(P.window.scene.leftHP.healthFrame and P.mini.health.healthFrame,'Pet health bars use framed styling')
+assert(P.window.scene.enemyHP[1].eliteDragon:IsShown() and P.mini.scene.enemyHP[1].eliteDragon:IsShown(),'Elite health bars show the dragon in both views')
+P.floor=11;P.Render();assert(not P.window.scene.eliteLabel:IsShown() and not P.mini.scene.eliteLabel:IsShown(),'Normal floors clear elite markers')
+assert(not P.window.scene.enemyHP[1].eliteDragon:IsShown() and not P.mini.scene.enemyHP[1].eliteDragon:IsShown(),'Normal enemies never retain the elite dragon')
+P.floor,P.mode,P.miniMode=oldFloor,oldMode,oldMiniMode;P.Active().best=oldBest
 -- Each actor has its own visible turn, with speed affecting order.
 pet=P.Active();pet.best=66;pet.level=67;pet.health=100;pet.food=100;pet.energy=100;pet.species=35;pet.rarity=1
 assert(P.StartBattle(67));local multi=P.state.battle;assert(#multi.enemies==3)
