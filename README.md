@@ -1,15 +1,15 @@
-# Forever Waylaid — v0.3.6 preview
+# Forever Waylaid — v0.4.0 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.3.6.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.4.0.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
-4. In **Settings**, choose PvP, Normal, or RP to match your realm. The faction comes from your character. No market is guessed automatically.
+4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
 
-The folder includes an AHledger snapshot. Its actual observation date appears in the window. Empty RP markets remain unpriced until a scan is available. Auctionator, Auctioneer and TomTom are optional and are not bundled.
+The addon has no bundled auction prices or external price service. Until you scan or receive opted-in peer prices, items remain unpriced. Existing personal scans survive upgrades. Auctionator, Auctioneer and TomTom are optional and are not bundled.
 
 ## What is in this version
 
@@ -19,7 +19,7 @@ The folder includes an AHledger snapshot. Its actual observation date appears in
 - Tooltips with configurable **cheapest fill**, **include crate purchase price**, and **all material fill costs**. Known low-stock options cannot win cheapest-fill selection. Prices are estimates: quantity is total observed stock, not a guarantee that every unit can be bought at the minimum price.
 - Personal Auctionator full/incremental scans captured while this addon is enabled at recognized faction capitals. Neutral and unidentified auction houses are excluded. Older Auctionator history is not relabeled as a fresh scan.
 - Auctioneer Advanced's home-faction scan image, read when the auction house closes or when you click **Read personal prices**. Versions lacking that API are ignored safely.
-- Price selection per item: the newest dated observation wins; AHledger wins ties. Missing AHledger items can use personal prices. Newer AHledger observations supersede older personal prices after the next import and `/reload`.
+- Price selection per item: the newest dated observation wins; personal scans win ties. Peer prices are considered only while sharing is enabled and expire after 24 hours. Each quote keeps its original observation age and source.
 - Accepted writ tracking, material progress, automatic completed-quest waypoints when exposed by the client, and manual destination pins.
 - Numbered deliveries and flight-master pins on Blizzard's world map: gold travel legs and blue flight legs. Select a delivery and click **Track delivery** or **Show on map**. Optional TomTom waypoint support.
 - A movable **Courier's Compass** that stays available when the ledger and main map close: direction arrow, distance, current writ, recipient information, and destination coordinates. Its down-arrow button unfolds a small map using the game's actual map artwork.
@@ -36,32 +36,27 @@ Hover only the **picture** of a required good, reagent, crafted step, writ, or c
 
 Craft costs value the full batch, including materials you already own; bag counts are shown separately. Vendor values are undiscounted base prices, and recipes are not assumed to be learned. These are planning lists: the addon does not craft, buy, or consume items for you. Gathered goods keep their purchase cost instead of inventing a recipe.
 
+## Built-in auction scanner
+
+The built-in scanner controls appear only when neither Auctionator nor Auctioneer Advanced is installed (even a disabled installation hides them). Without either addon, open an auction house in your faction capital, then choose **Settings → Scan AH prices**. Keep the AH open until the progress text reports completion. **Cancel** or closing the AH discards any unfinished scan. The scanner requests one full snapshot, reads it in small batches, and saves the lowest unit buyout and total buyout stock for relevant items. It makes no purchases and does not run automatically.
+
+Full snapshots have a 15-minute local cooldown, including a known Auctionator snapshot cooldown. Server throttling can also delay a response. Missing listings retain their previous price and original age; incomplete rows do not replace valid prices. Newer eligible peer observations can win while sharing is enabled. Personal scan prices must be enabled in Settings. Opening or closing the AH never initiates a scan.
+
 ## Auction searches and flight setup
 
 With the auction house open, click the search text box so its cursor is blinking, then **Shift-click an item picture** in the ledger. The item name fills that focused box, with the cursor at the end. The addon does not choose Shopping, change tabs, reset filters, or submit the search. The ledger stays open. With no focused text box or with the AH closed, Shift-click quietly does nothing. Ordinary clicks still select entries, and hovering text does not show item tooltips.
 
 Until a flight-master map has been recorded, the ledger, compass, and login message warn that flight paths are unscanned. **Talk to a flight master and open their map; no flight purchase is needed.** The warning clears after a successful scan, even if that character has no reachable destinations yet. Visit more flight masters to build route coverage. Turning off flight routing also hides the warning.
 
-## AHledger updates
+## Optional peer sharing
 
-**The helper is optional.** Use bundled AHledger prices and your own supported scans without running anything else. WoW addons cannot fetch web APIs directly, so automatic web refreshes require the companion tool **outside WoW**, using Node.js 22 or newer. It downloads public prices only: no token, account details, or scan upload is needed.
+**Off by default.** Enable **Settings → Opt in: share scan prices with guild / party / raid** to send your observations and receive prices from other opted-in users. The addon periodically requests updates through your guild or current group, then responders send compact addon whispers. Both players must be online, share a guild/group, and match realm and faction. This is not a realm-wide network. No ordinary chat messages, custom channels, web service, or external helper are used.
 
-From this repository, run:
+Messages contain the protocol version, realm/faction, item IDs, unit prices, quantities and original scan timestamps. WoW also supplies the sending character's name. No bags, gold balance, quests, flight paths, or other character details are shared. Only your directly observed Auctionator, Auctioneer, or built-in scans are sent; received prices are not relayed. Unknown-age and older-than-24-hour observations are not shared.
 
-```powershell
-node tools/sync-prices.mjs --addon-dir "C:\path\to\World of Warcraft\_classic_beta_\Interface\AddOns\ForeverWaylaid"
-```
+Received quotes are labeled **Peer scan (unverified)**. Payloads are size/rate limited and checked for known item IDs, scope, numeric bounds, age, and request tokens. These checks cannot prove that another user's price is truthful. Turning sharing off immediately clears pending messages, ignores incoming data and excludes cached peer prices from calculations. Your own scan data is retained.
 
-Use your actual client path. Run `/reload` in game afterward. Optional flags:
-
-```powershell
-# Fetch one market only
-node tools/sync-prices.mjs --addon-dir "C:\path\to\AddOns\ForeverWaylaid" --market forever.pvp.horde.us
-# Keep the helper running; check at most every 30 minutes
-node tools/sync-prices.mjs --addon-dir "C:\path\to\AddOns\ForeverWaylaid" --watch
-```
-
-The updater honors longer server cache lifetimes, validates market and timestamp, retains previous prices on failures, and writes `Prices.lua` atomically. It never edits the game's SavedVariables. Running without `--addon-dir` updates the repository's addon folder. No scheduled task is installed.
+Updates are requested roughly every five minutes, with staggered timing and limited response rates. A group change schedules discovery without rapid polling. Until a suitable peer responds, only your own available prices can be shown. Cross-client peer exchange still needs live testing with a second opted-in player.
 
 ## Delivery routes
 
@@ -91,7 +86,7 @@ pnpm check
 node tools/build-recipes.mjs
 ```
 
-The Lua suite loads the addon and renders every panel against a simulated API. It tests cost arithmetic, market isolation, scan timestamps, directed flights, unknown destinations, and route ordering against brute-force permutations. It also checks route clipping, cardinal bearings, rotating minimap coordinates, material filtering, compass independence, launcher controls, and departure/in-flight/customer guidance. Node tests cover AHledger parsing, cache limits, and failed/older download retention. CI also runs the Lua suite with Lua 5.1. Crafting tests compare all 246 catalogue requests with the website engine for both factions (492 comparisons), plus nested batching, vendor fallback, shortages, and item-hover binding. Simulated checks do not replace real delivery tests.
+The Lua suite loads the addon and renders every panel against a simulated API. It tests cost arithmetic, market isolation, scan timestamps, directed flights, unknown destinations, and route ordering against brute-force permutations. It also checks route clipping, cardinal bearings, rotating minimap coordinates, material filtering, compass independence, launcher controls, and departure/in-flight/customer guidance. Scanner tests cover manual starts, batching, cancellation, timeouts, cooldowns and hidden controls when third-party scanners are installed. Peer tests cover opt-in/out, scopes, freshness, malformed messages, response throttling and direct-only sharing. CI also runs the Lua suite with Lua 5.1. Crafting tests compare all 246 catalogue requests with the website engine for both factions (492 comparisons), plus nested batching, vendor fallback, shortages, and item-hover binding. Simulated checks do not replace real delivery tests.
 
 Before calling the preview stable, verify in Forever: each tooltip toggle; Auctionator full/incremental completion; an Auctioneer home-faction scan; accepting and completing a writ; learning two flight masters; map pins at zone and continent zoom; `/reload`; and a second character/faction. Report the game build and full Lua error if one occurs.
 
@@ -99,6 +94,6 @@ The website's separate vendor-location catalogue remains on the website. Recursi
 
 ## License and sources
 
-Original addon code is [MIT licensed](LICENSE). Price data is credited to [AHledger](https://ahledger.com/) and follows its [developer terms](https://ahledger.com/developers). Game names, data, and built-in UI assets belong to their respective owners; MIT does not relicense those assets or third-party addons. This project is not affiliated with Blizzard Entertainment.
+Original addon code is [MIT licensed](LICENSE). Game names, data, and built-in UI assets belong to their respective owners; MIT does not relicense those assets or third-party addons. This project is not affiliated with Blizzard Entertainment.
 
 The catalogue was imported from Warlune's MIT-licensed [forever-waylaid-ledger](https://github.com/Warlune/forever-waylaid-ledger) at `6a7913d`; its metadata records the original data sources. WoW API signatures were checked against the [Forever UI source](https://github.com/Gethe/wow-ui-source/tree/forever). Auctioneer integration calls the [scan-image API](https://gitlab.com/norganna-wow/auctioneer/auc-advanced/-/blob/master/CoreScan.lua); Auctioneer source is not included.

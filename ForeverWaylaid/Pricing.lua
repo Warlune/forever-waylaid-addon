@@ -1,21 +1,20 @@
 local _, F = ...
 
--- Compare observation times per item, never the time this addon imported them.
--- Undated personal values cannot displace a dated AHledger observation.
-function F.SelectPrice(public, personal)
-  if not public then return personal end
-  if not personal then return public end
-  if (personal.time or 0) > (public.time or 0) then return personal end
-  return public
+-- Compare observation times per item, never import/receive times. The first
+-- source wins ties; direct personal observations take precedence over peers.
+function F.SelectPrice(preferred, candidate)
+  if not preferred then return candidate end
+  if not candidate then return preferred end
+  if (candidate.time or 0) > (preferred.time or 0) then return candidate end
+  return preferred
 end
 function F.Price(id)
-  local market = F.Market()
-  local feed = market and F.bundledPrices[market]
-  local row = feed and feed.items[id]
-  local public = row and { price = row[1], quantity = row[2], time = feed.time, source = "AHledger.com" }
   local scope = F.char.realm .. ":" .. UnitFactionGroup("player")
   local personal = F.db.settings.personal and F.char.localPrices[scope]
-  return F.SelectPrice(public, personal and personal[id])
+  local peers=F.db.settings.peerSharing and F.char.peerPrices and F.char.peerPrices[scope]
+  local peer=peers and peers[id]
+  if peer and (not peer.time or F.Now()-peer.time>86400 or peer.time>F.Now()+60) then peer=nil end
+  return F.SelectPrice(personal and personal[id],peer)
 end
 function F.CrateCosts(crate, includeCrate)
   local rows, best = {}, nil
@@ -41,7 +40,7 @@ local function save(target, id, price, observed, source, quantity)
   local row = { price = math.ceil(price), time = observed, source = source, quantity = quantity }
   target[id] = F.SelectPrice(target[id], row)
 end
-function F.ImportPersonal()
+function F.ImportPersonal(silent)
   local scope = F.char.realm .. ":" .. UnitFactionGroup("player")
   local target = F.char.localPrices[scope] or {}
   F.char.localPrices[scope] = target
@@ -73,7 +72,7 @@ function F.ImportPersonal()
       used[#used + 1] = "Auctioneer"
     end
   end
-  F.Print(#used > 0 and ("Read personal prices: " .. table.concat(used, ", ") .. ".") or "No supported personal scan API found.")
+  if not silent then F.Print(#used > 0 and ("Read personal prices: " .. table.concat(used, ", ") .. ".") or "Use Scan AH prices in Settings to collect prices without another scanner.")end
 end
 
 local capitals = {
@@ -91,6 +90,16 @@ local function scanScope()
     map = info and info.parentMapID
     if not map or map==0 then break end
   end
+end
+F.PersonalScanScope=scanScope
+function F.SaveNativeSnapshot(snapshot,scope,observed)
+  local target=F.char.localPrices[scope] or {};F.char.localPrices[scope]=target
+  local count=0
+  for id,row in pairs(snapshot)do
+    save(target,id,row.price,observed,"Forever Waylaid",row.quantity)
+    count=count+1
+  end
+  return count
 end
 function F.SaveAuctionatorRows(kind, rows, scope, observed)
   if type(rows) ~= "table" then return end
@@ -132,6 +141,7 @@ function F.RegisterAuctionator()
     local e=phases[name]
     if not e or not F.char then return end
     if e.phase=="start" then
+      if F.CancelNativeScan then F.CancelNativeScan("Stopped: another auction scan started. Previous prices kept.")end
       local scope,city=scanScope(); pending=scope and {scope=scope,city=city,kind=e.kind}
     elseif e.phase=="failed" then pending=nil
     elseif e.phase=="complete" then
@@ -144,9 +154,9 @@ function F.RegisterAuctionator()
   if #names>0 then Auctionator.EventBus:Register(listener,names) end
 end
 
--- Read on AH close; no scan or network polling is initiated by this addon.
+-- Import optional third-party data silently when the auction house closes.
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("AUCTION_HOUSE_CLOSED")
 frame:SetScript("OnEvent", function()
-  if F.char and F.db.settings.personal then F.ImportPersonal(); F.Refresh() end
+  if F.char and F.db.settings.personal then F.ImportPersonal(true); F.Refresh() end
 end)

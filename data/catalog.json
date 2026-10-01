@@ -3,7 +3,6 @@
     "clientBuild": "1.60.1.70009",
     "crateSource": "https://daybreakforever.com/static/forever/datamine.json",
     "writSource": "https://www.wowhead.com/forever/quests/eastern-kingdoms/crafting",
-    "priceSource": "https://ahledger.com/developers",
     "writLevelSource": "ItemSparse.RequiredLevel, Forever client 1.60.1.70009 via https://wago.tools/db2/ItemSparse"
   },
   "crates": [

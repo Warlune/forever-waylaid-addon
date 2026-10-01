@@ -31,28 +31,30 @@ C_QuestLog={IsOnQuest=function()return false end,IsComplete=function()return fal
 C_Item={GetItemCount=function()return 0 end}
 Enum={}
 local function load(name) assert(loadfile('ForeverWaylaid/'..name..'.lua'))('ForeverWaylaid',F) end
-for _,name in ipairs({'Catalog','Recipes','Prices','Core','Pricing','Crafting','Style','Geometry','Routing','Tracking','Tooltips','UI','Map','Navigator'}) do load(name) end
+for _,name in ipairs({'Catalog','Recipes','Core','Pricing','Scanner','Peers','Crafting','Style','Geometry','Routing','Tracking','Tooltips','UI','Map','Navigator'}) do load(name) end
 F.events.scripts.OnEvent(nil,'ADDON_LOADED','ForeverWaylaid')
 F.events.scripts.OnEvent(nil,'PLAYER_LOGIN')
 for _,tab in ipairs({'Crates','Writs','Route','Settings'}) do F.tab=tab;F.Render() end
 assert(#F.catalog.crates==30 and #F.catalog.writs==150)
 print('PASS: addon load, login, all four panels and catalogue')
 
-local public={price=90,time=100,source='AHledger.com'}
+local public={price=90,time=100,source='Peer scan (unverified)'}
 assert(F.SelectPrice(public,{price=50,time=99})==public)
 assert(F.SelectPrice(public,{price=50,time=100})==public)
 assert(F.SelectPrice(public,{price=50}).price==90)
 assert(F.SelectPrice(public,{price=50,time=101}).price==50)
 assert(F.SelectPrice(nil,{price=50}).price==50)
-F.bundledPrices={['forever.pvp.horde.us']={time=100,items={[123]={10,100},[1]={50,1},[2]={2,1}}}}
-F.char.ruleset='pvp';F.char.localPrices={['Test Realm:Horde']={[123]={price=8,time=101,quantity=100,source='Auctionator'}}}
+F.db.settings.peerSharing=true
+F.char.peerPrices={['Test Realm:Horde']={[123]={price=10,time=100,quantity=100,source='Peer scan (unverified)'},[1]={price=50,time=100,quantity=1},[2]={price=2,time=100,quantity=1}}}
+F.char.localPrices={['Test Realm:Horde']={[123]={price=8,time=101,quantity=100,source='Auctionator'}}}
 assert(F.Price(123).price==8)
 F.db.settings.personal=false;assert(F.Price(123).price==10);F.db.settings.personal=true
 UnitFactionGroup=function()return 'Alliance'end;assert(F.Price(123)==nil);UnitFactionGroup=function()return 'Horde'end
 local crate={id=1,options={{itemId=123,qty=10,name='First'},{itemId=2,qty=10,name='Low stock'}}}
 local _,best=F.CrateCosts(crate);assert(best.cost==80)
 F.db.settings.includeCrate=true;_,best=F.CrateCosts(crate);assert(best.cost==130)
-F.bundledPrices['forever.pvp.horde.us'].items[1]=nil;_,best=F.CrateCosts(crate);assert(best==nil)
+F.char.peerPrices['Test Realm:Horde'][1]=nil;_,best=F.CrateCosts(crate);assert(best==nil)
+F.db.settings.peerSharing=false
 print('PASS: source recency, ties, unknown age, market isolation, stock and crate totals')
 
 local id=F.catalog.crates[1].options[1].itemId
@@ -169,3 +171,5 @@ print('PASS: departure/in-flight/customer guidance, minimap overlay and launcher
 assert(loadfile('tests/crafting.lua'))(F)
 assert(loadfile('tests/ledger.lua'))(F)
 assert(loadfile('tests/search.lua'))(F)
+assert(loadfile('tests/scanner.lua'))(F)
+assert(loadfile('tests/peers.lua'))(F)

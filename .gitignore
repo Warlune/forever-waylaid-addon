@@ -2,5 +2,3 @@ node_modules/
 release/
 *.tmp
 *.zip
-tools/.sync-*
-ForeverWaylaid/.ahledger-cache.json

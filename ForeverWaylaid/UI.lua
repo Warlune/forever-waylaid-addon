@@ -158,7 +158,7 @@ function F.BuildUI()
   F.mapButton=S.Button(w,"Show on map",827,-645,187,function()
     if F.detailEntry and F.detailEntry.stop then F.Navigate(F.detailEntry.stop.point,F.detailEntry.stop.questID) end
   end)
-  S.Text(w,"AHledger.com  •  market estimates, not guaranteed purchase prices",27,-684,730,"GameFontDisableSmall")
+  S.Text(w,"Personal & opt-in peer scans  •  market estimates, not guaranteed purchase prices",27,-684,730,"GameFontDisableSmall")
   S.Text(w,"v"..F.version,948,-684,65,"GameFontDisableSmall")
   F.settings=S.Panel(w,24,-221,990,415)
   S.Text(F.settings,"Make the ledger your own",25,-18,800,"GameFontNormalLarge",S.gold)
@@ -166,20 +166,23 @@ function F.BuildUI()
   S.Check(F.settings,"Show cheapest crate fill",23,-80,"cheapest")
   S.Check(F.settings,"Include crate price in tooltip totals",23,-115,"includeCrate")
   S.Check(F.settings,"Show every material's fill cost",23,-150,"allCosts")
-  S.Check(F.settings,"Use my Auctionator / Auctioneer scans",23,-185,"personal")
+  S.Check(F.settings,"Use personal scan prices",23,-185,"personal")
   S.Text(F.settings,"MAPS & TRAVEL",515,-57,400,"GameFontNormalSmall",S.muted)
   S.Check(F.settings,"Show the travel compass",513,-80,"navigator")
   S.Check(F.settings,"Show routes on the world map",513,-115,"worldRoute")
   S.Check(F.settings,"Show routes on the minimap",513,-150,"minimapRoute")
   S.Check(F.settings,"Consider my learned flight routes",513,-185,"flights")
   S.Rule(F.settings,25,-232,934)
-  S.Text(F.settings,"Choose the AHledger market matching your realm",25,-252,850,"GameFontNormal",S.gold)
-  for i,ruleset in ipairs({"pvp","normal","rp"}) do
-    S.Button(F.settings,ruleset:upper(),25+(i-1)*112,-282,102,function()F.char.ruleset=ruleset;F.Refresh()end)
-  end
+  local peerToggle=S.Check(F.settings,"Opt in: share scan prices with guild / party / raid",23,-247,"peerSharing")
+  peerToggle:SetScript("OnClick",function(self)F.SetPeerSharing(not not self:GetChecked())end)
+  F.peerStatus=S.Text(F.settings,"Peer sharing is off.",25,-287,476,"GameFontHighlightSmall",S.muted)
   S.Button(F.settings,"Read personal prices",515,-282,200,function()F.ImportPersonal();F.Refresh()end)
   S.Button(F.settings,"Reset compass position",727,-282,231,function()F.ResetNavigator()end)
-  S.Text(F.settings,"Open a flight master's map to learn routes — no flight purchase needed. Visit more masters to improve coverage.\nThe optional helper refreshes AHledger snapshots. Scan in a faction capital for personal auction prices.",25,-337,920,"GameFontHighlight",S.muted)
+  F.scanButton=S.Button(F.settings,"Scan AH prices",25,-321,200,F.StartNativeScan)
+  F.cancelScanButton=S.Button(F.settings,"Cancel",235,-321,90,function()F.CancelNativeScan()end)
+  F.scanStatus=S.Text(F.settings,"",340,-327,615,"GameFontHighlightSmall",S.muted)
+  F.UpdateScanUI()
+  S.Text(F.settings,"Peer prices are unverified and expire after 24 hours. Sharing sends only your observed item prices, stock and scan times.\nNo scanner installed? Use Scan AH prices. Open a flight master's map to learn routes for free.",25,-365,920,"GameFontHighlightSmall",S.muted)
   w:EnableMouseWheel(true);w:SetScript("OnMouseWheel",function(_,delta)
     if F.detailPanel:IsMouseOver() and F.tab~="Settings" then F.ScrollDetails(delta);return end
     if F.tab~="Settings" then F.offset=math.max(0,math.min(F.lastPage or 0,(F.offset or 0)-delta*pageSize));F.Render()end
@@ -300,8 +303,7 @@ end
 function F.Render()
   if not F.window then return end
   F.craftButton:SetText(F.db.settings.craftGoods and "Goods: Craft" or "Goods: Buy at AH")
-  local market=F.Market();local feed=market and F.bundledPrices[market]
-  F.status:SetText((market or "Choose your market in Settings").."\n"..(feed and "AHledger snapshot • "..S.Age(feed.time) or "Personal scans available • no AHledger snapshot"))
+  F.status:SetText(F.char.realm.." • "..UnitFactionGroup("player").."\nPersonal scans"..(F.db.settings.peerSharing and " + unverified peer prices" or " • peer sharing off"))
   F.factionTitle:SetText(UnitFactionGroup("player")=="Horde" and "DUROTAR SUPPLY & LOGISTICS  /  FIELD LEDGER" or "AZEROTH COMMERCE AUTHORITY  /  FIELD LEDGER")
   local settings=F.tab=="Settings"
   F.settings:SetShown(settings);F.body:SetShown(not settings);F.detailPanel:SetShown(not settings)

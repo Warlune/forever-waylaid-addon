@@ -1,17 +1,18 @@
 ## Interface: 16001
 ## Title: Forever Waylaid
-## Notes: Crate costs, writ deliveries and learned flight routes. AHledger.com prices.
+## Notes: Crate costs, writ deliveries, personal scans and optional peer prices.
 ## Author: Warlune
-## Version: 0.3.6
+## Version: 0.4.0
 ## SavedVariables: ForeverWaylaidDB
 ## SavedVariablesPerCharacter: ForeverWaylaidCharDB
 ## OptionalDeps: Auctionator, Auc-Advanced, TomTom
 
 Catalog.lua
 Recipes.lua
-Prices.lua
 Core.lua
 Pricing.lua
+Scanner.lua
+Peers.lua
 Crafting.lua
 Style.lua
 Geometry.lua

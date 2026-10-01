@@ -1,6 +1,6 @@
 local _, F = ...
-F.version = "0.3.6"
-F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false }
+F.version = "0.4.0"
+F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false }
 
 function F.Now() return GetServerTime and GetServerTime() or time() end
 function F.Positive(n) return type(n) == "number" and n == n and n > 0 and n < math.huge end
@@ -11,11 +11,6 @@ function F.Money(n)
   if not n then return "Unpriced" end
   n = math.ceil(n)
   return string.format("%dg %ds %dc", math.floor(n / 10000), math.floor(n / 100) % 100, n % 100)
-end
-function F.Market()
-  local faction = UnitFactionGroup("player")
-  if faction ~= "Horde" and faction ~= "Alliance" then return nil end
-  return F.char.ruleset and ("forever." .. F.char.ruleset .. "." .. faction:lower() .. ".us") or nil
 end
 function F.Refresh()
   if F.UpdateTracking then F.UpdateTracking() end
@@ -42,11 +37,13 @@ events:SetScript("OnEvent", function(_, event, name, success)
     F.char.flights = F.char.flights or { nodes = {}, edges = {} }
     F.char.pins = F.char.pins or {}
     F.char.localPrices = F.char.localPrices or {}
+    F.char.peerPrices = F.char.peerPrices or {}
     F.char.recipients = F.char.recipients or {}
     F.char.realm = GetRealmName()
   elseif event == "PLAYER_LOGIN" then
     F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.BuildNavigator(); F.RegisterAuctionator(); F.Refresh()
-    F.Print("v" .. F.version .. " — /fwl to open. Choose your AHledger market in Settings.")
+    F.InitializePeers()
+    F.Print("v" .. F.version .. " — /fwl to open. Scan AH prices or opt into peer sharing in Settings.")
     if F.NeedsFlightScan()then F.Print("Flight paths not scanned: open a flight master's map to learn your routes. No flight purchase needed; until then, routing uses walking estimates.")end
   elseif F.char then
     if event=="ADDON_LOADED" then F.InstallMap();return end
