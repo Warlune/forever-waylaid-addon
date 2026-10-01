@@ -129,9 +129,12 @@ function F.BuildUI()
     row.text:SetMaxLines(1);row.detail:SetMaxLines(1)
     row.reward=S.Text(row,"",64,-43,295,"GameFontHighlightSmall",S.muted);row.reward:SetMaxLines(1)
     row.cost=S.Text(row,"",370,-6,195,"GameFontHighlightSmall");row.cost:SetJustifyH("RIGHT")
-    row:SetScript("OnClick",function(self)F.selected[F.tab]=self.entry.item.id;F.Render()end)
+    row:SetScript("OnClick",function(self,button)
+      if F.ItemClick(self.entry.item.id,button)then return end
+      F.selected[F.tab]=self.entry.item.id;F.Render()
+    end)
     row.cost:SetSpacing(3)
-    row.icon:EnableMouse(true);row.icon:SetScript("OnMouseUp",function()F.selected[F.tab]=row.entry.item.id;F.Render()end)
+    row.icon.selectItem=function()F.selected[F.tab]=row.entry.item.id;F.Render()end
     F.rows[i]=row
   end
   F.empty=S.Text(F.body,"",30,-160,520,"GameFontNormalLarge",S.gold);F.empty:SetJustifyH("CENTER")
@@ -176,7 +179,7 @@ function F.BuildUI()
   end
   S.Button(F.settings,"Read personal prices",515,-282,200,function()F.ImportPersonal();F.Refresh()end)
   S.Button(F.settings,"Reset compass position",727,-282,231,function()F.ResetNavigator()end)
-  S.Text(F.settings,"The addon works on its own. The optional helper only refreshes AHledger snapshots.\nScan in a faction capital with Auctionator, or use Auctioneer's saved prices.",25,-337,920,"GameFontHighlight",S.muted)
+  S.Text(F.settings,"Open a flight master's map to learn routes — no flight purchase needed. Visit more masters to improve coverage.\nThe optional helper refreshes AHledger snapshots. Scan in a faction capital for personal auction prices.",25,-337,920,"GameFontHighlight",S.muted)
   w:EnableMouseWheel(true);w:SetScript("OnMouseWheel",function(_,delta)
     if F.detailPanel:IsMouseOver() and F.tab~="Settings" then F.ScrollDetails(delta);return end
     if F.tab~="Settings" then F.offset=math.max(0,math.min(F.lastPage or 0,(F.offset or 0)-delta*pageSize));F.Render()end
@@ -305,7 +308,9 @@ function F.Render()
   local ready=0;for _,stop in ipairs(F.active or {})do if stop.ready then ready=ready+1 end end
   local flightCount=0;for _ in pairs(F.char.flights.nodes)do flightCount=flightCount+1 end
   local stats={{"YOUR DELIVERY BOOK",#(F.active or {}).." accepted writs"},{"READY TO HAND IN",ready.." customers waiting"},{"KNOWN FLIGHT POINTS",flightCount.." destinations"},{"PLANNED JOURNEY","~"..math.ceil((F.routeSeconds or 0)/60).." min • estimate"}}
+  if F.NeedsFlightScan()then stats[3]={"FLIGHT PATHS NOT SCANNED","Visit a flight master"}end
   for i,stat in ipairs(stats)do F.stats[i].caption:SetText(stat[1]);F.stats[i].value:SetText(stat[2])end
+  F.stats[3].caption:SetTextColor(unpack(F.NeedsFlightScan() and S.gold or S.muted))
   if settings then F.trackButton:Hide();F.mapButton:Hide();return end
   F.tierButton:SetShown(F.tab=="Crates");F.tierButton:SetText("Tier: "..(tiers[F.tierIndex or 1] or "All"))
   F.sortButton:SetText("Sort: "..({"Best value","Lowest total","Name"})[F.sortIndex or 1])

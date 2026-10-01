@@ -168,3 +168,4 @@ F.db.settings.navigator=true;F.minimapButton.scripts.OnClick(nil,'RightButton');
 print('PASS: departure/in-flight/customer guidance, minimap overlay and launcher controls')
 assert(loadfile('tests/crafting.lua'))(F)
 assert(loadfile('tests/ledger.lua'))(F)
+assert(loadfile('tests/search.lua'))(F)

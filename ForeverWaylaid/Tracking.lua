@@ -48,6 +48,12 @@ function F.UpdateTracking()
   F.route, F.unresolved, F.routeSeconds, F.routeMode = F.Route.Plan(F.Route.Player(), F.active, F.char.flights, F.db.settings.flights)
 end
 
+function F.NeedsFlightScan()
+  if not F.db.settings.flights then return false end
+  -- An observed departure with no destinations is still a valid scan.
+  return not next(F.char.flights.edges)
+end
+
 function F.LearnFlights()
   if not C_TaxiMap or not C_TaxiMap.GetTaxiNodesForMap then return end
   local mapID = C_Map.GetBestMapForUnit("player")

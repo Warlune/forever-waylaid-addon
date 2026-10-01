@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.3.1"
+F.version = "0.3.2"
 F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false }
 
 function F.Now() return GetServerTime and GetServerTime() or time() end
@@ -43,6 +43,7 @@ events:SetScript("OnEvent", function(_, event, name)
   elseif event == "PLAYER_LOGIN" then
     F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.BuildNavigator(); F.RegisterAuctionator(); F.Refresh()
     F.Print("v" .. F.version .. " — /fwl to open. Choose your AHledger market in Settings.")
+    if F.NeedsFlightScan()then F.Print("Flight paths not scanned: open a flight master's map to learn your routes. No flight purchase needed; until then, routing uses walking estimates.")end
   elseif F.char then
     if event=="ADDON_LOADED" then F.InstallMap();return end
     if event=="QUEST_COMPLETE" then F.LearnRecipient() end

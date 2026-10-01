@@ -1,6 +1,6 @@
 {
   "name": "forever-waylaid-addon",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "license": "MIT",
   "scripts": {
@@ -8,5 +8,5 @@
     "catalog": "node tools/build-catalog.mjs",
     "check": "node tools/check-lua.mjs"
   },
-  "devDependencies": { "fengari-node-cli": "0.1.0", "luaparse": "0.3.1" }
+  "devDependencies": { "fengari-node-cli": "0.1.0", "luaparse": "0.3.2" }
 }

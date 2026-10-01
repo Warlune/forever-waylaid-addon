@@ -12,9 +12,61 @@ function S.BindItem(frame,id)
   frame.itemID=id;frame:EnableMouse(id~=nil)
   frame:SetScript("OnEnter",function(self)
     if not self.itemID then return end
-    GameTooltip:SetOwner(self,"ANCHOR_RIGHT");GameTooltip:SetHyperlink("item:"..self.itemID);GameTooltip:Show()
+    GameTooltip:SetOwner(self,"ANCHOR_RIGHT");GameTooltip:SetHyperlink("item:"..self.itemID)
+    GameTooltip:AddLine("Shift-click: fill auction search",0.94,0.77,0.42);GameTooltip:Show()
   end)
   frame:SetScript("OnLeave",function()GameTooltip:Hide()end)
+  frame:SetScript("OnMouseUp",function(self,button)
+    if F.ItemClick(self.itemID,button) then return end
+    local selectItem=rawget(self,"selectItem")
+    if button=="LeftButton" and selectItem then selectItem()end
+  end)
+end
+
+local function itemName(id)
+  local info=C_Item and C_Item.GetItemInfo or GetItemInfo
+  local name=info and info(id)
+  if name then return name end
+  local item=F.cratesByID[id] or F.writsByID[id]
+  if item then return item.name end
+  local recipe=F.recipeData.recipes[tostring(id)]
+  if recipe then return (recipe[1] or recipe).name end
+  local leaf=F.recipeData.metadata.leaves[tostring(id)]
+  if leaf then return leaf.name end
+  for _,crate in ipairs(F.catalog.crates)do
+    for _,option in ipairs(crate.options)do if option.itemId==id then return option.name end end
+  end
+end
+function F.SearchAuctionItem(id)
+  local modern=AuctionHouseFrame and AuctionHouseFrame:IsShown()
+  local legacy=AuctionFrame and AuctionFrame:IsShown()
+  if not modern and not legacy then F.Print("Open the auction house, then Shift-click an item picture to fill its search.");return false end
+  local name=itemName(id)
+  if not name then F.Print("Item name is still loading. Try Shift-click again in a moment.");return false end
+  local shopping=AuctionatorShoppingFrame
+  -- Fill the same exact-name field used by Auctionator's item-link handler.
+  -- Leave submitting the search to the player.
+  if shopping and shopping.SearchOptions and shopping.SearchOptions.SetSearchTerm and AuctionatorTabs_Shopping then
+    AuctionatorTabs_Shopping:Click()
+    shopping.SearchOptions:SetSearchTerm('"'..name..'"')
+  elseif legacy and BrowseName then
+    if AuctionFrameTab1 then AuctionFrameTab1:Click()end
+    if BrowseResetButton then BrowseResetButton:Click()end
+    BrowseName:SetText(name)
+  elseif modern and AuctionHouseFrame.SetSearchText then
+    AuctionHouseFrame:SetSearchText(name)
+  else
+    F.Print("No supported auction search box is available.");return false
+  end
+  GameTooltip:Hide()
+  -- The ledger overlays the auction UI; expose the filled search immediately.
+  if F.window then F.window:Hide()end
+  return true
+end
+function F.ItemClick(id,button)
+  if not id or button~="LeftButton" or not IsShiftKeyDown or not IsShiftKeyDown() then return false end
+  F.SearchAuctionItem(id)
+  return true
 end
 function S.Text(parent, text, x, y, width, font, color)
   local t=parent:CreateFontString(nil,"OVERLAY",font or "GameFontHighlight")

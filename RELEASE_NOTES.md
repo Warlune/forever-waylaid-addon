@@ -1,10 +1,8 @@
-## 0.3.1 — Clear prices and value colors
+## 0.3.2 — Auction shortcuts and flight-path setup
 
-- Every writ/crate row shows Writ/Crate, Goods, and Total. Totals consistently include both purchase prices, even for owned items.
-- Rows use the website's green-to-red value scale based on total cost per reward. Unpriced, short-stock, or unverified-reward entries stay gray.
-- Entries missing either purchase or goods/crafting price always follow fully priced entries, for every sort mode.
-- Native item tooltips appear on pictures only; names and rows remain clear to read and click.
-- Simplified the parchment detail sheet and moved required crafting professions, skill ranks, and specialization notes to the top. Filled missing skill ranks from explicit requirements on the corresponding Forever recipe pages.
-- The header shows catalogue-backed writ/crate level requirements separately from crafting skill. Raw-material shortages, ordered craft steps, and source ages remain available.
+- Shift-click any item picture to fill the open auction house's search: writs, crates, goods, reagents, and crafted items. Auctionator uses its Shopping tab; native auction search is the fallback.
+- The ledger closes to reveal the filled search. Search submission and purchasing remain manual. Ordinary clicks and picture-only hover tooltips remain intact.
+- Added an unscanned-flight-path warning to the ledger, compass, and login message. Talk to a flight master and open the flight map to record routes; no paid flight is needed.
+- A successful scan clears the warning, including a scan with no reachable destinations. Failed scans do not. Disabling flight routing hides the warning.
 
-Installed updates take effect with /reload. The helper remains optional. Prices are estimates; craft costs value the full batch and do not assume learned recipes.
+Install the ForeverWaylaid folder in Interface/AddOns, then /reload. Live accepted-writ delivery testing remains pending; route estimates still depend on known destinations and learned flight connections.
