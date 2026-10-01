@@ -29,11 +29,11 @@ jobs:
           cp -r ForeverWaylaid release/stage/
           cp README.md LICENSE RELEASE_NOTES.md release/stage/
           cd release/stage
-          zip -r ../ForeverWaylaid-0.13.0.zip ForeverWaylaid README.md LICENSE RELEASE_NOTES.md
+          zip -r ../ForeverWaylaid-0.13.1.zip ForeverWaylaid README.md LICENSE RELEASE_NOTES.md
       - uses: actions/upload-artifact@v4
         with:
-          name: ForeverWaylaid-0.13.0
-          path: release/ForeverWaylaid-0.13.0.zip
+          name: ForeverWaylaid-0.13.1
+          path: release/ForeverWaylaid-0.13.1.zip
   release:
     if: startsWith(github.ref, 'refs/tags/')
     needs: verify
@@ -44,9 +44,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: ForeverWaylaid-0.13.0
+          name: ForeverWaylaid-0.13.1
           path: release
       - name: Publish preview
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" release/ForeverWaylaid-0.13.0.zip --verify-tag --title "Forever Waylaid 0.13.0 preview" --notes-file RELEASE_NOTES.md --prerelease
+        run: gh release create "$GITHUB_REF_NAME" release/ForeverWaylaid-0.13.1.zip --verify-tag --title "Forever Waylaid 0.13.1 preview" --notes-file RELEASE_NOTES.md --prerelease

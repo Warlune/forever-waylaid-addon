@@ -256,6 +256,43 @@ P.Init();P.random=function(a,b)return a end
 P.EncounterStart(5,'Onyxia');P.EncounterEnd(5,'Onyxia',1);assert(not P.state.bossEggs[86])
 GetInstanceInfo,F.Now=savedInfo,savedNow
 print('PASS: preview/equip separation, six-pack UI, 1v3 speed-ordered turns, dungeon/raid rewards, persistent cooldowns and boss claims')
+local oldClock,oldMotion=P.sceneClock,F.db.settings.reduceMotion
+P.sceneClock=100;F.db.settings.reduceMotion=false
+pet=P.Active();pet.species=47;pet.rarity=4;pet.level=100;pet.best=66;pet.health=100;pet.food=100;pet.energy=100
+P.mode='tower';P.miniMode='tower';P.window:Show();P.ToggleCompass(true)
+assert(P.StartBattle(67));local encounter=P.state.battle
+encounter.enemies[1].hp=1;encounter.enemies[2].hp=10000;encounter.enemies[3].hp=10000
+P.BattleAction('strike');assert(P.state.battle and not P.victory,'Partial kills do not win the floor')
+P.Render()
+local alpha;P.window.scene.enemies[1].SetAlpha=function(_,value)alpha=value end
+local deathTime=encounter.enemies[1].defeatedAt
+P.sceneClock=deathTime-0.01;P.window.scene.scripts.OnUpdate(P.window.scene);assert(alpha==1,'No fade before the lethal hit')
+P.sceneClock=deathTime+0.325;P.window.scene.scripts.OnUpdate(P.window.scene);assert(math.abs(alpha-0.5)<0.001,'Defeated enemies fade smoothly')
+F.db.settings.reduceMotion=true;P.window.scene.scripts.OnUpdate(P.window.scene);assert(alpha==0,'Reduced motion hides defeated enemies immediately')
+F.db.settings.reduceMotion=false;P.sceneClock=deathTime+3
+encounter.enemies[2].hp=1;encounter.enemies[3].hp=1
+P.BattleAction('burst');local victory=P.victory
+assert(victory and victory.first and victory.floor==67 and victory.tokens==11 and P.FloorStatus(67)=='Completed')
+P.Render();assert(not P.window.scene.victory.shown,'Victory waits for the final turn and fade')
+P.sceneClock=victory.readyAt+4;P.Render()
+assert(P.window.scene.victory.shown and P.mini.scene.victory.shown,'Both tower views show victory')
+assert(alpha==0 and P.window.scene.displayEnemies==victory.round.enemies,'Enemies do not reappear after the old three-second timeout')
+assert(P.window.tower.info.text:find('Completed',1,true) and P.mini.enter.label.text=='Replay')
+local awarded=P.state.tokens;P.Render();P.Render();assert(P.state.tokens==awarded,'Rendering cannot duplicate rewards')
+P.mini.scene.victory.next.scripts.OnClick()
+assert(P.floor==68 and not P.state.battle and not P.window.scene.victory.shown and P.FloorStatus(68)=='Not cleared','Next selects without auto fighting')
+pet.energy=100;pet.food=100;pet.health=100;assert(P.StartBattle(67));P.Render()
+assert(not P.victory and alpha==1,'Replay resets enemy opacity and old victory')
+P.BattleAction('retreat');assert(not P.CurrentVictory(),'Retreat has no victory panel')
+pet.best=99;pet.health=100;pet.food=100;pet.energy=100;assert(P.StartBattle(100))
+for _,enemy in ipairs(P.state.battle.enemies)do enemy.hp=1 end
+P.BattleAction('burst');P.sceneClock=P.victory.readyAt+1;P.Render()
+assert(P.window.scene.victory.title.text=='TOWER CONQUERED' and P.window.scene.victory.next.text=='Done')
+P.window.scene.victory.next.scripts.OnClick()
+assert(P.floor==100 and not P.state.battle and not P.window.scene.victory.shown,'Final floor never advances beyond 100')
+P.Init();assert(P.FloorStatus(67)=='Completed' and not P.victory,'Completion survives reload, presentation is transient')
+P.sceneClock=oldClock;F.db.settings.reduceMotion=oldMotion
+print('PASS: timed enemy fade, reduced motion, shared victory panels, persistent completion, replay reset and no auto-start/reward duplication')
 F.char.pets={version=1,pets='broken'};P.Init();assert(not P.state.review and F.char.petQuarantine.pets=='broken','Unreadable save is backed up without accusing the player')
 P.state=old;F.char.pets=oldChar;P.random=oldRandom;P.notice=oldNotice;P.window=oldWindow;P.mini=oldMini
 print('PASS: pet rarity boundaries, care/persistence, permanent death/memorials, 100-floor gates, battle actions, NPC/PvP combat XP limits, save recovery, opt-in target inspection and compass/large pet UI')

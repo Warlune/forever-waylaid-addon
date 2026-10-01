@@ -1,4 +1,4 @@
-# Waylaid companions — 0.13.0 preview
+# Waylaid companions — 0.13.1 preview
 
 Open **Pets → Adopt**, choose a pack, then select the new companion in the stable and click **Equip**. Browsing a pet does not change the equipped companion. The first living companion is equipped automatically. The compass and large window share the same pet and battle.
 
@@ -59,3 +59,7 @@ Supported raid companions: Ragnaros, Onyxia, Nefarian, C'Thun, Kel'Thuzad, Hakka
 ## Sharing
 
 Opt-in inspection shows the equipped pet's species, rarity, level, stats, lifespan and tower progress. Both players need 0.13.0 or later. This is a personal collection game: no leaderboard, anti-cheat claims or real-game combat automation.
+
+## Victory and completed floors
+
+Defeated enemies fade out after their lethal hit (or disappear immediately with Reduced motion). Once all enemies are down, both tower views show a victory panel with the cleared floor and earned XP/tokens. **Next floor** selects the next challenge without starting combat. Floor 100 instead shows **Tower conquered** and a **Done** button. Cleared floors are marked **Completed** for the equipped pet, even after reloading; their Fight button becomes **Replay**. Replaying resets the arena and keeps the reduced repeat rewards.

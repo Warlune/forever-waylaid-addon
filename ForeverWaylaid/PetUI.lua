@@ -41,8 +41,29 @@ local function meter(parent,x,y,width,label,color)
   b.label=text(b,label,4,0,width-8,19,{1,1,1});return b
 end
 local function fill(bar,value,label)bar:SetValue(value or 0);bar.label:SetText(label)end
+local function updateOutcome(f)
+  local now=P.sceneClock or 0
+  for i,art in ipairs(f.enemies)do
+    local enemy=f.displayEnemies[i]
+    local alpha=1
+    if enemy and enemy.defeatedAt and now>=enemy.defeatedAt then
+      alpha=F.db.settings.reduceMotion and 0 or math.max(0,1-(now-enemy.defeatedAt)/0.65)
+    end
+    art:SetAlpha(alpha)
+    if enemy then f.enemyHP[i]:SetShown(alpha>0)end
+  end
+  local result=f.tower and P.CurrentVictory()
+  local visible=result and not result.dismissed and now>=result.readyAt
+  f.victory:SetShown(not not visible)
+  if visible then
+    f.victory.title:SetText(result.floor==100 and "TOWER CONQUERED" or "VICTORY!")
+    f.victory.detail:SetText("Floor "..result.floor..(result.first and " completed!" or " cleared again!").."\n+"..result.xp.." XP  |  +"..result.tokens.." tokens")
+    f.victory.next:SetText(result.floor<100 and "Next floor" or "Done")
+  end
+end
 local function stage(parent,x,y,width,height)
   local f=S.Panel(parent,x,y,width,height);f.width=width;f.height=height
+  f.displayEnemies={};f.round=false;f.tower=false
   f.bg=f:CreateTexture(nil,"BACKGROUND");f.bg:SetPoint("TOPLEFT",3,-3);f.bg:SetPoint("BOTTOMRIGHT",-3,3)
   f.pet=sprite(f,height*0.88);f.enemies={};f.enemyHP={}
   for i=1,3 do f.enemies[i]=sprite(f,height*0.88);f.enemyHP[i]=meter(f,width*0.48+(i-1)*width*0.17,-36,width*0.15,"",{0.75,0.25,0.2})end
@@ -51,8 +72,20 @@ local function stage(parent,x,y,width,height)
   f.rightHP=meter(f,width/2+5,-10,(width-30)/2,"",{0.75,0.25,0.2})
   f.float=text(f,"",10,-50,width-20,28,{1,0.85,0.3});f.float:SetJustifyH("CENTER")
   f.caption=text(f,"",8,-height+29,width-16,24,{1,1,1});f.caption:SetJustifyH("CENTER")
+  local vw=math.min(width-16,350)
+  f.victory=S.Panel(f,(width-vw)/2,-(height-144)/2,vw,144)
+  local v=f.victory;v:SetFrameLevel(f:GetFrameLevel()+5);v:EnableMouse(true)
+  v.title=text(v,"VICTORY!",8,-8,vw-16,26,S.gold);v.title:SetJustifyH("CENTER")
+  v.detail=text(v,"",8,-40,vw-16,48,{1,1,1});v.detail:SetJustifyH("CENTER")
+  v.next=S.Button(v,"Next floor",(vw-166)/2,-105,166,function()
+    local result=P.CurrentVictory();if not result then return end
+    result.dismissed=true
+    if result.floor<100 then P.floor=result.floor+1 end
+    P.Render()
+  end)
+  v:Hide()
   f:SetScript("OnUpdate",function(self)
-    local t=P.sceneClock or 0;local round=P.lastRound;local age=round and t-round.at or 9
+    local t=P.sceneClock or 0;local round=self.round;local age=round and t-round.at or 9
     local motion=not F.db.settings.reduceMotion;local attack=0;local reply=0;local event
     if self.tower and round and age<(round.duration or 1.6) then
       event=round.events and round.events[math.floor(age/0.55)+1]
@@ -70,6 +103,7 @@ local function stage(parent,x,y,width,height)
       art:SetPoint("CENTER",self,"TOPLEFT",width*((self.enemyCount or 1)==1 and 0.73 or 0.54+(i-1)*0.17)-(event and event.actor==i and reply or 0),-height*0.65)
     end
     self.pet:SetVertexColor(1,event and event.actor~=0 and motion and 0.6 or 1,1)
+    updateOutcome(self)
   end)
   return f
 end
@@ -77,10 +111,13 @@ local function renderStage(f,pet,tower)
   f.tower=tower
   f.bg:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\PetScenes"..S.Faction(),"CLAMP","CLAMP","NEAREST")
   f.bg:SetTexCoord(tower and 0.5 or 0,tower and 1 or 0.5,0.2,0.8);f.bg:SetAlpha(S.HighContrast() and 0.25 or 1)
-  local b=P.state.battle;local r=P.lastRound;local recent=tower and r and r.enemy.floor==(P.floor or 1) and (P.sceneClock or 0)-r.at<3
+  local b=P.state.battle;local result=tower and P.CurrentVictory()
+  local r=result and result.round or P.lastRound
+  local recent=tower and r and r.enemy.floor==(P.floor or 1) and (result or (P.sceneClock or 0)-r.at<3)
   local age=r and (P.sceneClock or 0)-r.at or 9
   local step=recent and age<(r.duration or 0) and r.events[math.floor(age/0.55)+1]
   local enemies=tower and (b and b.enemies or recent and r.enemies or P.Enemies(P.floor or 1)) or {}
+  f.round=(b or recent) and r or false;f.displayEnemies=enemies
   f.enemyCount=#enemies
   showPet(f.pet,pet or recent and r.pet)
   f.pet:SetSize(f.height*(tower and 0.65 or 0.88),f.height*(tower and 0.65 or 0.88))
@@ -95,8 +132,9 @@ local function renderStage(f,pet,tower)
   if tower then
     if step then fill(f.leftHP,step.hp/r.maxHP*100,"HP "..step.hp.." / "..r.maxHP)
     else fill(f.leftHP,b and b.hp/b.maxHP*100 or pet and pet.health or 0,"Your pet: "..math.floor(pet and pet.health or 0).."%")end
-    f.caption:SetText(b and (b.paused and "Paused" or "Round "..(b.turn+1).." - 1 vs "..#enemies) or "Floor "..(P.floor or 1).." / 100 - 1 vs "..#enemies)
+    f.caption:SetText(b and (b.paused and "Paused" or "Round "..(b.turn+1).." - 1 vs "..#enemies) or "Floor "..(P.floor or 1).." - "..P.FloorStatus(P.floor or 1))
   else f.caption:SetText(pet and (pet.resting and "Resting at camp" or P.rarities[pet.rarity].." "..P.species[pet.species]) or "Your next companion awaits")end
+  updateOutcome(f)
 end
 local function careIcons(parent,x,y,size,gap)
   local result={}
@@ -148,10 +186,12 @@ function P.RenderCompass()
   m.stats:SetText(pet and ("Lv "..pet.level.." | XP "..pet.xp.." | "..P.state.tokens.." tokens") or "A new friend for your journey")
   fill(m.health,pet and pet.health or 0,"Health "..math.floor(pet and pet.health or 0));fill(m.food,pet and pet.food or 0,"Food "..math.floor(pet and pet.food or 0))
   m.health:SetShown(not tower);m.food:SetShown(not tower);m.prev:SetShown(tower);m.next:SetShown(tower);m.floor:SetShown(tower)
-  m.floor:SetText("Floor "..(b and b.floor or P.floor).." | Open "..P.Unlocked())
+  m.floor:SetText("Floor "..(b and b.floor or P.floor).." | "..P.FloorStatus(b and b.floor or P.floor))
   for _,control in ipairs(m.care)do shown(control,not tower and pet~=nil)end
   for _,control in ipairs(m.battle)do shown(control,tower and pet~=nil)end
   m.enter:SetEnabled(not b);m.battle[2].label:SetText(b and b.paused and "Resume" or "Pause")
+  m.enter.label:SetText(P.FloorStatus(P.floor)=="Completed" and "Replay" or "Fight")
+  m.battle[2]:SetEnabled(b~=nil);m.battle[3]:SetEnabled(b~=nil)
   m.adopt:SetShown(pet==nil);m.notice:SetText(P.notice or "Hover an icon for details")
 end
 function P.BuildUI()
@@ -285,6 +325,8 @@ function P.Render()
   for _,b in ipairs(w.care)do shown(b,not tower and not social and viewed==pet and pet~=nil)end
   for _,b in ipairs(w.fight)do shown(b,tower)end
   w.fight[1]:SetEnabled(not s.battle and pet~=nil);w.fight[2].label:SetText(s.battle and s.battle.paused and "Resume" or "Pause")
+  w.fight[1].label:SetText(P.FloorStatus(P.floor)=="Completed" and "Replay" or "Fight")
+  w.fight[2]:SetEnabled(s.battle~=nil);w.fight[3]:SetEnabled(s.battle~=nil)
   w.care[3].label:SetText(pet and pet.resting and "Wake" or "Rest")
   w.collection:SetShown(not tower and not social);w.tower:SetShown(tower);w.social:SetShown(social)
   if not tower and not social then
@@ -296,7 +338,7 @@ function P.Render()
     end
   elseif tower then
     local b=s.battle;local floor=b and b.enemy.floor or P.floor;local e=b and b.enemy or P.Enemy(floor)
-    w.tower.info:SetText((e.boss and "BOSS CHAMBER" or "THE NEXT CHALLENGE").."\n"..P.species[e.species].." | "..e.maxHP.." HP\nYour best: "..(pet and pet.best or 0))
+    w.tower.info:SetText((e.boss and "BOSS CHAMBER" or "THE NEXT CHALLENGE").."\n"..P.species[e.species].." | "..e.maxHP.." HP\n"..P.FloorStatus(floor).." | Best: "..(pet and pet.best or 0))
     w.tower.floor:SetText("Floor "..floor.." / 100")
   end
   w.notice:SetText(P.notice or "Care for a companion. Explore together. Face the tower when ready.")

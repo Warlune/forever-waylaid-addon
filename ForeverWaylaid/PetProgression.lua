@@ -61,6 +61,14 @@ end
 function P.Unlocked()
   local pet=P.Active();return math.min(100,pet and pet.best+1 or 1)
 end
+function P.FloorStatus(floor)
+  local pet=P.Active()
+  return pet and floor<=pet.best and "Completed" or floor<=P.Unlocked() and "Not cleared" or "Locked"
+end
+function P.CurrentVictory()
+  local pet=P.Active();local result=P.victory
+  if result and pet and result.petID==pet.id and result.floor==(P.floor or 1) and not P.state.battle then return result end
+end
 function P.Enemies(floor)
   if not integer(floor,1,100)then return end
   local count=floor<=33 and 1 or floor<=66 and 2 or 3
@@ -87,7 +95,7 @@ function P.StartBattle(floor)
   for _,enemy in ipairs(enemies)do enemy.hp=enemy.maxHP end
   P.state.battle={petID=pet.id,enemies=enemies,enemy=enemies[1],floor=floor,hp=math.ceil(hp*pet.health/100),
     maxHP=hp,attack=attack,armor=armor,speed=speed,turn=0,cooldown=0,elapsed=0,paused=false}
-  P.lastRound=nil;P.floor=floor
+  P.lastRound=nil;P.victory=nil;P.floor=floor
   P.notice="Floor "..floor..": 1 versus "..#enemies..". Auto battle - defeat is permanent."
   return true
 end
@@ -108,7 +116,10 @@ function P.BattleAction(action)
   local shield=false
   local function record(actor,label,amount,target)
     local event={actor=actor,label=label,amount=amount,target=target,hp=b.hp,enemyHP={}}
-    for i,e in ipairs(b.enemies)do event.enemyHP[i]=e.hp end
+    for i,e in ipairs(b.enemies)do
+      event.enemyHP[i]=e.hp
+      if e.hp<=0 and not e.defeatedAt then e.defeatedAt=round.at+#round.events*0.55+0.2 end
+    end
     round.events[#round.events+1]=event
   end
   for _,actor in ipairs(actors)do
@@ -148,10 +159,11 @@ function P.BattleAction(action)
   local living=0;for _,e in ipairs(b.enemies)do if e.hp>0 then living=living+1;b.enemy=e end end
   if living==0 then
     local first=b.floor>pet.best;pet.best=math.max(pet.best,b.floor);pet.wins=pet.wins+1
-    P.AddXP(pet,math.floor((30+b.floor*6)*(first and 1 or 0.4)))
+    local xp=P.AddXP(pet,math.floor((30+b.floor*6)*(first and 1 or 0.4)))
     -- First clears are the main income; repeat farming gives only one token.
     local reward=first and 5+math.floor(b.floor/10) or 1
     s.tokens=s.tokens+reward;pet.happy=clamp(pet.happy+8);s.battle=nil
+    P.victory={petID=pet.id,floor=b.floor,first=first,xp=xp,tokens=reward,round=round,readyAt=round.at+round.duration}
     P.notice="Floor "..b.floor.." cleared! +"..reward.." tokens. "..(pet.best==100 and "Tower conquered!" or "Next floor unlocked.")
   else P.notice="Round "..b.turn.." - "..living.." enemies remaining. "..((b.turn+1)%3==0 and "Heavy attacks next round." or "Fighting automatically.")end
   return true

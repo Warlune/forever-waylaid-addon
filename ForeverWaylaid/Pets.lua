@@ -53,6 +53,7 @@ local function validSave(s)
   return true
 end
 function P.Init()
+  P.victory=nil;P.lastRound=nil
   local s=F.char.pets
   local invalid=s~=nil and not validSave(s)
   if invalid then F.char.petQuarantine=s;s=nil end
