@@ -3,6 +3,18 @@ local S = {}; F.Style = S
 S.gold = {0.94,0.77,0.42}; S.ink = {0.22,0.13,0.07}; S.muted = {0.66,0.61,0.49}
 S.icons = {crate="Interface\\Icons\\INV_Crate_01", writ="Interface\\Icons\\INV_Misc_Note_01", flight="Interface\\Icons\\Ability_Druid_FlightForm", route="Interface\\Icons\\INV_Misc_Map_01"}
 S.qualityPending={}
+S.panels={}
+function S.Faction()
+  return F.db and F.db.settings.debugAlliance and "Alliance" or UnitFactionGroup("player")
+end
+function S.ApplyTheme()
+  local theme=S.Theme()
+  for _,panel in ipairs(S.panels)do panel:SetBackdropColor(unpack(theme.panel))end
+  if F.window then F.window:SetBackdropColor(unpack(theme.bg))end
+  if F.banner then F.banner:SetColorTexture(unpack(theme.accent));F.crest:SetTexture(theme.crest)end
+  if F.compassStripe then F.compassStripe:SetColorTexture(unpack(theme.accent))end
+  if F.auctionScanUI then F.auctionScanUI.pose()end
+end
 function S.RarityColor(id)
   local info=C_Item and C_Item.GetItemInfo or GetItemInfo
   local quality
@@ -36,7 +48,7 @@ function S.ColorBorder(lines,r,g,b,alpha)
   for _,line in ipairs(lines)do line:SetColorTexture(r,g,b,alpha or 0.8)end
 end
 function S.Theme()
-  if UnitFactionGroup("player")=="Alliance" then
+  if S.Faction()=="Alliance" then
     return {bg={0.043,0.09,0.16,1},panel={0.09,0.16,0.26,1},accent={0.23,0.43,0.70,1},crest="Interface\\Timer\\Alliance-Logo"}
   end
   return {bg={0.09,0.075,0.055,1},panel={0.15,0.12,0.09,1},accent={0.55,0.20,0.14,1},crest="Interface\\Timer\\Horde-Logo"}
@@ -100,6 +112,7 @@ function S.Panel(parent, x, y, w, h, parchment)
   local p=CreateFrame("Frame",nil,parent,"BackdropTemplate");p:SetPoint("TOPLEFT",x,y);p:SetSize(w,h)
   p:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",tile=true,tileSize=32,edgeSize=16,insets={left=4,right=4,top=4,bottom=4}})
   p:SetBackdropColor(unpack(S.Theme().panel))
+  S.panels[#S.panels+1]=p
   p:SetBackdropBorderColor(0.52,0.40,0.22,1)
   local solid=p:CreateTexture(nil,"BACKGROUND",nil,-8);solid:SetPoint("TOPLEFT",4,-4);solid:SetPoint("BOTTOMRIGHT",-4,4);solid:SetColorTexture(0.055,0.04,0.024,0.97)
   if parchment then
@@ -156,6 +169,6 @@ function S.Check(parent,text,x,y,key)
   local b=CreateFrame("CheckButton",nil,parent,"UICheckButtonTemplate");b:SetPoint("TOPLEFT",x,y);b:SetSize(26,26)
   S.Text(b,text,32,-6,360,"GameFontHighlight")
   b:SetScript("OnShow",function(self)self:SetChecked(F.db.settings[key])end)
-  b:SetScript("OnClick",function(self) F.db.settings[key]=not not self:GetChecked();F.Refresh() end)
+  b:SetScript("OnClick",function(self) F.db.settings[key]=not not self:GetChecked();F.ApplySettings() end)
   return b
 end

@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.6.0 preview
+# Forever Waylaid — v0.7.0 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.6.0.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.7.0.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -32,19 +32,41 @@ The top **Goods: Buy at AH / Goods: Craft** button is independent of tooltip set
 
 Craft mode uses the website's 208 verified recipes and 143 raw materials. The selected bundle's required professions and highest skill ranks appear at the top, including specialization notes. The header shows the writ/crate's required item level from the catalogue; this is separate from a recipe's profession skill rank. Unknown recipe ranks are explicitly labeled unverified. Each option includes a raw-material shopping list, bag counts and quantities still needed, vendor or auction sources, and an ordered crafting list with profession and skill requirements. Shared intermediate ingredients are combined before rounding to whole crafts. Variable yields use the guaranteed minimum; faction-only recipes are excluded for the other faction. Alternate root recipes are compared by stock availability and cost.
 
-Hover only the **picture** of a required good, reagent, crafted step, writ, or crate to see the normal in-game item tooltip. The faction theme follows your character: warm Horde tones or Alliance blue with a native crest.
+Hover only the **picture** of a required good, reagent, crafted step, writ, or crate to see the normal in-game item tooltip. The faction theme follows your character: warm Horde tones or Alliance blue with a native crest. **Settings → Debug: preview Alliance appearance** switches the colors, crest, heading, compass accent and scribe immediately. This preview changes appearance only; prices, recipes, routes and peer sharing still use your real faction. Turn it off to restore your character's theme.
 
 Craft costs value the full batch, including materials you already own; bag counts are shown separately. Vendor values are undiscounted base prices, and recipes are not assumed to be learned. These are planning lists: the addon does not craft, buy, or consume items for you. Gathered goods keep their purchase cost instead of inventing a recipe.
 
 ## Built-in auction scanner
 
-The built-in **Scan** tab appears along the bottom of the auction house, beside Buy / Sell / Auctions, when neither Auctionator nor Auctioneer Advanced is enabled for your character. Installed but disabled copies do not hide it. Open an auction house in your faction capital, choose **Scan**, then click **Scan auction house**. Opening the tab never starts a scan. The original **Settings → Scan AH prices** control remains available too.
+The built-in **Scan** tab appears along the bottom of the auction house, beside Buy / Sell / Auctions. By default, another supported auction addon enabled for your character hides our tab and scan controls. Installed but disabled copies do not hide them. Open an auction house in your faction capital, choose **Scan**, then click **Scan auction house**. Opening the tab never starts a scan. The original **Settings → Scan AH prices** control remains available too, with the same visibility rule.
 
 An animated orc (Horde) or human (Alliance) scribe copies prices into a ledger, using the original four-frame artwork and slower animation. Beneath the scribe, live counters show auctions read, all distinct item IDs encountered (including bid-only and unrelated items), relevant items with buyouts, prices saved, and elapsed time. The progress bar reflects records processed, not a simulated timer. Prices saved stays at zero until a complete snapshot is committed; the final report remains visible until the next scan. Keep the AH open until completion. **Cancel** or closing the AH discards any unfinished scan. The scanner requests one full snapshot, reads it in small batches, and saves the lowest unit buyout and total buyout stock for **every item with a valid buyout**, including items unrelated to Waylaid deliveries. It makes no purchases and does not run automatically.
 
 **Comparing scan counts:** every auction row in Blizzard's returned snapshot is read, and prices are retained across the entire market. All item types counts distinct item IDs; Relevant items counts the Waylaid subset; Prices saved counts valid price observations committed by this scan. Bid-only listings do not supply buyout values. Prices are grouped by base item ID, so differently enchanted or random-suffix versions share a lowest-price estimate. This scanner does not reproduce Auctionator/Auctioneer's broader shopping, selling, or historical valuation tools. We have not measured accuracy or counts against both addons on a matching market snapshot, so no parity claim is made.
 
-Hover an item in your bags, equipment, chat links, or other normal item tooltips to see **AH buyout (each)**, its source, and scan age when a price is available. The value is per item, not a stack total. When Auctionator or Auctioneer is enabled for this character, our tooltip additions are suppressed for unrelated items; writs, crates, required goods, and crafting ingredients retain Waylaid information. Installed but disabled scanners do not suppress it. Missing prices are not invented. Scan again after upgrading from 0.5.x to populate unrelated item prices; old Waylaid quotes remain available.
+Hover an item in your bags, equipment, chat links, or other normal item tooltips to see **AH buyout (each)**, its source, and scan age when a price is available. The value is per item, not a stack total. With auto-hide enabled, another supported auction addon suppresses our tooltip additions for unrelated items; writs, crates, required goods, and crafting ingredients retain Waylaid information. Installed but disabled scanners do not suppress it. Missing prices are not invented. Scan again after upgrading from 0.5.x to populate unrelated item prices; old Waylaid quotes remain available.
+
+### Other auction addons and settings
+
+**Auto-hide extras with another AH addon** is on by default. Turn it off to keep our manual scanner and general tooltip additions available alongside another auction addon. **AH tooltips on unrelated items** independently disables our general price tooltips; Waylaid details remain. Re-enabling auto-hide during our scan cancels that scan and preserves previous prices. Settings display the first detected auction addon.
+
+Detection recognizes these addon identifiers, based on their maintainers' projects:
+
+| Addon | Identifier |
+| --- | --- |
+| [Auctionator](https://www.curseforge.com/wow/addons/auctionator) | `Auctionator` |
+| [Auctioneer](https://www.curseforge.com/wow/addons/auctioneer) | `Auc-Advanced`, `Auctioneer` |
+| [TradeSkillMaster](https://www.curseforge.com/wow/addons/tradeskill-master) | `TradeSkillMaster` |
+| [Aux](https://github.com/shirsig/aux-addon) | `aux-addon` |
+| [AuctionLite](https://www.curseforge.com/wow/addons/auctionlite-classic) | `AuctionLite` |
+| [AuctionFaster](https://github.com/kaminaris/AuctionFaster) | `AuctionFaster` |
+| [AHDB](https://github.com/mooreatv/AuctionDB) | `AuctionDB` |
+| [AuctionMaster](https://www.curseforge.com/wow/addons/auctionmaster) | `AuctionMaster` |
+| [AuctionBuddy](https://github.com/MarcLF/AuctionBuddy) | `AuctionBuddy` |
+| [Midas](https://www.curseforge.com/wow/addons/midas) | `Midas` |
+| [GoldCap](https://goldcap.gg/addon) | `GoldCap` |
+
+This is a known-addon list, not a guarantee that every fork is covered or that every project supports Forever (GoldCap currently targets Retail, for example). For an unrecognized price-tooltip addon, turn off our unrelated-item tooltips manually. Blizzard's auction UI and standalone helpers such as `TradeSkillMaster_AppHelper` do not count as competing auction addons. Detection does not import prices: third-party price imports remain limited to Auctionator and Auctioneer. No third-party addon implementation is bundled.
 
 The v0.5.0 Horde page and animation were checked in the Forever client, including a complete manual scan of 76,812 auctions that saved 273 relevant item prices in 11 seconds. Alliance artwork selection, tab switching, cancellation, cooldowns, and disabled-scanner detection also have automated coverage; the Alliance page has not yet been checked on a live Alliance character.
 

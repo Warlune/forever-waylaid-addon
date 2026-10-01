@@ -1,6 +1,7 @@
 local F=...
 local oldPrices,oldAddons,oldPersonal=F.char.localPrices,C_AddOns,F.db.settings.personal
 local oldProcessor,oldType=TooltipDataProcessor,Enum.TooltipDataType
+local oldGeneral,oldHide=F.db.settings.generalAuctionTooltips,F.db.settings.autoHideAuction
 local enabled={Auctionator=0,['Auc-Advanced']=0}
 C_AddOns={GetAddOnEnableState=function(name)return enabled[name]end}
 F.db.settings.personal=true
@@ -25,7 +26,8 @@ local t=tip();callback(t,{id=unrelated})
 assert(text(t):find('AH buyout %(each%)=1g 23s 45c') and text(t):find('Forever Waylaid · 1m ago'))
 local count=#t.lines;callback(t,{id=unrelated});assert(#t.lines==count,'Repeated processing must not duplicate the price')
 GameTooltip.scripts.OnTooltipCleared(t);t.lines={};callback(t,{id=unrelated});assert(#t.lines==count,'Clearing allows the same item to render again')
-for _,scanner in ipairs({'Auctionator','Auc-Advanced'})do
+for _,addon in ipairs(F.auctionAddons)do
+  local scanner=addon[1]
   enabled[scanner]=2
   t=tip();callback(t,{id=unrelated});assert(#t.lines==0,'Another enabled scanner owns unrelated tooltips')
   t=tip();callback(t,{id=ingredient});assert(text(t):find('AH buyout'),'Waylaid ingredients retain our prices')
@@ -34,6 +36,12 @@ for _,scanner in ipairs({'Auctionator','Auc-Advanced'})do
   enabled[scanner]=0
 end
 t=tip();callback(t,{id=unrelated});assert(#t.lines>0,'Installed but disabled scanners do not hide our prices')
+enabled.TradeSkillMaster=2;F.db.settings.autoHideAuction=false
+t=tip();callback(t,{id=unrelated});assert(#t.lines>0,'Turning off auto-hide restores general tooltip additions')
+F.db.settings.generalAuctionTooltips=false
+t=tip();callback(t,{id=unrelated});assert(#t.lines==0,'Manual tooltip toggle wins even when auto-hide is off')
+t=tip();callback(t,{id=writ.id});assert(text(t):find('reputation'),'Waylaid information survives the general tooltip switch')
+enabled.TradeSkillMaster=0;F.db.settings.autoHideAuction=true;F.db.settings.generalAuctionTooltips=true
 t=tip();callback(t,{id=999998});assert(#t.lines==0,'Missing prices must not invent an AH value')
 F.db.settings.personal=false;t=tip();callback(t,{id=unrelated});assert(#t.lines==0,'Personal-price setting is respected')
 F.db.settings.personal=true
@@ -45,5 +53,6 @@ TooltipDataProcessor=nil;F.InstallTooltips()
 t=tip();t.GetItem=function()return 'Item','item:'..unrelated end
 GameTooltip.scripts.OnTooltipSetItem(t);assert(text(t):find('AH buyout'))
 F.char.localPrices,C_AddOns,F.db.settings.personal=oldPrices,oldAddons,oldPersonal
+F.db.settings.generalAuctionTooltips,F.db.settings.autoHideAuction=oldGeneral,oldHide
 TooltipDataProcessor,Enum.TooltipDataType=oldProcessor,oldType
 print('PASS: all-item AH tooltips, source age, scanner coexistence, Waylaid exceptions, deduplication and faction isolation')

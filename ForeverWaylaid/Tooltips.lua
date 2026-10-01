@@ -2,7 +2,7 @@ local _, F = ...
 local function append(tooltip, id)
   if not F.db or not F.char then return end
   local crate, writ = F.cratesByID[id], F.writsByID[id]
-  if F.HasAuctionScanner() and not F.catalogIDs[id] then return end
+  if not F.catalogIDs[id] and (F.db.settings.generalAuctionTooltips==false or F.ShouldHideAuctionExtras()) then return end
   local market=F.Price(id)
   if not crate and not writ and not market then return end
   if tooltip.fwlItem == id then return end

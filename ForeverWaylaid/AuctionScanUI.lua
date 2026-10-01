@@ -53,10 +53,11 @@ function F.InstallAuctionScanUI()
   ui.art=art
   local phase,elapsed=0,0
   local function pose()
-    local row=UnitFactionGroup("player")=="Alliance" and 1 or 0
+    local row=S.Faction()=="Alliance" and 1 or 0
     art:SetTexCoord(phase/4,(phase+1)/4,row/2,(row+1)/2)
   end
   pose()
+  ui.pose=pose
   page:SetScript("OnUpdate",function(_,dt)
     elapsed=elapsed+dt
     local interval=ui.active and 0.22 or 0.48
@@ -83,7 +84,7 @@ function F.InstallAuctionScanUI()
   centered(page,"Manual scan • Keep the auction house open • 15-minute cooldown",-452,720,"GameFontHighlightSmall",S.muted)
 
   tab:SetScript("OnClick",function()
-    if F.HasAuctionScanner() then return end
+    if F.ShouldHideAuctionExtras() then return end
     host:SetDisplayMode(scanMode)
     for _,nativeTab in ipairs(host.Tabs)do PanelTemplates_DeselectTab(nativeTab)end
     PanelTemplates_SelectTab(tab);host:SetTitle("Forever Waylaid — Auction Scribe")

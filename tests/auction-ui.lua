@@ -40,6 +40,9 @@ assert(count==4,'The original four writing poses animate at the slower cadence')
 local oldFaction=UnitFactionGroup;UnitFactionGroup=function()return 'Alliance'end
 ui.page.scripts.OnUpdate(nil,0.48);assert(coords[3]==0.5 and coords[4]==1,'Alliance uses the original lower row')
 UnitFactionGroup=oldFaction
+F.db.settings.debugAlliance=true;F.Style.ApplyTheme()
+assert(coords[3]==0.5 and UnitFactionGroup('player')=='Horde','Debug preview switches the scribe immediately without changing faction')
+F.db.settings.debugAlliance=false;F.Style.ApplyTheme();assert(coords[3]==0,'Turning the preview off restores the actual faction')
 ui.start.scripts.OnClick();assert(calls==1 and F.GetScanProgress().phase=='waiting')
 F.scanFrame.scripts.OnEvent(nil,'REPLICATE_ITEM_LIST_UPDATE')
 F.scanFrame.scripts.OnUpdate(nil,0.25)
@@ -54,6 +57,11 @@ now=now+901;ui.start.scripts.OnClick();ui.cancel.scripts.OnClick()
 assert(not F.GetScanProgress().active and F.GetScanProgress().saved==0,'Cancel never reports committed prices')
 enabled=2;F.UpdateScanUI()
 assert(not ui.tab:IsShown() and not ui.page:IsShown() and AuctionHouseFrame.displayMode==AuctionHouseFrameDisplayMode.Buy)
+F.db.settings.autoHideAuction=false;F.ApplySettings()
+assert(ui.tab:IsShown(),'Auto-hide switch can restore the native Scan tab')
+now=now+901;ui.start.scripts.OnClick();assert(F.nativeScanActive)
+F.db.settings.autoHideAuction=true;F.ApplySettings()
+assert(not ui.tab:IsShown() and not F.nativeScanActive,'Re-enabling auto-hide cancels an active native scan without committing it')
 enabled=0;F.UpdateScanUI();assert(ui.tab:IsShown(),'Disabled installed scanners expose the Scan tab')
 F.auctionScanUI=nil
 AuctionHouseFrame,C_AuctionHouse,C_AddOns,AuctionHouseFrameDisplayMode=oldAH,oldAPI,oldAddons,oldMode

@@ -1,6 +1,12 @@
 local _, F = ...
-F.version = "0.6.0"
-F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false }
+F.version = "0.7.0"
+F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
+
+function F.ApplySettings()
+  F.Style.ApplyTheme()
+  if F.ShouldHideAuctionExtras() then F.CancelNativeScan("Another auction addon is enabled. Previous prices kept.")end
+  F.UpdateScanUI();F.Refresh()
+end
 
 function F.Now() return GetServerTime and GetServerTime() or time() end
 function F.Positive(n) return type(n) == "number" and n == n and n > 0 and n < math.huge end
