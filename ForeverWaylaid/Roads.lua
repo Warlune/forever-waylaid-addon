@@ -125,4 +125,3 @@ function R.Path(a,b)
   R.cache[key]={d,segments};R.cacheSize=R.cacheSize+1
   return d,segments
 end
-
