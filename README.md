@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.9.7 preview
+# Forever Waylaid — v0.9.8 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.9.7.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.9.8.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -23,7 +23,7 @@ The addon has no bundled auction prices or external price service. Until you sca
 - Accepted writ tracking, material progress, automatic completed-quest waypoints when exposed by the client, and manual destination pins.
 - Numbered deliveries and flight-master pins on Blizzard's world map: gold travel legs and blue flight legs. Select a delivery and click **Track delivery** or **Show on map**. Optional TomTom waypoint support.
 - A movable **Courier's Compass** that stays available when the ledger and main map close: direction arrow, distance, current writ, recipient information, and destination coordinates. Its down-arrow button unfolds a small map using the game's actual map artwork.
-- Route lines on the native minimap, clipped to its circular edge and adjusted for zoom and rotating-map settings. The compass guides to a flight master, keeps the arrival target during flight, then points toward the customer.
+- Route lines on the native minimap, clipped to its circular edge and adjusted for zoom and rotating-map settings. The compass automatically guides to the next flight master, boat/zeppelin dock, personal teleport or customer. It keeps the arrival target during a booked flight and recalculates from your current position every five seconds.
 - Flight points and directed routes learned by opening flight masters. Unlearned routes are not invented. Visit order is optimized for up to nine located stops, with a nearest-next estimate for larger sets. The warning icon beside Known flight points lists Eastern Kingdoms and/or Kalimdor when no recorded flight-master departure exists for that continent. Hover it for details; open a flight master's map there without buying a flight. A recorded visit does not mean every route on the continent is known.
 
 ## Buy or craft your cargo
@@ -93,7 +93,7 @@ Full snapshots have a 15-minute local cooldown, including a known Auctionator sn
 
 With the auction house open, click the search text box so its cursor is blinking, then **Shift-click an item picture** in the ledger. The item name fills that focused box, with the cursor at the end. The addon does not choose Shopping, change tabs, reset filters, or submit the search. The ledger stays open. With no focused text box or with the AH closed, Shift-click quietly does nothing. Ordinary clicks still select entries, and hovering text does not show item tooltips.
 
-Until a flight-master map has been recorded, the ledger, compass, and login message warn that flight paths are unscanned. **Talk to a flight master and open their map; no flight purchase is needed.** The warning clears after a successful scan, even if that character has no reachable destinations yet. Visit more flight masters to build route coverage. Turning off flight routing also hides the warning.
+Until a flight-master map has been recorded, the ledger, compass, and login message warn that flight paths are unscanned. **Talk to a flight master and open their map; no flight purchase is needed.** The initial no-flights warning clears after a successful scan, even if that character has no reachable destinations yet. The compass and warning tooltip continue listing Eastern Kingdoms and/or Kalimdor until a departure has been recorded on each continent, and explain that incomplete flight coverage may produce a slower route. Visit more flight masters to build route coverage. Turning off flight routing also hides the warning.
 
 ## Optional peer sharing
 
@@ -122,7 +122,21 @@ Before a writ is ready, the game's quest pointer may lead to materials rather th
 
 Coordinates use 0–100. The Route tab shows the quest ID for unresolved writs. A manually pinned writ can be included before its materials are ready, and is labeled accordingly.
 
-**Route limits:** lines are travel estimates, not terrain-aware roads or turn-by-turn instructions. Mountains, water, hazards, mounts, boats, zeppelins, portals, and hearthstones are not modeled. Cross-continent deliveries stay unresolved until you travel there. Flight estimates use distance, not measured flight durations. The exact visit ordering is exact only within this estimated travel model. Navigation requires your clicks; the addon never moves your character or chooses a flight for you.
+### Travel options
+
+The planner compares walking, your recorded flights on **both continents**, and Classic boat/zeppelin connections. Horde routes include Durotar–Tirisfal, Durotar–Grom'gol and Tirisfal–Grom'gol; both factions can use Ratchet–Booty Bay. Alliance routes include Menethil–Auberdine, Menethil–Theramore, Auberdine–Rut'theran, the Feralas ferry and the Deeprun Tram. Faction-only transport is excluded for the other faction.
+
+Personal travel is considered only when available to your character:
+
+- **Hearthstone:** carried item, readable cooldown and a recorded home location. Bind at an inn or successfully hearth once with the addon enabled to record that position. A changed bind invalidates the old position. Until recorded, the Route details explain why Hearthstone is excluded.
+- **Engineering:** carried Gadgetzan or Everlook transporter, Engineering 260 and its matching learned specialization. Equip and use it yourself when directed. Malfunctions are not predicted.
+- **Mage teleport/portal:** mage characters only, a learned Classic capital spell, its required rune in your bags and a readable cooldown. Portal routes allow extra time to enter the portal. No other player's portal is assumed.
+
+Waiting for a cooldown is included in the estimate; the planner uses ordinary travel when that is faster. For multiple writs it reserves runes and limits each Hearthstone/engineering device to one use in the itinerary. Personal travel makes visit ordering an estimate rather than an exact optimization. The route recalculates as you travel, use items, learn flights or finish deliveries. It does not model warlock summons or Forever-specific teleports.
+
+**Route limits:** lines connect travel points; they are not terrain-aware roads or guaranteed turn-by-turn instructions. Follow roads and avoid hazards. Walking uses a base running-speed estimate; flight times use distance, and boat/zeppelin/tram times include estimated waiting rather than live schedules. Cross-continent transport coordinates and routes are based on Classic geography and still need full journey testing in Forever. Missing flight data can make the suggested route slower. Navigation requires your clicks; the addon never moves your character, buys a flight, casts a spell or consumes an item for you.
+
+Travel reference data was checked against [Nauticus route pairs](https://github.com/Road-block/Nauticus/blob/master/data.lua), [Leatrix map locations](https://github.com/WowInterfaces/leatrix-maps-wrath/blob/main/Leatrix_Maps_Icons.lua) (Classic-era routes only), and the local Forever client data for item/spell requirements. No third-party routing implementation is included.
 
 ## Development and verification
 

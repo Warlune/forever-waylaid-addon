@@ -20,7 +20,8 @@ function F.UpdateGuidance()
     F.guidance=F.flightGuidance;F.guidance.action="In flight";return
   end
   F.flightGuidance=nil
-  local seconds,steps=F.Route.Leg(player,chosen.point,F.char.flights,F.db.settings.flights)
+  local seconds,steps=F.Route.Leg(player,chosen.point,F.char.flights,F.db.settings.flights,F.travel)
+  if seconds==math.huge then F.guidance=nil;return end
   local target,action,flight=chosen.point,"Deliver to customer",nil
   for _,step in ipairs(steps)do
     if step.mode=="Fly" then
@@ -28,11 +29,25 @@ function F.UpdateGuidance()
       if F.Route.Distance(player,step.from)>25 then target,action=step.from,"Go to flight master"
       else target,action=step.from,"Take flight to "..(step.to.name or "next stop") end
       break
+    elseif step.mode~="Travel" then
+      target=step.from
+      local personal=step.detail and step.detail.resource
+      if personal then
+        local wait=step.detail.wait or 0
+        action=wait>1 and ("Wait "..math.ceil(wait/60).."m: "..step.mode) or ("Use "..step.mode)
+      else
+        local mode=step.mode:lower()
+        action=F.Route.Distance(player,step.from)>35 and ("Go to "..mode.." boarding point") or ("Board "..mode)
+      end
+      break
     end
   end
   F.guidance={stop=chosen,target=target,action=action,steps=steps,seconds=seconds,flight=flight}
+  for _,step in ipairs(steps)do
+    if step.mode~="Travel" then F.guidance.nextStep=step;break end
+  end
   if flight then
-    F.flightGuidance={stop=chosen,target=flight.to,action="In flight",steps=steps,seconds=seconds,flight=flight}
+    F.flightGuidance={stop=chosen,target=flight.to,action="In flight",steps=steps,seconds=seconds,flight=flight,nextStep=flight}
   end
 end
 function F.DisplayRoute()
@@ -74,6 +89,21 @@ function F.BuildNavigator()
   c.location=S.Text(c,"",10,-98,192,"GameFontHighlightSmall",S.muted);c.location:SetMaxLines(1)
   c.empty=S.Text(c,"Accept a writ to start a route.",12,-35,182,"GameFontHighlightSmall",S.muted)
   c.flightNotice=S.Text(c,"Flight paths not scanned\nVisit a flight master to learn routes.",11,-76,278,"GameFontHighlightSmall",S.gold)
+  c:SetScript("OnEnter",function(self)
+    GameTooltip:SetOwner(self,"ANCHOR_LEFT");GameTooltip:SetText("Delivery route")
+    local guide=F.guidance
+    if guide then
+      GameTooltip:AddLine(guide.stop.writ.name,1,1,1,true)
+      for _,step in ipairs(guide.steps)do
+        if step.mode~="Travel" then GameTooltip:AddLine(step.mode..": "..(step.to.name or F.DestinationText(step.to)),1,0.85,0.5,true)end
+      end
+    end
+    local warning=F.FlightCoverageText()
+    if warning then GameTooltip:AddLine(warning,1,0.82,0,true)end
+    GameTooltip:AddLine("Travel and waiting times are estimates. Follow roads and board transport manually.",0.8,0.8,0.8,true)
+    GameTooltip:Show()
+  end)
+  c:SetScript("OnLeave",function()GameTooltip:Hide()end)
   c.expand=S.Button(c,unfold,210,-94,35,function()
     F.char.navExpanded=not F.char.navExpanded;F.UpdateNavigator()
   end)
@@ -85,7 +115,7 @@ function F.BuildNavigator()
     button:SetScript("OnLeave",function()GameTooltip:Hide()end)
   end
   c.map=F.CreateTravelMap(c,8,-129,284,189)
-  c.legend=S.Text(c,"Gold: travel  •  Blue: flight  •  Numbers: customers",11,-324,280,"GameFontDisableSmall")
+  c.legend=S.Text(c,"Gold: walk • Blue: fly • Purple: transport",11,-324,280,"GameFontDisableSmall")
   c.map:EnableMouse(true);c.map:SetScript("OnMouseUp",function(_,button)
     if button=="LeftButton" and F.guidance then F.Navigate(F.guidance.stop.point,F.guidance.stop.questID)end
   end)
@@ -133,8 +163,10 @@ function F.UpdateNavigator()
   c.writ:ClearAllPoints();c.writ:SetPoint("TOPLEFT",60,large and -51 or -44);c.writ:SetHeight(large and 40 or 28)
   c.recipient:ClearAllPoints();c.recipient:SetPoint("TOPLEFT",60,large and -97 or -76)
   c.location:ClearAllPoints();c.location:SetPoint("TOPLEFT",10,large and -128 or -98)
-  local needsScan=F.NeedsFlightScan()
-  local height=baseHeight+(needsScan and (large and 48 or 34) or 0)
+  local missing=F.MissingFlightContinents()
+  local needsScan=#missing>0
+  local height=baseHeight+(needsScan and (large and 80 or 52) or 0)
+  c.flightNotice:SetText(needsScan and ("Missing flights: "..table.concat(missing," / ").."\nRoutes may not be optimal.") or "")
   c.flightNotice:SetShown(needsScan)
   c.flightNotice:ClearAllPoints();c.flightNotice:SetPoint("TOPLEFT",11,-baseHeight+3)
   c:SetHeight(height+(expanded and (large and 238 or 212) or 0));c.map:SetShown(expanded);c.legend:SetShown(expanded)
@@ -148,10 +180,10 @@ function F.UpdateNavigator()
   if guide then
     c.action:SetText(guide.action)
     c.writ:SetText(guide.stop.writ.name:gsub("^Craftsman's Writ: ",""))
-    c.recipient:SetText(guide.target~=guide.stop.point and (guide.target.name or "Flight master") or guide.stop.npc or guide.stop.deliveryText or "See quest for recipient")
+    c.recipient:SetText(guide.nextStep and ("To: "..(guide.nextStep.to.name or F.DestinationText(guide.nextStep.to))) or guide.stop.npc or guide.stop.deliveryText or "See quest for recipient")
     c.location:SetText(F.DestinationText(guide.target))
   else
-    c.empty:SetText(#(F.active or {})>0 and "Writ needs a customer pin. Open the ledger." or "Accept a writ to start a route.")
+    c.empty:SetText(#(F.active or {})>0 and "No route. Open the Route tab." or "Accept a writ from your bags.")
   end
   if expanded then F.UpdateTravelMap(c.map)end
   F.UpdateCompassPose()
@@ -159,6 +191,14 @@ end
 function F.UpdateCompassPose()
   local c=F.compass;if not c or not c:IsShown()then return end
   local player=F.Route.Player();local guide=F.guidance
+  local personal=guide and guide.nextStep and guide.nextStep.detail and guide.nextStep.detail.resource
+  if personal and F.Route.Distance(player,guide.target)<25 then
+    c.arrow:SetTexture(guide.nextStep.mode=="Hearthstone" and "Interface\\Icons\\INV_Misc_Rune_01" or "Interface\\Icons\\Spell_Arcane_TeleportOrgrimmar")
+    c.arrow:SetRotation(0);c.arrow:Show();c.distance:SetText((guide.nextStep.detail.wait or 0)>1 and "Wait" or "Use")
+    if F.char.navExpanded then F.DrawTravelRoute(c.map)end
+    return
+  end
+  c.arrow:SetTexture("Interface\\Minimap\\MinimapArrow")
   local angle=guide and G.Bearing(player,guide.target,GetPlayerFacing and GetPlayerFacing() or 0)
   c.arrow:SetShown(angle~=nil)
   if angle then

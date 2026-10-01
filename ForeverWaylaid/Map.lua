@@ -26,7 +26,7 @@ function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small)
     end
     p:ClearAllPoints();p:SetPoint("CENTER",overlay,"TOPLEFT",x,-y);p:Show()
     p.icon:SetShown(kind~="stop");p.text:SetText(kind=="stop" and text or "")
-    p.icon:SetTexture(kind=="player" and "Interface\\Minimap\\MinimapArrow" or S.icons.flight)
+    p.icon:SetTexture(kind=="player" and "Interface\\Minimap\\MinimapArrow" or kind=="transport" and "Interface\\Icons\\INV_Misc_Map_01" or S.icons.flight)
     p:SetBackdropColor(0.13,0.09,0.04,kind=="player" and 0 or 0.95)
     p:SetBackdropBorderColor(0.94,0.73,0.28,kind=="player" and 0 or 1)
     p.icon:SetRotation(kind=="player" and (GetPlayerFacing and GetPlayerFacing()or 0)or 0)
@@ -45,11 +45,14 @@ function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small)
       if x and (math.abs(x-u)+math.abs(y-v))>0.1 then
         lineIndex=lineIndex+1;local line=overlay.lines[lineIndex]
         if not line then line=overlay:CreateLine(nil,"ARTWORK");line:SetThickness(small and 2 or 3);overlay.lines[lineIndex]=line end
-        if step.mode=="Fly" then line:SetColorTexture(0.25,0.8,1,0.95)else line:SetColorTexture(1,0.73,0.2,0.95)end
+        if step.mode=="Fly" then line:SetColorTexture(0.25,0.8,1,0.95)
+        elseif step.mode~="Travel" then line:SetColorTexture(0.8,0.55,1,0.95)
+        else line:SetColorTexture(1,0.73,0.2,0.95)end
         line:SetStartPoint("TOPLEFT",overlay,x,-y);line:SetEndPoint("TOPLEFT",overlay,u,-v);line:Show()
       end
     end
     if step.mode=="Fly" then pin(step.from,step.from.name or "Flight master","flight");pin(step.to,step.to.name or "Arrival flight master","flight")end
+    if step.mode~="Fly" and step.mode~="Travel" then pin(step.from,step.mode..": "..(step.to.name or "Destination"),"transport");pin(step.to,step.to.name or "Arrival","transport")end
   end
   for _,stop in ipairs(stops)do pin(stop.point,tostring(stop.number),"stop",stop.stop)end
   if showPlayer then local player=F.Route.Player();if player then pin(player,"You","player")end end

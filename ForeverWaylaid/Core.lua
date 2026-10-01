@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.9.7"
+F.version = "0.9.8"
 F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
 
 function F.ApplySettings()
@@ -28,9 +28,13 @@ end
 
 local events = CreateFrame("Frame")
 F.events = events
-for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "QUEST_LOG_UPDATE", "BAG_UPDATE_DELAYED", "TAXIMAP_OPENED", "ZONE_CHANGED_NEW_AREA", "QUEST_COMPLETE", "GET_ITEM_INFO_RECEIVED", "SKILL_LINES_CHANGED", "PLAYER_LEVEL_UP"}) do events:RegisterEvent(event) end
+for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "QUEST_LOG_UPDATE", "BAG_UPDATE_DELAYED", "TAXIMAP_OPENED", "ZONE_CHANGED_NEW_AREA", "QUEST_COMPLETE", "GET_ITEM_INFO_RECEIVED", "SKILL_LINES_CHANGED", "PLAYER_LEVEL_UP", "HEARTHSTONE_BOUND", "SPELLS_CHANGED", "PLAYER_ENTERING_WORLD", "UNIT_SPELLCAST_SUCCEEDED"}) do events:RegisterEvent(event) end
 local queued = false
-events:SetScript("OnEvent", function(_, event, name, success)
+events:SetScript("OnEvent", function(_, event, name, success,spellID)
+  if event=="UNIT_SPELLCAST_SUCCEEDED" then
+    if name=="player" and spellID==8690 and F.char then F.hearthPending=F.Now()+30 end
+    return
+  end
   if event=="SKILL_LINES_CHANGED" then
     if F.readingProfessions then return end
     F.professionRanks=nil
@@ -62,6 +66,11 @@ events:SetScript("OnEvent", function(_, event, name, success)
   elseif F.char then
     if event=="ADDON_LOADED" then F.InstallMap();return end
     if event=="QUEST_COMPLETE" then F.LearnRecipient() end
+    if event=="HEARTHSTONE_BOUND" then C_Timer.After(0.5,F.Travel.RecordHome) end
+    if (event=="PLAYER_ENTERING_WORLD" or event=="ZONE_CHANGED_NEW_AREA") and F.hearthPending then
+      local valid=F.Now()<=F.hearthPending
+      F.hearthPending=nil;if valid then C_Timer.After(1,F.Travel.RecordHome)end
+    end
     if event == "TAXIMAP_OPENED" then F.LearnFlights() end
     if not queued then
       queued = true

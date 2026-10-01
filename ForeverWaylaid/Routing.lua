@@ -20,16 +20,29 @@ function R.Player()
   if pos then local x, y = pos:GetXY(); return R.World({ mapID = map, x = x, y = y }) end
 end
 
--- A complete walking graph plus directed, observed taxi routes. Dijkstra
--- returns the actual selected steps, so the route list explains its estimate.
-function R.Leg(start, finish, flights, useFlights)
+-- Islands cannot be connected by a straight walking edge across the sea.
+local function land(point)
+  if point.mapID==1438 or point.mapID==1457 then return "Teldrassil" end
+  if point.mapID==1444 and point.x and point.x<0.38 and point.y>0.30 and point.y<0.60 then return "Sardor" end
+  return point.instance
+end
+function R.WalkDistance(a,b)
+  if land(a)~=land(b) then return math.huge end
+  return R.Distance(a,b)
+end
+
+-- Dijkstra over observed flights, public transports and eligible personal
+-- teleports. Cooldown waiting is charged at the point of use, not ignored.
+function R.Leg(start, finish, flights, useFlights, travel, elapsed, used)
+  if not start or not finish then return math.huge,{} end
+  elapsed,used=elapsed or 0,used or {}
   local points, index = {start, finish}, {}
   if useFlights then
     for id, node in pairs(flights.nodes) do
-      if node.instance == start.instance then points[#points + 1] = node; index[id] = #points end
+      points[#points + 1] = node; index[id] = #points
     end
   end
-  local costs, visited, previous, modes = {[1] = 0}, {}, {}, {}
+  local costs, visited, previous, modes,details = {[1] = 0}, {}, {}, {},{}
   local flightEdges = {}
   if useFlights then
     for from, edges in pairs(flights.edges) do
@@ -41,6 +54,20 @@ function R.Leg(start, finish, flights, useFlights)
       end
     end
   end
+  local links,personal={},{}
+  local function addPoint(p)
+    for i,other in ipairs(points)do if R.Distance(p,other)<1 then return i end end
+    points[#points+1]=p;return #points
+  end
+  for _,link in ipairs(travel and travel.links or {})do
+    local from,to=addPoint(link.from),addPoint(link.to)
+    links[from]=links[from] or {};links[from][to]=link
+  end
+  for _,link in ipairs(travel and travel.personal or {})do
+    if (used[link.resource] or 0)<(travel.resources[link.resource] or 1) then
+      personal[#personal+1]={to=addPoint(link.to),link=link}
+    end
+  end
   for _ = 1, #points do
     local at, cost
     for i = 1, #points do
@@ -50,18 +77,29 @@ function R.Leg(start, finish, flights, useFlights)
     visited[at] = true
     for to = 1, #points do
       if not visited[to] then
-        local weight, mode = R.Distance(points[at], points[to]) / 7, "Travel"
+        local weight, mode,detail = R.WalkDistance(points[at], points[to]) / 7, "Travel",nil
         local taxi = flightEdges[at] and flightEdges[at][to]
         if taxi and taxi < weight then weight, mode = taxi, "Fly" end
+        local link=links[at] and links[at][to]
+        if link and link.seconds<weight then weight,mode,detail=link.seconds,link.mode,link end
+        for _,entry in ipairs(personal)do
+          if entry.to==to then
+            local p=entry.link;local wait=math.max(0,p.wait-elapsed-cost)
+            if wait+p.seconds<weight then
+              weight,mode=wait+p.seconds,p.mode
+              detail={id=p.id,resource=p.resource,wait=wait}
+            end
+          end
+        end
         if weight < math.huge and (not costs[to] or cost + weight < costs[to]) then
-          costs[to], previous[to], modes[to] = cost + weight, at, mode
+          costs[to], previous[to], modes[to],details[to] = cost + weight, at, mode,detail
         end
       end
     end
   end
   local steps, at = {}, 2
   while previous[at] do
-    table.insert(steps, 1, { from = points[previous[at]], to = points[at], mode = modes[at] })
+    table.insert(steps, 1, { from = points[previous[at]], to = points[at], mode = modes[at],detail=details[at] })
     at = previous[at]
   end
   return costs[2] or math.huge, steps
@@ -69,18 +107,42 @@ end
 
 -- Exact open-path visit order for up to 9 stops; nearest-next beyond that.
 -- Missing/cross-continent routes are left unresolved, never treated as free.
-function R.Plan(start, stops, flights, useFlights)
+function R.Plan(start, stops, flights, useFlights, travel)
   local usable, unresolved = {}, {}
   for _, stop in ipairs(stops) do
-    if start and stop.point and stop.point.instance == start.instance then usable[#usable + 1] = stop
+    if start and stop.point and R.Leg(start,stop.point,flights,useFlights,travel)<math.huge then usable[#usable + 1] = stop
     else unresolved[#unresolved + 1] = stop end
   end
   local n, matrix, paths = #usable, {}, {}
   if n == 0 then return {}, unresolved, 0, "exact" end
+  -- Personal resources change after a delivery. Re-evaluate each next leg
+  -- with consumed runes/items and elapsed cooldown time. Never promise a
+  -- second Hearthstone/engineering use in the same itinerary.
+  if travel and #travel.personal>0 then
+    local result,total,at,seen,used={},0,start,{},{}
+    for _=1,n do
+      local best,j,path=math.huge,nil,nil
+      for i,stop in ipairs(usable)do
+        if not seen[i] then
+          local seconds,steps=R.Leg(at,stop.point,flights,useFlights,travel,total,used)
+          if seconds<best then best,j,path=seconds,i,steps end
+        end
+      end
+      if not j then break end
+      result[#result+1]={stop=usable[j],seconds=best,steps=path}
+      for _,step in ipairs(path)do
+        local resource=step.detail and step.detail.resource
+        if resource then used[resource]=(used[resource] or 0)+1 end
+      end
+      total,at,seen[j]=total+best,usable[j].point,true
+    end
+    for i,stop in ipairs(usable)do if not seen[i] then unresolved[#unresolved+1]=stop end end
+    return result,unresolved,total,"estimated"
+  end
   for i = 0, n do
     matrix[i], paths[i] = {}, {}
     for j = 1, n do
-      if i ~= j then matrix[i][j], paths[i][j] = R.Leg(i == 0 and start or usable[i].point, usable[j].point, flights, useFlights) end
+      if i ~= j then matrix[i][j], paths[i][j] = R.Leg(i == 0 and start or usable[i].point, usable[j].point, flights, useFlights,travel) end
     end
   end
   local order, mode = {}, n <= 9 and "exact" or "estimated"

@@ -45,7 +45,8 @@ function F.UpdateTracking()
     end
   end
   table.sort(F.active, function(a,b) return a.questID < b.questID end)
-  F.route, F.unresolved, F.routeSeconds, F.routeMode = F.Route.Plan(F.Route.Player(), F.active, F.char.flights, F.db.settings.flights)
+  F.travel=F.Travel.Options()
+  F.route, F.unresolved, F.routeSeconds, F.routeMode = F.Route.Plan(F.Route.Player(), F.active, F.char.flights, F.db.settings.flights,F.travel)
 end
 
 function F.NeedsFlightScan()

@@ -59,7 +59,7 @@ C_TaxiMap=oldTaxi;F.char.flights={nodes={},edges={}}
 F.LearnFlights();assert(not F.NeedsFlightScan(),'A successfully recorded departure clears the warning')
 F.char.flights={nodes={[1]={}},edges={[1]={}}}
 assert(not F.NeedsFlightScan(),'A valid scan with no reachable destinations must not demand a paid flight')
-F.UpdateNavigator();assert(not F.compass.flightNotice.shown)
+F.UpdateNavigator();assert(F.compass.flightNotice.shown,'Unknown continent coverage still needs a warning')
 F.char.flights={nodes={},edges={}};F.db.settings.flights=false
 assert(not F.NeedsFlightScan(),'Do not warn when flight routing is disabled')
 F.db.settings.flights=true

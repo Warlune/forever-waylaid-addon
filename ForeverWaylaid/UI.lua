@@ -123,6 +123,7 @@ function F.BuildUI()
   warning:SetScript("OnEnter",function(self)
     GameTooltip:SetOwner(self,"ANCHOR_RIGHT");GameTooltip:SetText("Flight points not scanned")
     for _,name in ipairs(F.MissingFlightContinents())do GameTooltip:AddLine(name,1,0.82,0)end
+    GameTooltip:AddLine("Routes may not be optimal until these flight maps are scanned.",1,0.82,0,true)
     GameTooltip:AddLine("Open a flight master's map on each missing continent. No flight purchase needed.",1,1,1,true)
     GameTooltip:AddLine("Only discovered destinations and observed routes are recorded.",0.7,0.7,0.7,true)
     GameTooltip:Show()
@@ -330,8 +331,15 @@ function F.RenderDetail(entry)
       if entry.leg then
         add("Travel plan","~"..math.ceil(entry.leg.seconds/60).." min • estimate")
         for _,step in ipairs(entry.leg.steps)do
-          if step.mode=="Fly" then add("Fly",(step.from.name or "Flight master").." → "..(step.to.name or "Destination"))end
+          if step.mode~="Travel" then
+            local detail=(step.from.name or "Current position").." → "..(step.to.name or F.DestinationText(step.to))
+            if step.detail and (step.detail.wait or 0)>1 then detail=detail.."\nCooldown: ~"..math.ceil(step.detail.wait/60).." min" end
+            if step.mode=="Engineering teleport" then detail=detail.."\nEquip your transporter; malfunctions are possible." end
+            add(step.mode,detail)
+          end
         end
+        local warning=F.FlightCoverageText();if warning then add("Flight coverage",warning)end
+        if not F.char.home or F.char.home.name~=F.Travel.BindName() then add("Hearthstone destination unknown","Bind at an inn or use your Hearthstone once to record its destination.")end
       end
       if not stop.point then add("Set the customer pin","/fwl pin "..stop.questID.." MAP_ID X Y")end
     else add("Not accepted","Open the writ in your bags to start its route.")end
