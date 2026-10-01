@@ -82,7 +82,11 @@ function F.AdvanceRoadGuidance(guide,player)
   local step=walk[index]
   if step then
     if step.road=="mapped" then
-      guide.target=step.to;guide.action="Follow the road";guide.roadWarning=nil
+      guide.target=step.to;guide.action=step.terrain=="corridor" and "Cross open ground" or "Follow the road"
+      guide.roadWarning=step.terrain=="corridor" and "Approximate open-ground route. Enemies and small obstacles are not tracked." or nil
+    elseif step.road=="transition" then
+      guide.target=step.to;guide.action="Continue through the pass"
+      guide.roadWarning="Zone handoff: the passage itself is not traced. Follow its entrance and terrain; no ground line is shown."
     else
       guide.target=step.to;guide.action=step.road=="approach" and walk[index+1] and walk[index+1].road=="mapped" and "Join the mapped road" or "Direction only"
       guide.roadWarning="This approach has no mapped walking path. Follow the terrain; no ground line is shown."

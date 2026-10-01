@@ -30,8 +30,11 @@ end
 function R.WalkDistance(a,b)
   if land(a)~=land(b) then return math.huge end
   if F.Roads then
-    local distance,segments=F.Roads.Path(a,b)
+    local distance,segments,blocked=F.Roads.Path(a,b)
     if distance then return distance,segments end
+    -- A known separation or faction restriction is not permission to invent
+    -- a straight walking connection through it.
+    if blocked then return math.huge end
   end
   return R.Distance(a,b)
 end

@@ -1,0 +1,10 @@
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+const data=JSON.parse(readFileSync(new URL('../data/world-roads.json',import.meta.url),'utf8'));
+mkdirSync(new URL('../release/',import.meta.url),{recursive:true});
+writeFileSync(new URL('../release/world-roads.html',import.meta.url),`<!doctype html><meta charset="utf-8"><title>Forever road review</title>
+<style>body{margin:0;background:#191713;color:#eadcb5;font:14px system-ui}header{height:40px;display:flex;gap:16px;align-items:center;justify-content:center}main{position:relative;width:1002px;height:668px;margin:auto}img,svg{position:absolute;width:100%;height:100%;inset:0}select{font:inherit}polyline{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}svg.off{display:none}</style>
+<header><select aria-label="Zone">${data.maps.map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}</select><label><input type="checkbox" checked> Show traces</label><span>Road · cyan | Open ground · amber | Untraced handoff · purple</span><span id="ready"></span></header><main><img alt="Revealed map"><svg viewBox="0 0 1002 668"></svg></main>
+<script>const data=${JSON.stringify(data)};const select=document.querySelector('select'),image=document.querySelector('img'),svg=document.querySelector('svg');
+function draw(){const id=+select.value,m=data.maps.find(m=>m.id===id);document.querySelector("#ready").textContent="Loading";image.onload=()=>document.querySelector("#ready").textContent="Ready: "+m.name;image.src=m.image;svg.innerHTML=[...data.lines,...data.seams].filter(l=>l.points.every(p=>p[0]===id)).map(l=>'<polyline stroke="'+({road:'#00ffff',corridor:'#ffe06b',transition:'#ed8cff'}[l.kind])+'" points="'+l.points.map(p=>(p[1]*10.02)+','+(p[2]*6.68)).join(' ')+'"><title>'+l.name+'</title></polyline>').join('')}
+select.onchange=draw;document.querySelector('input').onchange=e=>svg.classList.toggle('off',!e.target.checked);draw();</script>`);
+console.log('Open release/world-roads.html through a local HTTP server. No map artwork is bundled.');

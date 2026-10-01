@@ -1,9 +1,11 @@
-## 0.9.14 — Shorter zeppelin approach
+# Forever Waylaid 0.10.0 preview
 
-- Added the missing northern forecourt connection outside Orgrimmar, fixing the southward detour from Durotar 46.5, 13.9 toward the zeppelin approach.
-- Recalculate the active leg twice per second after meaningful player movement, rather than waiting for the five-second itinerary refresh.
-- Skip extra path calculations while stationary or on a booked flight. Visual lines continue updating at up to 20 frames per second.
+- Expanded selected roads and open-ground corridors from three maps to all 50 main zone/city maps in the revealed Forever atlas, including Riverglades, Zephras Isle, Mount Hyjal and Shen'dralas. Added explicit regional crossings and port approaches.
+- Added **Safer: prefer roads** and **Fastest: allow shortcuts** in Route and Settings. Changes recalculate immediately and persist. The compass distinguishes open ground from roads; ETA reflects actual selected path length.
+- Both modes filter faction-owned mapped branches and capitals by the actual character faction. Debug Alliance appearance does not change travel access. Existing faction-filtered boats, zeppelins and personal travel remain supported.
+- Indexed nearby roads and cached destination searches for the larger network. Known disconnected roads cannot silently become a straight-line shortcut through terrain.
+- Added production-data connectivity, faction, mode, distance and cache regression tests, plus generated-data validation in CI.
 
-The new connection is based on the player's in-game screenshot; road coordinates and tower access remain approximate. This does not add a general terrain navigation mesh.
+This remains a **0.x preview**. Map coverage is partial: no collision mesh, live enemy data, complete building interiors, lift geometry or guaranteed safe paths. Undercity currently covers only the surface approach. Some new-zone sections still lack verified connecting passages. Untraced approaches and zone handoffs remain direction-only, without a solid ground line. NPC danger warnings are deferred.
 
-Reload after installing; the addon should report v0.9.14. This remains a preview release.
+After updating, use `/reload`, then open **Route** or **Settings** to choose a routing preference. Full in-game travel testing is still required. No 1.0 release has been made.

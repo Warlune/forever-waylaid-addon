@@ -1,7 +1,7 @@
 {
   "reviewedOn": "2026-10-01",
   "scope": "Forever-specific routing from manually reviewed, fully revealed online maps. Use our own route engine. Do not require player exploration, recorded walking trails, a companion addon, or local client extraction.",
-  "status": "Forever public-transport connections implemented in 0.9.9. Offline source review complete for the listed new routes; full in-game journeys and road tracing remain unverified.",
+  "status": "0.10.0 adds reviewed roads/corridors on 50 main maps, explicit regional handoffs, faction-filtered branches and Safer/Fastest modes. Coverage and ground walkability remain partial; see ROAD_DATA.md.",
   "mapAtlas": "https://warcraftforever.games/maps",
   "newZoneCoverage": [
     "Riverglades",

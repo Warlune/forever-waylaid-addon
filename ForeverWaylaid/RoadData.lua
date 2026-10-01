@@ -6,7 +6,7 @@ local _,F=...
 -- points merely because they look close across a wall or mountain.
 F.roadData={lines={},coverage={1454,1411,1420}}
 local function line(map,name,points)
-  local result={name=name,points={}}
+  local result={name=name,points={},faction=map==1454 and "Horde" or "Both"}
   for _,p in ipairs(points)do result.points[#result.points+1]={map,p[1],p[2]}end
   F.roadData.lines[#F.roadData.lines+1]=result
 end
@@ -34,7 +34,7 @@ line(1411,"Orgrimmar approach",{
   {51.0,30.4},{52.2,33.2},{52.5,38.2},{52.4,42.2},{52.6,43.9},
 })
 -- The city exit is the only explicit connection between these two maps.
-F.roadData.lines[#F.roadData.lines+1]={name="Orgrimmar south gate",points={{1454,48.0,94.6},{1411,45.5,11.7}}}
+F.roadData.lines[#F.roadData.lines+1]={name="Orgrimmar south gate",faction="Horde",points={{1454,48.0,94.6},{1411,45.5,11.7}}}
 line(1411,"Zeppelin tower approach",{{46.1,15.4},{47.6,16.8},{48.8,16.5},{50.0,14.7},{50.7,14.5}})
 -- The open forecourt also has a northern approach. The player's in-game
 -- screenshot at 46.5,13.9 exposed the missing connection and southward detour.

@@ -107,6 +107,19 @@ function F.BuildUI()
   local placeholder=S.Text(edit,"Search names or materials…",8,-7,250,"GameFontDisableSmall")
   edit:HookScript("OnTextChanged",function(self)placeholder:SetShown(self:GetText()=="")end)
   F.search=edit
+  F.routeModeBar=CreateFrame("Frame",nil,w);F.routeModeBar:SetPoint("TOPLEFT",24,-120);F.routeModeBar:SetSize(988,28)
+  F.saferRouteButton=S.Button(F.routeModeBar,"Safer: prefer roads",0,0,236,function()F.SetRouteMode("safer")end)
+  F.fastestRouteButton=S.Button(F.routeModeBar,"Fastest: allow shortcuts",250,0,248,function()F.SetRouteMode("fastest")end)
+  F.routeModeHint=S.Text(F.routeModeBar,"Enemies may be present in either mode.",516,-7,470,"GameFontHighlightSmall",S.muted)
+  for _,button in ipairs({F.saferRouteButton,F.fastestRouteButton})do
+    button:SetScript("OnEnter",function(self)
+      GameTooltip:SetOwner(self,"ANCHOR_BOTTOM");GameTooltip:SetText("Route preference")
+      GameTooltip:AddLine("Safer favors mapped roads. Fastest also considers reviewed open-ground shortcuts.",1,1,1,true)
+      GameTooltip:AddLine("Faction access applies to both. Enemy locations are not tracked yet; neither mode guarantees safety.",1,0.82,0,true)
+      GameTooltip:Show()
+    end)
+    button:SetScript("OnLeave",function()GameTooltip:Hide()end)
+  end
   F.tierButton=S.Button(F.filters,"Tier: All",308,0,160,function()F.tierIndex=F.tierIndex%#tiers+1;F.offset=0;F.Render()end)
   F.sortButton=S.Button(F.filters,"Sort: Best value",480,0,176,function()F.sortIndex=F.sortIndex%3+1;F.offset=0;F.Render()end)
   F.ownedButton=S.Button(F.filters,"Show: All",668,0,166,function()F.onlyOwned=not F.onlyOwned;F.offset=0;F.Render()end)
@@ -362,6 +375,9 @@ function F.Render()
   local settings=F.tab=="Settings"
   F.settings:SetShown(settings and not F.accessibilityView);F.accessibility:SetShown(settings and F.accessibilityView);F.body:SetShown(not settings);F.detailPanel:SetShown(not settings)
   F.filters:SetShown(F.tab=="Crates" or F.tab=="Writs")
+  F.routeModeBar:SetShown(F.tab=="Route" or (settings and not F.accessibilityView))
+  F.saferRouteButton:SetEnabled(F.Roads.Mode()~="safer")
+  F.fastestRouteButton:SetEnabled(F.Roads.Mode()~="fastest")
   F.prev:SetShown(not settings);F.next:SetShown(not settings);F.pageLabel:SetShown(not settings)
   for tab,b in pairs(F.tabButtons) do b:SetEnabled(tab~=F.tab)end
   local ready=0;for _,stop in ipairs(F.active or {})do if stop.ready then ready=ready+1 end end

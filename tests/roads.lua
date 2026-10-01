@@ -72,7 +72,13 @@ roads.Path=oldPath
 
 fixture({{{1454,0,0},{1454,0,10}},{{1454,10,0},{1454,10,10}}})
 assert(roads.Path(a,b)==nil,'Disconnected roads cannot be joined by proximity')
-F.roadData=reviewedData;roads.Invalidate()
+-- The local regression uses a synthetic common map scale. World regions
+-- must not overlap it as they would under that deliberately simplified API.
+local localLines={}
+for _,line in ipairs(reviewedData.lines)do
+  if line.points[1][1]==1411 or line.points[1][1]==1454 then localLines[#localLines+1]=line end
+end
+F.roadData={lines=localLines};roads.Invalidate()
 local forecourt=R.World({mapID=1411,x=0.465,y=0.139})
 local tower=R.World({mapID=1411,x=0.507,y=0.145})
 local shortCost,shortPath=roads.Path(forecourt,tower)
@@ -81,7 +87,7 @@ for _,step in ipairs(shortPath)do
   assert(step.to.y<=0.14701,'Do not send the player south around the old forecourt detour')
 end
 local oldLines={}
-for _,line in ipairs(reviewedData.lines)do if line.name~='Zeppelin forecourt approach' then oldLines[#oldLines+1]=line end end
+for _,line in ipairs(localLines)do if line.name~='Zeppelin forecourt approach' then oldLines[#oldLines+1]=line end end
 F.roadData={lines=oldLines};roads.Invalidate()
 local detourCost=roads.Path(forecourt,tower)
 assert(detourCost and shortCost<detourCost,'The added northern connection must beat the old southern approach')
