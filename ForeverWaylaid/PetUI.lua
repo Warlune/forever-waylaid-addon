@@ -259,7 +259,7 @@ function P.Toggle()P.BuildUI();P.window:SetShown(not P.window:IsShown());P.Rende
 function P.OpenStore()
   if not P.store then
     local w=S.Panel(UIParent,0,0,396,364);P.store=w
-    w:ClearAllPoints();w:SetPoint("CENTER");w:SetFrameStrata("DIALOG");w:SetFrameLevel(300);w:SetToplevel(true);w:EnableMouse(true);w:SetClampedToScreen(true)
+    w:ClearAllPoints();w:SetPoint("CENTER");w:SetFrameStrata("FULLSCREEN_DIALOG");w:SetFrameLevel(100);w:SetToplevel(true);w:EnableMouse(true);w:SetClampedToScreen(true)
     local close=CreateFrame("Button",nil,w,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-3,-3);close:SetScript("OnClick",function()w:Hide()end)
     text(w,"COMPANION SUPPLIES",16,-14,350,26)
     w.wallet=text(w,"",16,-46,364,24);w.rows={};w.buy={}
@@ -275,7 +275,9 @@ function P.OpenStore()
     end
     text(w,"2 tokens per 5 minutes online with a living equipped pet. Purchases add supplies; they do not use them.",16,-286,364,64,S.muted)
   end
-  P.store:Show();P.RenderStore()
+  -- A separate stratum survives automatic raising of the top-level Pets window.
+  if P.adoption then P.adoption:Hide()end
+  P.store:Show();P.store:Raise();P.RenderStore()
 end
 function P.RenderStore()
   local w=P.store;if not w or not w:IsShown() or not P.state then return end
@@ -289,7 +291,7 @@ end
 function P.OpenAdopt()
   if not P.adoption then
     local a=S.Panel(UIParent,0,0,820,680);P.adoption=a
-    a:ClearAllPoints();a:SetPoint("CENTER");a:SetFrameStrata("DIALOG");a:SetFrameLevel(200);a:SetToplevel(true);a:EnableMouse(true);a:SetClampedToScreen(true)
+    a:ClearAllPoints();a:SetPoint("CENTER");a:SetFrameStrata("FULLSCREEN_DIALOG");a:SetFrameLevel(100);a:SetToplevel(true);a:EnableMouse(true);a:SetClampedToScreen(true)
     local close=CreateFrame("Button",nil,a,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-3,-3);close:SetScript("OnClick",function()a:Hide()end)
     text(a,"ADOPTION CRATES",22,-16,750,28)
     a.cards={}
@@ -310,7 +312,8 @@ function P.OpenAdopt()
     a.close=S.Button(a,"Back to pets",578,-590,222,function()a:Hide()end)
     a.notice=text(a,"",20,-633,778,36);a.notice:SetMaxLines(2)
   end
-  P.adoption:Show();P.RenderAdopt()
+  if P.store then P.store:Hide()end
+  P.adoption:Show();P.adoption:Raise();P.RenderAdopt()
 end
 function P.RenderAdopt()
   local a=P.adoption;if not a or not a:IsShown() or not P.state then return end

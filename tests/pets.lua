@@ -200,9 +200,19 @@ local equipped=P.state.active
 P.window.collection.rows[1].scripts.OnClick(P.window.collection.rows[1])
 assert(P.state.active==equipped and P.viewID==P.state.pets[1].id)
 P.OpenAdopt();assert(P.adoption:IsShown() and #P.adoption.cards==6)
-assert(P.adoption.frameStrata=='DIALOG' and P.adoption.frameLevel>P.window.frameLevel and P.adoption.mouseEnabled,'Adoption stays above pets and blocks clicks through the panel')
+assert(P.adoption.frameStrata=='FULLSCREEN_DIALOG' and P.window.frameStrata=='DIALOG' and P.adoption.mouseEnabled,'Adoption stays above pets and blocks clicks through the panel')
 for _,crate in ipairs(P.packs)do assert(crate.name:find('Adoption Crate',1,true) and crate.icon=='INV_Crate_01')end
 P.RenderAdopt();P.adoption:Hide()
+-- Client focus can raise a top-level window far beyond its creation-time level.
+local petWindowLevel=P.window:GetFrameLevel()
+P.window:SetFrameLevel(5000)
+P.OpenStore();assert(P.store:IsShown() and not P.adoption:IsShown())
+P.OpenAdopt();assert(P.adoption:IsShown() and not P.store:IsShown())
+assert(P.adoption.frameStrata=='FULLSCREEN_DIALOG' and P.window.frameStrata=='DIALOG',
+  'Adoption remains above Pets after focus raises the pet frame')
+P.OpenStore();assert(P.store:IsShown() and not P.adoption:IsShown())
+assert(P.store.frameStrata=='FULLSCREEN_DIALOG','Reopened store remains in the higher layer')
+P.store:Hide();P.window:SetFrameLevel(petWindowLevel)
 local priorSpecies=P.Active().species;P.viewID=P.Active().id
 P.window.scene.pet.SetTexCoord=function(_,left,right,top,bottom)
   assert(left>=0 and left<=1 and right>=0 and right<=1 and top>=0 and bottom<=1 and top<bottom)
@@ -332,7 +342,7 @@ do
   P.state.rewardSeconds=299;P.Tick(1);assert(P.state.tokens==20)
   assert(P.Rescue());companion=P.Active();P.Tick(1);assert(P.state.tokens==22)
   P.OpenStore();local food=P.state.inventory.food;local hunger=companion.food
-  assert(P.store.frameLevel>P.window.frameLevel and P.store.mouseEnabled,'Store stays above pets and blocks clicks through the panel')
+  assert(P.store.frameStrata=='FULLSCREEN_DIALOG' and P.window.frameStrata=='DIALOG' and P.store.mouseEnabled,'Store stays above pets and blocks clicks through the panel')
   P.store.buy.food.scripts.OnClick()
   assert(P.state.inventory.food==food+1 and P.state.tokens==20 and companion.food==hunger)
   P.store:Hide()

@@ -1,7 +1,7 @@
-# Forever Waylaid 0.13.3 preview
+# Forever Waylaid 0.13.4 preview
 
-- Renamed all six token adoption options to Adoption Crates and gave them crate icons. Prices, rarity odds, saved pets and earned crates are unchanged.
-- Moved the Pets window above the ledger so their contents no longer interleave. Adoption and Store panels sit above Pets and block clicks through their backgrounds.
-- Restored scene drawing above the panel fill and below the characters. Re-exported the existing Horde and Alliance artwork as uncompressed, opaque RGBA TGA textures with explicit texture paths.
+- Fixed Store and Adoption opening behind the Pets window after it gains focus. These panels now use a separate higher display layer instead of relying on fixed frame levels.
+- Opening Store closes Adoption, and opening Adoption closes Store, keeping the chosen panel in front.
+- Keeps the adoption crate names, restored scene backgrounds and ledger overlap fixes from 0.13.3.
 
-Run `/reload`. Addon regressions, window-layer checks and Lua 5.1 syntax checks pass; texture checks validate both scene exports. The final appearance still needs an in-game check. This remains a preview release.
+Run `/reload`. Regression checks cover reopening and switching panels after the Pets frame has been raised. The final window appearance needs an in-game check. This remains a preview release.
