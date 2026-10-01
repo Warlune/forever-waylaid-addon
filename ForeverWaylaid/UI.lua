@@ -344,7 +344,7 @@ function F.Render()
       row.entry=entry;row.itemID=entry.item.id;S.SetIcon(row.icon,entry.item.id)
       local r,g,b=S.RarityColor(entry.item.id)
       S.TextColor(row.text,{r,g,b})
-      local color=entry.band and S.ValueColor(entry.band) or neutral
+      local color=entry.band and F.valueColors[entry.band] or neutral
       if S.HighContrast() then row.bg:SetColorTexture(1,1,1,entry==selected and 0.2 or 0.025)
       else row.bg:SetColorTexture(color[1],color[2],color[3],entry==selected and 0.27 or 0.11)end
       if S.HighContrast() then row.stripe:SetColorTexture(1,1,1,entry==selected and 1 or 0.3)
@@ -360,7 +360,7 @@ function F.Render()
         row.detail:SetText(entry.best and entry.best.option.qty.." × "..entry.best.option.name or entry.item.questId and entry.item.qty.." × "..entry.item.targetName or "Price missing / short stock")
         local status=entry.stop and (entry.stop.ready and " • Ready" or " • Accepted") or ""
         row.reward:SetText((entry.reward or 0)..(F.tab=="Crates" and " favor" or " rep").." • "..(entry.band and F.valueLabels[entry.band] or entry.fullyPriced and "Stock / value unverified" or "Unpriced")..status)
-        S.TextColor(row.reward,entry.band and S.ValueTextColor(entry.band) or neutral)
+        S.TextColor(row.reward,entry.band and F.valueColors[entry.band] or neutral)
       end
     end
   end

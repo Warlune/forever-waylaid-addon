@@ -2,7 +2,6 @@ local _,F=...
 local S=F.Style
 local sizeOptions={{1,"100% (default)"},{1.15,"115%"},{1.3,"130%"},{1.5,"150%"}}
 local textOptions={{0,"Default"},{12,"12 point"},{13,"13 point"},{14,"14 point"},{16,"16 point"}}
-local paletteOptions={{"default","Original colors"},{"sunset","Blue / orange"},{"mono","Monochrome"}}
 function F.AccessibleScale(requested,width,height)
   requested=tonumber(requested) or 1
   if requested~=requested then requested=1 end
@@ -19,21 +18,16 @@ function F.ApplyAccessibility()
     for _,option in ipairs(control.options)do if option[1]==settings[key] then label=option[2];break end end
     control.button:SetText(label.."  |TInterface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up:16:16|t")
   end
-  for index,preview in ipairs(F.accessibilityPreview or {})do
-    local color=S.HighContrast() and {1,1,1} or S.ValueColor(index)
-    preview.swatch:SetColorTexture(unpack(color))
-    S.TextColor(preview.label,S.ValueTextColor(index))
-  end
 end
 function F.ResetAccessibility()
-  for _,key in ipairs({"ledgerScale","compassScale","textSize","valuePalette","highContrast","reduceMotion"})do
+  for _,key in ipairs({"ledgerScale","compassScale","textSize","highContrast","reduceMotion"})do
     F.db.settings[key]=F.defaults[key]
   end
   F.ApplySettings()
   for key,check in pairs(F.accessibilityChecks or {})do check:SetChecked(F.db.settings[key])end
 end
 function F.BuildAccessibility(parent)
-  local panel=S.Panel(parent,24,-221,990,415);F.accessibility=panel
+  local panel=S.Panel(parent,24,-221,990,310);F.accessibility=panel
   S.Text(panel,"Accessibility",25,-18,620,"GameFontNormalLarge",S.gold)
   S.Button(panel,"Back to settings",740,-14,220,function()F.accessibilityView=false;F.Render()end)
   -- One shared popup closes on selection, outside click, Escape or leaving this panel.
@@ -68,20 +62,13 @@ function F.BuildAccessibility(parent)
   dropdown("ledgerScale","Ledger size",25,-60,sizeOptions)
   dropdown("compassScale","Compass size",500,-60,sizeOptions)
   dropdown("textSize","Minimum text size",25,-128,textOptions)
-  dropdown("valuePalette","Color-blind options: value colors",500,-128,paletteOptions)
+  S.Text(panel,"Color filters",500,-128,430,"GameFontNormal",S.gold)
+  S.Text(panel,"Use WoW Settings > Accessibility > Colors.",500,-155,430,"GameFontHighlightSmall",S.muted)
   S.Text(panel,"Size is limited to fit your screen. Text size keeps headings at least as large as body text.",25,-194,930,"GameFontHighlightSmall",S.muted)
   F.accessibilityChecks={}
-  F.accessibilityChecks.highContrast=S.Check(panel,"High contrast (overrides value colors)",23,-222,"highContrast")
+  F.accessibilityChecks.highContrast=S.Check(panel,"High contrast",23,-222,"highContrast")
   F.accessibilityChecks.reduceMotion=S.Check(panel,"Reduced motion: pause the scribe",498,-222,"reduceMotion")
-  S.Text(panel,"Value preview",25,-265,930,"GameFontNormal",S.gold)
-  F.accessibilityPreview={}
-  for index,label in ipairs(F.valueLabels)do
-    local x=25+(index-1)*188
-    local swatch=panel:CreateTexture(nil,"ARTWORK");swatch:SetPoint("TOPLEFT",x,-293);swatch:SetSize(170,6)
-    F.accessibilityPreview[index]={swatch=swatch,label=S.Text(panel,label,x,-308,178,"GameFontHighlightSmall")}
-  end
-  S.Text(panel,"Ratings always have words. These palettes affect value ratings; item rarity and map colors stay the same.",25,-339,930,"GameFontHighlightSmall",S.muted)
-  S.Button(panel,"Reset accessibility",25,-375,260,F.ResetAccessibility)
-  S.Text(panel,"Applies immediately; saved for your account.",310,-382,640,"GameFontHighlightSmall",S.muted)
+  S.Button(panel,"Reset accessibility",25,-270,260,F.ResetAccessibility)
+  S.Text(panel,"Applies immediately; saved for your account.",310,-277,640,"GameFontHighlightSmall",S.muted)
   popup:Hide();panel:Hide()
 end

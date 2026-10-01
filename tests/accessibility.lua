@@ -1,6 +1,6 @@
 local F=...
 local S=F.Style
-local keys={'ledgerScale','compassScale','textSize','valuePalette','highContrast','reduceMotion'}
+local keys={'ledgerScale','compassScale','textSize','highContrast','reduceMotion'}
 local saved={};for _,key in ipairs(keys)do saved[key]=F.db.settings[key]end
 local width,height=UIParent.GetWidth,UIParent.GetHeight
 UIParent.GetWidth=function()return 1920 end;UIParent.GetHeight=function()return 1080 end
@@ -20,10 +20,6 @@ assert(S.Theme().panel[1]<0.05 and S.Money(nil)=='Unpriced')
 F.db.settings.highContrast=false;S.TextColor(text,text.fwColor);assert(color[1]==0.2,'Original color survives a contrast toggle')
 F.db.settings.highContrast=true;F.db.settings.textSize=13;F.db.settings.reduceMotion=true
 F.db.settings.ledgerScale=1.3;F.db.settings.compassScale=1.5
-F.db.settings.valuePalette='sunset'
-assert(S.ValueColor(1)==S.valuePalettes.sunset[1] and S.ValueTextColor(1)[1]==1)
-F.db.settings.valuePalette='mono';assert(S.ValueColor(1)[1]>S.ValueColor(5)[1])
-F.db.settings.valuePalette='invalid';assert(S.ValueColor(1)==F.valueColors[1])
 -- All supported font choices are absolute minimums, never compounded.
 for _,minimum in ipairs({12,13,14,16})do
   F.db.settings.textSize=minimum;S.ReadableFont(text,'GameFontHighlightSmall');assert(size==minimum)
@@ -43,12 +39,12 @@ assert(F.accessibilityMenu:IsShown() and F.accessibilityMenu.key=='textSize')
 F.accessibilityMenu.choices[5].scripts.OnClick()
 assert(F.db.settings.textSize==16 and not F.accessibilityMenu:IsShown())
 controls.ledgerScale.button.scripts.OnClick()
-controls.valuePalette.button.scripts.OnClick()
-assert(F.accessibilityMenu.key=='valuePalette')
+controls.compassScale.button.scripts.OnClick()
+assert(F.accessibilityMenu.key=='compassScale')
 F.accessibilityMenu.choices[2].scripts.OnClick()
-assert(F.db.settings.valuePalette=='sunset')
+assert(F.db.settings.compassScale==1.15)
 F.ResetAccessibility()
-print('PASS: size dropdown selection, menu replacement, palettes and text-size presets')
+print('PASS: size dropdown selection, menu replacement and text-size presets')
 
 -- WoW can retain a per-label SetFont override after SetFontObject.
 local originalFont=GameFontHighlightSmall
@@ -62,9 +58,10 @@ F.db.settings.textSize=12;S.ReadableFont(sticky,'GameFontHighlightSmall');assert
 GameFontHighlightSmall=originalFont
 local savedSettings=F.db.settings
 for _,case in ipairs({{old=true,expected=13},{old=false,expected=0},{old=true,current=16,expected=16}})do
- F.db.settings={largeText=case.old,textSize=case.current}
+ F.db.settings={largeText=case.old,textSize=case.current,valuePalette="sunset"}
  F.events.scripts.OnEvent(nil,'ADDON_LOADED','ForeverWaylaid')
  assert(F.db.settings.textSize==case.expected and F.db.settings.largeText==nil)
+ assert(F.db.settings.valuePalette==nil and F.defaults.valuePalette==nil, "Retired palette preference is removed")
 end
 F.db.settings=savedSettings
 F.ResetAccessibility()

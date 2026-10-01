@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.9.1 preview
+# Forever Waylaid — v0.9.2 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.9.1.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.9.2.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -42,7 +42,7 @@ Open **Settings → Accessibility**, or type `/fwl accessibility`.
 
 - **Ledger size** and **Compass size** dropdowns offer 100%, 115%, 130% and 150%, capped to fit the screen.
 - **Minimum text size** offers Default, 12, 13, 14 and 16 points. Larger headings retain their size. The former Larger text preference migrates to 13 points. At 16 points, lists show five taller rows; long item names may still truncate, with full names in the detail panel.
-- **Color-blind options: value colors** offers Original colors, Blue / orange and Monochrome with a live labeled preview. Blue / orange uses five colors from [Paul Tol's sunset scheme](https://sronpersonalpages.nl/~pault/). Alternate palettes keep rating text white. Palettes affect value rows only, not item rarity or map colors; written ratings remain in every mode. No palette is a universal substitute for those labels.
+- For **color filters**, use WoW's **Settings → Accessibility → Colors**. These game-wide filters also affect the addon. Value ratings retain written labels.
 - **High contrast** uses white text on dark surfaces, removes parchment and colored value fills, and keeps the written value ratings. Icon rarity borders remain colored.
 - **Reduced motion** pauses the decorative scribe animation. The directional arrow and scan progress continue to update.
 - **Reset accessibility** restores these controls to their defaults without changing prices, routes or other preferences.
