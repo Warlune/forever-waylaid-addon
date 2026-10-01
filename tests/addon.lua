@@ -18,9 +18,13 @@ local function object()
     if key=="SetFrameStrata" then return function(s,value)s.frameStrata=value end end
     if key=="SetFrameLevel" then return function(s,value)s.frameLevel=value end end
     if key=="EnableMouse" then return function(s,value)s.mouseEnabled=value end end
+    if key=="SetValue" then return function(s,value)s.value=value end end
+    if key=="SetStatusBarColor" then return function(s,...)s.barColor={...} end end
+    if key=="SetAtlas" then return function(s,value)s.atlas=value end end
     if key=="GetFrameLevel" then return function(s) return rawget(s,'frameLevel') or 1 end end
     if key=="CreateTexture" then return function(s,name,layer,template,sublevel)local t=object();t.drawLayer=layer;t.drawSublevel=sublevel;return t end end
-    if key=="CreateFontString" or key=="CreateLine" then return object end
+    if key=="CreateFontString" or key=="CreateLine" or key=="CreateMaskTexture" then return object end
+    if key=="GetStatusBarTexture" then return function(s) s.barTexture=rawget(s,"barTexture") or object();return s.barTexture end end
     return function() end
   end})
 end

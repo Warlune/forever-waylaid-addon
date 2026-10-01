@@ -1,9 +1,9 @@
-# Forever Waylaid 0.13.8 preview
+# Forever Waylaid 0.13.9 preview
 
-- Made floors 10, 20, 30, 40, 50, 60, 70, 80, 90 and 100 elite encounters, with a tougher leader and up to two weaker supporting enemies on later floors.
-- Elite encounters have 55% extra total health and 25% extra total attack over the ordinary same-floor formula. The leader has 3 extra armor and stronger third-round heavy attacks (185% instead of 160%). Ordinary floors retain their tuning.
-- Added larger elite sprites, gold health bars, ELITE labels in both pet views and an Elite Chamber preview with preparation guidance.
-- Framed pet and enemy health bars with Classic-style borders. Elite enemy bars also show the client's gold dragon ornament.
-- Existing progression gates, manual healing, permanent death and rewards are unchanged.
+- Rebuilt tower health displays with Forever's native target-frame artwork: colored nameplates, round pet portraits, level badges, green health bars, percentage and actual current HP.
+- Elite enemies use the full native gold dragon around their portrait. Their health stays green, and the lower strip identifies them as ELITE. Enemy badges show the tower floor; pet badges show the pet level.
+- Hover a frame for the full creature name and current / maximum HP. The pet's lower strip shows its energy; enemies do not display a fake mana bar.
+- Supporting enemies get separate frames in a second row. The compass grows only in Tower view to leave room for the frames and battle animation; Camp keeps its compact layout.
+- Damage and defeated-enemy visibility follow the displayed battle turns. Elite difficulty, rewards, manual healing and permanent death are unchanged.
 
-Run `/reload`. Balance checks cover all 500 species/rarity combinations at level 100 with explicit player-requested healing (up to 11 herbs), and a common-pet 100-floor climb with full care between fights (100 herbs total). These controlled simulations establish viability, not guaranteed survival or final balance. This remains a preview release.
+Run `/reload` after updating. Addon tests, Lua 5.1 syntax and runtime packaging checks pass. Native artwork positioning still needs an in-game visual check. This remains a 0.x preview, not a 1.0 release.

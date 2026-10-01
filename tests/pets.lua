@@ -263,17 +263,32 @@ P.Active().species=priorSpecies
 local oldFloor,oldMode,oldMiniMode=P.floor,P.mode,P.miniMode
 local oldBest=P.Active().best;P.Active().best=99
 P.floor=10;P.mode='tower';P.miniMode='tower';P.window:Show();P.mini:Show();P.Render()
-assert(P.window.scene.eliteLabel:IsShown() and P.mini.scene.eliteLabel:IsShown(),'Both views identify elite floors')
+assert(P.window.scene.enemyHP[1].detail.text=='ELITE' and P.mini.scene.enemyHP[1].detail.text=='ELITE','Both views identify elite floors')
 assert(P.window.tower.info.text:find('ELITE CHAMBER',1,true))
 assert(P.window.scene.leftHP.healthFrame and P.mini.health.healthFrame,'Pet health bars use framed styling')
 assert(P.window.scene.enemyHP[1].eliteDragon:IsShown() and P.mini.scene.enemyHP[1].eliteDragon:IsShown(),'Elite health bars show the dragon in both views')
-P.floor=11;P.Render();assert(not P.window.scene.eliteLabel:IsShown() and not P.mini.scene.eliteLabel:IsShown(),'Normal floors clear elite markers')
+assert(P.window.scene.enemyHP[1].hp.barColor[2]==0.85,'Elite health remains green like the normal WoW unit frame')
+assert(P.window.scene.enemyHP[1].percent.text=='100%' and P.window.scene.enemyHP[1].amount.text==tostring(P.Enemy(10).maxHP),'Preview shows percentage and actual enemy HP')
+assert(P.window.scene.enemyHP[1].name.text==P.species[P.Enemy(10).species] and P.window.scene.enemyHP[1].level.text==10,'Unit frames identify the enemy and floor')
+assert(P.mini.scene.height==227,'Compass tower has room for the unit frames')
+P.floor=11;P.Render();assert(P.window.scene.enemyHP[1].detail.text=='Enemy 1' and P.mini.scene.enemyHP[1].detail.text=='Enemy 1','Normal floors clear elite markers')
 assert(not P.window.scene.enemyHP[1].eliteDragon:IsShown() and not P.mini.scene.enemyHP[1].eliteDragon:IsShown(),'Normal enemies never retain the elite dragon')
+P.floor=70;P.Render()
+for _,scene in ipairs({P.window.scene,P.mini.scene})do
+  assert(scene.enemyHP[3]:IsShown() and not scene.enemyHP[2].eliteDragon:IsShown(),'Supporting enemies have their own ordinary unit frames')
+  assert(scene.arenaHeight>60,'Three enemies leave space for the battle below their frames')
+end
+P.miniMode='care';P.RenderCompass();assert(P.mini.scene.height==137 and not P.mini.scene.leftHP:IsShown(),'Camp restores its compact layout and hides battle frames')
 P.floor,P.mode,P.miniMode=oldFloor,oldMode,oldMiniMode;P.Active().best=oldBest
 -- Each actor has its own visible turn, with speed affecting order.
 pet=P.Active();pet.best=66;pet.level=67;pet.health=100;pet.food=100;pet.energy=100;pet.species=35;pet.rarity=1
 assert(P.StartBattle(67));local multi=P.state.battle;assert(#multi.enemies==3)
 P.BattleAction('strike');assert(#P.lastRound.events==4 and P.lastRound.events[1].actor~=0)
+P.mode='tower';P.miniMode='tower';P.floor=67;P.Render()
+P.window.scene.scripts.OnUpdate(P.window.scene)
+local event=P.lastRound.events[1]
+assert(P.window.scene.leftHP.amount.text==tostring(event.hp),'Pet frame follows the displayed combat event')
+for i=1,3 do assert(P.window.scene.enemyHP[i].amount.text==tostring(event.enemyHP[i]),'Enemy frames follow displayed damage independently')end
 P.BattleAction('retreat')
 -- A full first-clear climb is possible with a common rescue and regular care.
 pet.species=1;pet.level=1;pet.rarity=1;pet.best=0;pet.xp=0;pet.wins=0

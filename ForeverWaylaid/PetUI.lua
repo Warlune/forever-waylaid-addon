@@ -40,27 +40,66 @@ local function meter(parent,x,y,width,label,color)
   local bg=b:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints();bg:SetColorTexture(0,0,0,0.9)
   b.label=text(b,label,4,0,width-8,19,{1,1,1});return b
 end
-local function frameHealth(bar,enemy)
+local function frameHealth(bar)
   local frame=CreateFrame("Frame",nil,bar,"BackdropTemplate")
   frame:SetPoint("TOPLEFT",-4,4);frame:SetPoint("BOTTOMRIGHT",4,-4)
   frame:SetBackdrop({edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",edgeSize=10,insets={left=3,right=3,top=3,bottom=3}})
   frame:SetBackdropBorderColor(0.72,0.68,0.56,1);frame:EnableMouse(false)
   bar.healthFrame=frame
   bar.label:SetShadowColor(0,0,0,1);bar.label:SetShadowOffset(1,-1)
-  if enemy then
-    local dragon=frame:CreateTexture(nil,"OVERLAY")
-    local atlasName="UI-HUD-UnitFrame-Target-PortraitOn-Boss-Gold"
-    local info=C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlasName)
-    if info then
-      dragon:SetAtlas(atlasName);dragon:SetSize(32*info.width/info.height,32)
-    else
-      dragon:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite")
-      dragon:SetTexCoord(0.65,1,0,0.8);dragon:SetSize(28,32)
-    end
-    dragon:SetPoint("RIGHT",bar,"LEFT",-2,0);dragon:Hide();bar.eliteDragon=dragon
-  end
 end
 local function fill(bar,value,label)bar:SetValue(value or 0);bar.label:SetText(label)end
+-- Decorative copies of Forever's target-frame geometry. Never inherit a
+-- secure unit template or register a fake pet as a real game unit.
+local function unitFrame(parent)
+  local f=CreateFrame("Frame",nil,parent);f:SetSize(232,100);f:EnableMouse(true)
+  local portraitBG=f:CreateTexture(nil,"BACKGROUND")
+  portraitBG:SetColorTexture(0.06,0.05,0.04,1);portraitBG:SetSize(58,58);portraitBG:SetPoint("TOPRIGHT",-26,-19)
+  f.portrait=sprite(f,58);f.portrait:SetDrawLayer("BACKGROUND",1);f.portrait:SetPoint("TOPRIGHT",-26,-19)
+  local mask=f:CreateMaskTexture();mask:SetAtlas("CircleMask");mask:SetAllPoints(f.portrait)
+  f.portrait:AddMaskTexture(mask);portraitBG:AddMaskTexture(mask)
+  local content=CreateFrame("Frame",nil,f);content:SetAllPoints();content:SetFrameLevel(f:GetFrameLevel()+1)
+  f.nameplate=content:CreateTexture(nil,"BACKGROUND");f.nameplate:SetAtlas("UI-HUD-UnitFrame-Target-PortraitOn-Type",true);f.nameplate:SetPoint("TOPRIGHT",-75,-25)
+  f.hp=meter(content,22,-40,126,"",{0,0.85,0})
+  f.hp:SetHeight(20);f.hp:GetStatusBarTexture():SetAtlas("UI-HUD-UnitFrame-Target-PortraitOn-Bar-Health")
+  f.hp.label:Hide()
+  f.resource=meter(content,22,-61,134,"",{0.9,0.7,0.1});f.resource:SetHeight(10);f.resource.label:Hide()
+  -- Artwork above the fills keeps the original beveled edges and portrait ring.
+  local trim=CreateFrame("Frame",nil,f);trim:SetAllPoints();trim:SetFrameLevel(f:GetFrameLevel()+3);trim:EnableMouse(false)
+  f.healthFrame=trim
+  local border=trim:CreateTexture(nil,"ARTWORK");border:SetAtlas("UI-HUD-UnitFrame-Target-PortraitOn",true);border:SetPoint("CENTER")
+  f.eliteDragon=trim:CreateTexture(nil,"OVERLAY",nil,1)
+  f.eliteDragon:SetAtlas("UI-HUD-UnitFrame-Target-PortraitOn-Boss-Gold",true);f.eliteDragon:SetPoint("TOPRIGHT",-11,-7);f.eliteDragon:Hide()
+  local circle=trim:CreateTexture(nil,"OVERLAY",nil,2);circle:SetAtlas("UI-HUD-UnitFrame-SmallCircle",true);circle:SetPoint("BOTTOMRIGHT",-13,7)
+  f.name=text(trim,"",26,-25,119,14,S.gold);f.name:SetMaxLines(1)
+  f.percent=text(trim,"",24,-42,47,16,{1,1,1})
+  f.amount=text(trim,"",70,-42,76,16,{1,1,1});f.amount:SetJustifyH("RIGHT")
+  f.detail=text(trim,"",24,-61,122,10,{1,1,1});f.detail:SetJustifyH("CENTER")
+  f.level=text(trim,"",0,0,30,22,S.gold);f.level:ClearAllPoints();f.level:SetPoint("CENTER",circle,"CENTER",0,0);f.level:SetJustifyH("CENTER")
+  for _,label in ipairs({f.name,f.percent,f.amount,f.detail,f.level})do
+    label:SetShadowColor(0,0,0,1);label:SetShadowOffset(1,-1)
+  end
+  tip(f,"Tower companion",function()return f.tooltip or ""end)
+  f:Hide();return f
+end
+local function healthValue(f,current,maximum)
+  maximum=math.max(1,maximum or 1);current=math.max(0,math.min(maximum,current or 0))
+  f.hp:SetValue(current/maximum*100)
+  f.percent:SetText(math.floor(current/maximum*100).."%")
+  f.amount:SetText(tostring(math.floor(current)))
+  f.tooltip=(f.unitName or "Companion").."\nHealth: "..math.floor(current).." / "..maximum..(f.isEnemy and "\nTower floor "..f.unitLevel or "\nLevel "..f.unitLevel)..(f.isElite and "\nElite" or "")
+end
+local function unitInfo(f,unit,enemy)
+  if not unit then f:Hide();return end
+  f.unitName=P.species[unit.species];f.unitLevel=unit.level or unit.floor
+  f.isEnemy=enemy;f.isElite=not not unit.elite
+  showPet(f.portrait,unit)
+  f.name:SetText(f.unitName);f.level:SetText(f.unitLevel)
+  f.nameplate:SetVertexColor(enemy and 0.8 or 0.1,enemy and 0.05 or 0.5,0.05)
+  f.eliteDragon:SetShown(f.isElite)
+  f.resource:SetValue(enemy and 0 or unit.energy or 0)
+  f.detail:SetText(enemy and (f.isElite and "ELITE" or "Enemy "..unit.index) or "Energy "..math.floor(unit.energy or 0))
+end
 -- Small pixel glyphs stay sharp without requiring a particular font or new artwork.
 local function pixelMark(parent,rows,color)
   local mark=CreateFrame("Frame",nil,parent);mark:SetSize(#rows[1]*2,#rows*2)
@@ -131,12 +170,10 @@ local function stage(parent,x,y,width,height)
   f.bg=f:CreateTexture(nil,"BORDER",nil,1);f.bg:SetPoint("TOPLEFT",6,-6);f.bg:SetPoint("BOTTOMRIGHT",-6,6)
   f.pet=sprite(f,height*0.88);f.enemies={};f.enemyHP={}
   buildNeeds(f)
-  for i=1,3 do f.enemies[i]=sprite(f,height*0.88);f.enemyHP[i]=meter(f,width*0.48+(i-1)*width*0.17,-36,width*0.15-6,"",{0.75,0.25,0.2});frameHealth(f.enemyHP[i],true)end
+  for i=1,3 do f.enemies[i]=sprite(f,height*0.88);f.enemyHP[i]=unitFrame(f)end
   f.enemy=f.enemies[1]
-  f.leftHP=meter(f,10,-10,(width-30)/2,"",{0.25,0.65,0.4})
-  frameHealth(f.leftHP)
-  f.rightHP=meter(f,width/2+5,-10,(width-30)/2,"",{0.75,0.25,0.2})
-  f.eliteLabel=text(f,"ELITE",width/2+5,-10,(width-30)/2,20,S.gold);f.eliteLabel:SetJustifyH("CENTER");f.eliteLabel:Hide()
+  f.leftHP=unitFrame(f)
+
   f.float=text(f,"",10,-50,width-20,28,{1,0.85,0.3});f.float:SetJustifyH("CENTER")
   f.caption=text(f,"",8,-height+29,width-16,24,{1,1,1});f.caption:SetJustifyH("CENTER")
   local vw=math.min(width-16,350)
@@ -160,14 +197,15 @@ local function stage(parent,x,y,width,height)
         local offset=motion and math.sin((age%0.55)/0.55*math.pi)*width*0.055 or 0
         attack=event.actor==0 and offset or 0;reply=event.actor~=0 and offset or 0
         self.float:SetText((event.actor==0 and "Pet: " or "Enemy "..event.actor..": ")..event.label..(event.amount>0 and " "..event.amount or ""))
-        fill(self.leftHP,event.hp/round.maxHP*100,"HP "..event.hp.." / "..round.maxHP)
-        for i,e in ipairs(round.enemies)do fill(self.enemyHP[i],event.enemyHP[i]/e.maxHP*100,tostring(event.enemyHP[i]))end
+        healthValue(self.leftHP,event.hp,round.maxHP)
+        for i,e in ipairs(round.enemies)do healthValue(self.enemyHP[i],event.enemyHP[i],e.maxHP)end
       else self.float:SetText("")end
     else self.float:SetText("")end
     local bob=motion and math.floor(math.sin(t*2)*2) or 0
-    self.pet:SetPoint("CENTER",self,"TOPLEFT",width*(self.tower and 0.23 or 0.5)+attack,-height*0.62+bob)
+    local actorY=self.tower and -(self.hudHeight+self.arenaHeight*0.52) or -self.height*0.62
+    self.pet:SetPoint("CENTER",self,"TOPLEFT",width*(self.tower and 0.23 or 0.5)+attack,actorY+bob)
     for i,art in ipairs(self.enemies)do
-      art:SetPoint("CENTER",self,"TOPLEFT",width*((self.enemyCount or 1)==1 and 0.73 or 0.54+(i-1)*0.17)-(event and event.actor==i and reply or 0),-height*0.65)
+      art:SetPoint("CENTER",self,"TOPLEFT",width*((self.enemyCount or 1)==1 and 0.73 or 0.54+(i-1)*0.17)-(event and event.actor==i and reply or 0),actorY)
     end
     self.pet:SetVertexColor(1,event and event.actor~=0 and motion and 0.6 or 1,1)
     updateNeeds(self,t,motion)
@@ -177,6 +215,7 @@ local function stage(parent,x,y,width,height)
 end
 local function renderStage(f,pet,tower)
   f.tower=tower;f.needsPet=pet or false
+  f.victory:ClearAllPoints();f.victory:SetPoint("CENTER",f,"CENTER")
   f.bg:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\PetScenes"..S.Faction()..".tga","CLAMP","CLAMP","NEAREST")
   f.bg:SetTexCoord(tower and 0.5 or 0,tower and 1 or 0.5,0.2,0.8);f.bg:SetAlpha(S.HighContrast() and 0.25 or 1)
   local b=P.state.battle;local result=tower and P.CurrentVictory()
@@ -187,25 +226,41 @@ local function renderStage(f,pet,tower)
   local enemies=tower and (b and b.enemies or recent and r.enemies or P.Enemies(P.floor or 1)) or {}
   f.round=(b or recent) and r or false;f.displayEnemies=enemies
   f.enemyCount=#enemies
-  showPet(f.pet,pet or recent and r.pet)
-  f.pet:SetSize(f.height*(tower and 0.65 or 0.88),f.height*(tower and 0.65 or 0.88))
+  local shownPet=pet or recent and r.pet
+  local scale=(f.width-12)/464
+  local rows=#enemies>1 and 2 or 1
+  f.hudHeight=tower and (rows*86*scale+8) or 0
+  f.arenaHeight=f.height-f.hudHeight-26
+  local function place(frame,column,row)
+    frame:SetScale(scale);frame:ClearAllPoints()
+    frame:SetPoint("TOPLEFT",f,"TOPLEFT",(6+column*(f.width-12)/2)/scale,-row*86)
+    -- Slightly larger type in the compass while keeping the native bar geometry.
+    local path=STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
+    for _,label in ipairs({frame.name,frame.percent,frame.amount,frame.level})do
+      label:SetFont(path,scale<0.7 and 16 or 12,"OUTLINE")
+    end
+    frame.detail:SetFont(path,scale<0.7 and 13 or 10,"OUTLINE")
+  end
+  place(f.leftHP,0,0);unitInfo(f.leftHP,shownPet,false)
+  showPet(f.pet,shownPet)
+  local petSize=tower and math.min(f.height*0.65,f.arenaHeight*0.95) or f.height*0.88
+  f.pet:SetSize(petSize,petSize)
   for i,art in ipairs(f.enemies)do
     local e=enemies[i];showPet(art,e,true)
-    local size=f.height*(#enemies>1 and 0.44 or 0.65)*(e and e.elite and 1.15 or 1)
+    local size=math.min(f.height*(#enemies>1 and 0.44 or 0.65),f.arenaHeight*0.85)*(e and e.elite and 1.15 or 1)
     art:SetSize(size,size)
-    f.enemyHP[i].eliteDragon:SetShown(e and e.elite or false)
-    f.enemyHP[i].healthFrame:SetBackdropBorderColor(e and e.elite and 1 or 0.72,e and e.elite and 0.75 or 0.68,e and e.elite and 0.22 or 0.56,1)
-    if e and e.elite then f.enemyHP[i]:SetStatusBarColor(0.85,0.62,0.15)
-    else f.enemyHP[i]:SetStatusBarColor(0.75,0.25,0.2)end
-    f.enemyHP[i]:SetShown(e~=nil)
-    f.enemyHP[i]:ClearAllPoints();f.enemyHP[i]:SetPoint("TOPLEFT",f,"TOPLEFT",f.width*(#enemies==1 and 0.65 or 0.48+(i-1)*0.17),-36)
-    if e then local value=step and step.enemyHP[i] or e.hp or e.maxHP;fill(f.enemyHP[i],value/e.maxHP*100,tostring(value))end
+    local bar=f.enemyHP[i]
+    place(bar,i==2 and 0 or 1,i>1 and 1 or 0)
+    unitInfo(bar,e,true);bar:SetShown(e~=nil)
+    if e then healthValue(bar,step and step.enemyHP[i] or e.hp or e.maxHP,e.maxHP)end
   end
-  f.leftHP:SetShown(tower);f.rightHP:Hide()
-  f.eliteLabel:SetShown(tower and enemies[1] and enemies[1].elite or false)
+  f.leftHP:SetShown(tower and shownPet~=nil)
+  -- The elite label now lives inside the native frame's lower strip.
+  f.float:ClearAllPoints();f.float:SetPoint("TOPLEFT",10,-f.hudHeight+4)
   if tower then
-    if step then fill(f.leftHP,step.hp/r.maxHP*100,"HP "..step.hp.." / "..r.maxHP)
-    else fill(f.leftHP,b and b.hp/b.maxHP*100 or pet and pet.health or 0,"Your pet: "..math.floor(pet and pet.health or 0).."%")end
+    local maxHP=b and b.maxHP or shownPet and P.Stats(shownPet) or 1
+    if step then healthValue(f.leftHP,step.hp,r.maxHP)
+    elseif shownPet then healthValue(f.leftHP,b and b.hp or math.floor(maxHP*(shownPet.health or 0)/100),maxHP)end
     f.caption:SetText(b and (b.paused and "Paused" or "Round "..(b.turn+1).." - 1 vs "..#enemies) or "Floor "..(P.floor or 1).." - "..P.FloorStatus(P.floor or 1))
   else f.caption:SetText(pet and (pet.resting and "Resting at camp" or P.rarities[pet.rarity].." "..P.species[pet.species]) or "Your next companion awaits")end
   updateNeeds(f,P.sceneClock or 0,not F.db.settings.reduceMotion)
@@ -245,27 +300,33 @@ function P.BuildCompass(parent)
   m.towerButton=S.Button(m,"Tower",98,-8,80,function()P.miniMode="tower";P.Render()end)
   S.Button(m,"Open",188,-8,86,function()P.BuildUI();P.window:Show();P.mode=P.miniMode=="tower" and "tower" or "collection";P.Render()end)
   m.scene=stage(m,8,-40,268,137)
-  m.stats=text(m,"",10,-182,264,20);m.stats:SetJustifyH("CENTER")
-  m.health=meter(m,10,-208,127,"",{0.25,0.65,0.4});m.food=meter(m,147,-208,127,"",{0.7,0.53,0.2})
+  m.footer=CreateFrame("Frame",nil,m);m.footer:SetSize(284,356);m.footer:SetPoint("TOPLEFT")
+  m.stats=text(m.footer,"",10,-182,264,20);m.stats:SetJustifyH("CENTER")
+  m.health=meter(m.footer,10,-208,127,"",{0.25,0.65,0.4});m.food=meter(m.footer,147,-208,127,"",{0.7,0.53,0.2})
   frameHealth(m.health)
-  m.happy=meter(m,10,-232,127,"",{0.4,0.6,0.8});m.energy=meter(m,147,-232,127,"",{0.55,0.4,0.7})
+  m.happy=meter(m.footer,10,-232,127,"",{0.4,0.6,0.8});m.energy=meter(m.footer,147,-232,127,"",{0.55,0.4,0.7})
   for _,entry in ipairs({{m.health,"Health"},{m.food,"Food"},{m.happy,"Happiness"},{m.energy,"Energy"}})do
     entry[1]:EnableMouse(true);tip(entry[1],entry[2],"Out of 100. Use Feed, Play, Rest or Heal to care for your companion.")
   end
-  m.care=careIcons(m,20,-263,34,64);m.battle=fightIcons(m,37,-263,34,86);m.enter=m.battle[1]
-  m.prev=S.Button(m,"<",10,-232,32,function()if not P.state.battle then P.floor=math.max(1,P.floor-1)end;P.Render()end)
-  m.next=S.Button(m,">",242,-232,32,function()if not P.state.battle then P.floor=math.min(P.Unlocked(),P.floor+1)end;P.Render()end)
-  m.floor=text(m,"",50,-233,184,22);m.floor:SetJustifyH("CENTER")
-  m.notice=text(m,"",10,-324,178,24);m.notice:SetMaxLines(1)
-  S.Button(m,"Store",196,-321,78,function()P.OpenStore()end)
+  m.care=careIcons(m.footer,20,-263,34,64);m.battle=fightIcons(m.footer,37,-263,34,86);m.enter=m.battle[1]
+  m.prev=S.Button(m.footer,"<",10,-232,32,function()if not P.state.battle then P.floor=math.max(1,P.floor-1)end;P.Render()end)
+  m.next=S.Button(m.footer,">",242,-232,32,function()if not P.state.battle then P.floor=math.min(P.Unlocked(),P.floor+1)end;P.Render()end)
+  m.floor=text(m.footer,"",50,-233,184,22);m.floor:SetJustifyH("CENTER")
+  m.notice=text(m.footer,"",10,-324,178,24);m.notice:SetMaxLines(1)
+  S.Button(m.footer,"Store",196,-321,78,function()P.OpenStore()end)
   tip(m,"Companion",function()return P.notice or "Open the large view to adopt, switch companions and inspect other players."end)
-  m.adopt=S.Button(m,"Adopt companion",49,-265,186,function()P.OpenAdopt()end)
+  m.adopt=S.Button(m.footer,"Adopt companion",49,-265,186,function()P.OpenAdopt()end)
   m:Hide()
 end
 function P.RenderCompass()
   local m=P.mini;if not m or not P.state or not m:IsShown()then return end
   local pet=P.Active();local tower=P.miniMode=="tower";local b=P.state.battle
   if not b then P.floor=math.max(1,math.min(P.floor or 1,P.Unlocked()))end
+  local extra=tower and 90 or 0
+  local layoutChanged=m.towerLayout~=tower;m.towerLayout=tower
+  m:SetHeight(356+extra);m.footer:ClearAllPoints();m.footer:SetPoint("TOPLEFT",0,-extra)
+  m.scene.height=137+extra;m.scene:SetHeight(m.scene.height)
+  m.scene.caption:ClearAllPoints();m.scene.caption:SetPoint("TOPLEFT",8,-m.scene.height+29)
   renderStage(m.scene,pet,tower)
   m.stats:SetText(pet and ("Lv "..pet.level.." | XP "..pet.xp.." | "..P.state.tokens.." tokens") or "A new friend for your journey")
   fill(m.health,pet and pet.health or 0,"Health "..math.floor(pet and pet.health or 0));fill(m.food,pet and pet.food or 0,"Food "..math.floor(pet and pet.food or 0))
@@ -280,6 +341,7 @@ function P.RenderCompass()
   m.battle[2]:SetEnabled(b~=nil);m.battle[3]:SetEnabled(b~=nil)
   m.battle[3].label:SetText(b and b.pendingHeal and "Queued" or "Heal")
   m.adopt:SetShown(pet==nil);m.notice:SetText(P.notice or "Hover an icon for details")
+  if layoutChanged and F.char.navPets then F.UpdateNavigator()end
 end
 function P.BuildUI()
   if P.window then return end
