@@ -40,12 +40,36 @@ function F.UpdateGuidance()
       break
     end
   end
-  F.guidance={stop=chosen,target=target,action=action,steps=steps,seconds=seconds,flight=flight}
+  F.guidance={stop=chosen,target=target,action=action,travelTarget=target,travelAction=action,steps=steps,seconds=seconds,flight=flight}
+  local walk={}
+  for _,step in ipairs(steps)do
+    if step.mode~="Travel" then break end
+    walk[#walk+1]=step
+  end
+  F.guidance.walkSteps=walk;F.guidance.walkIndex=1
+  F.AdvanceRoadGuidance(F.guidance,player)
   for _,step in ipairs(steps)do
     if step.mode~="Travel" then F.guidance.nextStep=step;break end
   end
   if flight then
     F.flightGuidance={stop=chosen,target=flight.to,action="In flight",steps=steps,seconds=seconds,flight=flight,nextStep=flight}
+  end
+end
+function F.AdvanceRoadGuidance(guide,player)
+  local walk=guide.walkSteps or {}
+  local index=guide.walkIndex or 1
+  while index<=#walk and F.Route.Distance(player,walk[index].to)<12 do index=index+1 end
+  guide.walkIndex=index
+  local step=walk[index]
+  if step then
+    if step.road=="mapped" then
+      guide.target=step.to;guide.action="Follow the road";guide.roadWarning=nil
+    else
+      guide.target=step.to;guide.action=step.road=="approach" and walk[index+1] and walk[index+1].road=="mapped" and "Join the mapped road" or "Direction only"
+      guide.roadWarning="This approach has no mapped walking path. Follow the terrain; no ground line is shown."
+    end
+  elseif guide.travelTarget then
+    guide.target=guide.travelTarget;guide.action=guide.travelAction;guide.roadWarning=nil
   end
 end
 function F.DisplayRoute()
@@ -56,7 +80,7 @@ function F.DisplayRoute()
       segments[#segments+1]={from=from,to=via,mode=step.mode,detail=step.detail}
       from=via
     end
-    segments[#segments+1]={from=from,to=step.to,mode=step.mode,detail=step.detail}
+    segments[#segments+1]={from=from,to=step.to,mode=step.mode,detail=step.detail,road=step.road}
   end
   for i,leg in ipairs(F.route or {})do
     local steps=i==1 and F.guidance and F.guidance.stop.questID==leg.stop.questID and F.guidance.steps or leg.steps
@@ -95,6 +119,7 @@ function F.BuildNavigator()
     local guide=F.guidance
     if guide then
       GameTooltip:AddLine(guide.stop.writ.name,1,1,1,true)
+      if guide.roadWarning then GameTooltip:AddLine(guide.roadWarning,1,0.82,0,true)end
       for _,step in ipairs(guide.steps)do
         if step.mode~="Travel" then GameTooltip:AddLine(step.mode..": "..(step.to.name or F.DestinationText(step.to)),1,0.85,0.5,true)end
         local via=F.Travel.ViaText(step.detail)
@@ -118,7 +143,7 @@ function F.BuildNavigator()
     button:SetScript("OnLeave",function()GameTooltip:Hide()end)
   end
   c.map=F.CreateTravelMap(c,8,-129,284,189)
-  c.legend=S.Text(c,"Gold: walk • Blue: fly • Purple: transport",11,-324,280,"GameFontDisableSmall")
+  c.legend=S.Text(c,"Gold: mapped road • Blue/purple: transport",11,-324,280,"GameFontDisableSmall")
   c.map:EnableMouse(true);c.map:SetScript("OnMouseUp",function(_,button)
     if button=="LeftButton" and F.guidance then F.Navigate(F.guidance.stop.point,F.guidance.stop.questID)end
   end)
@@ -194,6 +219,11 @@ end
 function F.UpdateCompassPose()
   local c=F.compass;if not c or not c:IsShown()then return end
   local player=F.Route.Player();local guide=F.guidance
+  if guide and guide.walkSteps and player and not (UnitOnTaxi and UnitOnTaxi("player")) then
+    F.AdvanceRoadGuidance(guide,player)
+    c.action:SetText(guide.action)
+    c.location:SetText(F.DestinationText(guide.target))
+  end
   local personal=guide and guide.nextStep and guide.nextStep.detail and guide.nextStep.detail.resource
   if personal and F.Route.Distance(player,guide.target)<25 then
     c.arrow:SetTexture(guide.nextStep.mode=="Hearthstone" and "Interface\\Icons\\INV_Misc_Rune_01" or "Interface\\Icons\\Spell_Arcane_TeleportOrgrimmar")

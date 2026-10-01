@@ -90,5 +90,17 @@
     "The retained Deeprun Tram approach coordinates and capital mage landing points still need verification against expanded city maps; do not claim those have been re-surveyed.",
     "Trace walkable road networks across fully revealed online maps, including Riverglades, Zephras Isle, Mount Hyjal and Shen'dralas. No new land corridor or special Forever portal is inferred merely from zone existence.",
     "Map line geometry remains schematic between travel points. Full wall, mountain, elevation and boat-onboard navigation are not validated by this transport update."
-  ]
+  ],
+  "roadImplementation": {
+    "version": "0.9.12",
+    "coverage": "Selected roads only: Orgrimmar streets and south gate, Durotar main road/zeppelin approach/Valley of Trials branch, Tirisfal Brill/Lordaeron approach/Bulwark/Agamand roads.",
+    "sources": [
+      "https://wowforever-media.fly.storage.tigris.dev/maps/1.60.1.69893/zones/1454.webp",
+      "https://wowforever-media.fly.storage.tigris.dev/maps/1.60.1.69893/zones/1411.webp",
+      "https://wowforever-media.fly.storage.tigris.dev/maps/1.60.1.69893/zones/1420.webp"
+    ],
+    "method": "Manually trace visible road bends, then visually compare plotted polylines against the source maps. No player exploration, walking recorder, companion addon or client terrain extraction.",
+    "limitations": "Approximate centerlines, no elevation/collision proof. No mapped tower ramps or building interiors. Unknown and off-road approach lines are suppressed. Other zones remain untraced.",
+    "verification": "Synthetic U-shaped obstacle, shared overlay geometry, compass waypoint progression, disconnected roads and unused taxi-node shortcut regression. In-game walking remains unverified."
+  }
 }

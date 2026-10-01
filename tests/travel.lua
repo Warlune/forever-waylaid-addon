@@ -79,9 +79,9 @@ local oldTaxi=UnitOnTaxi
 F.travel=travel;F.char.flights=no;F.char.navQuest=1
 local stop={questID=1,point=finish,writ={name='Test writ'}}
 F.active={stop};F.route={{stop=stop}};R.Player=function()return start end;UnitOnTaxi=function()return false end
-F.UpdateGuidance();assert(F.guidance.target==dock and F.guidance.action=='Go to zeppelin boarding point')
+F.UpdateGuidance();assert(F.guidance.target==dock and F.guidance.action=='Direction only')
 R.Player=function()return dock end;F.UpdateGuidance();assert(F.guidance.action=='Board zeppelin')
-R.Player=function()return arrival end;F.UpdateGuidance();assert(F.guidance.target==finish and F.guidance.action=='Deliver to customer')
+R.Player=function()return arrival end;F.UpdateGuidance();assert(F.guidance.target==finish and F.guidance.action=='Direction only')
 F.char.flights={nodes={a=p(0,1)},edges={a={}}};F.UpdateNavigator()
 assert(F.compass.flightNotice.text:find('Eastern Kingdoms',1,true) and F.compass.flightNotice.text:find('not be optimal',1,true))
 F.char.flights.nodes.b=p(0,0);F.char.flights.edges.b={};F.UpdateNavigator();assert(not F.compass.flightNotice.shown)

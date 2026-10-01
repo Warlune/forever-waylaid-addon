@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.9.11 preview
+# Forever Waylaid — v0.9.12 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.9.11.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.9.12.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -21,7 +21,7 @@ The addon has no bundled auction prices or external price service. Until you sca
 - Auctioneer Advanced's home-faction scan image, read when the auction house closes or when you click **Read personal prices**. Versions lacking that API are ignored safely.
 - Price selection per item: the newest dated observation wins; personal scans win ties. Peer prices are considered only while sharing is enabled and expire after 24 hours. Each quote keeps its original observation age and source.
 - Accepted writ tracking, material progress, automatic completed-quest waypoints when exposed by the client, and manual destination pins.
-- Numbered deliveries and flight-master pins on Blizzard's world map: gold travel legs and blue flight legs. Select a delivery and click **Follow route** or **Show on map**. Optional TomTom waypoint support.
+- Numbered deliveries and flight-master pins on Blizzard's world map: gold mapped roads and blue flight legs. Select a delivery and click **Follow route** or **Show on map**. Optional TomTom waypoint support.
 - A movable **Courier's Compass** that stays available when the ledger and main map close: direction arrow, distance, current writ, recipient information, and destination coordinates. Its down-arrow button unfolds a small map using the game's actual map artwork.
 - Route lines on the native minimap, clipped to its circular edge and adjusted for zoom and rotating-map settings. The compass automatically guides to the next flight master, boat/zeppelin dock, personal teleport or customer. It keeps the arrival target during a booked flight and recalculates from your current position every five seconds.
 - Flight points and directed routes learned by opening flight masters. Unlearned routes are not invented. Visit order is optimized for up to nine located stops, with a nearest-next estimate for larger sets. The warning icon beside Known flight points lists Eastern Kingdoms and/or Kalimdor when no recorded flight-master departure exists for that continent. Hover it for details; open a flight master's map there without buying a flight. A recorded visit does not mean every route on the continent is known.
@@ -138,7 +138,9 @@ Waiting for a cooldown is included in the estimate; the planner uses ordinary tr
 
 The compact compass map has **+ / −** buttons to step between world, continent and your current zone. Hover a button to see the next map. Your chosen zoom level stays in place while the route updates and follows your location when you change zones.
 
-**Route limits:** lines connect travel points; they are not terrain-aware roads or guaranteed turn-by-turn instructions. Follow roads and avoid hazards. Walking uses a base running-speed estimate, flights use distance, and public transport uses approximate leg/dock times plus an average boarding wait. These are not live departure schedules. Transport endpoints were checked against published Forever build 1.60.1.70124 data and revealed maps; complete journeys still need in-game testing. The retained tram approaches and mage landing points also need verification against expanded city maps. Missing flight data can make the suggested route slower. Navigation requires your clicks; the addon never moves your character, buys a flight, casts a spell or consumes an item for you.
+**Road navigation:** selected roads in Orgrimmar, Durotar and Tirisfal are manually traced from revealed Forever map art. Walking distance, compass bends and all three map overlays use the same road geometry. Nearby off-road approaches are not assumed to be traversable: they show **Direction only** or **Join the mapped road**, with no solid ground line. Unmapped areas retain only a direct-distance estimate and destination bearing. Flight and public-transport lines remain schematic.
+
+**Route limits:** road coverage is partial, not a complete terrain navigation system. Map artwork does not establish collision, floor height, tower stairs or safe access through buildings; traced roads still need in-game verification. Walking uses a base running-speed estimate, flights use distance, and public transport uses approximate leg/dock times plus an average boarding wait. These are not live departure schedules. Transport endpoints were checked against published Forever build 1.60.1.70124 data and revealed maps; complete journeys still need in-game testing. The retained tram approaches and mage landing points also need verification against expanded city maps. Missing flight data can make the suggested route slower. Navigation requires your clicks; the addon never moves your character, buys a flight, casts a spell or consumes an item for you.
 
 Transport evidence, coordinate methods and remaining verification work are recorded in [data/route-research.json](data/route-research.json). Sources include [Blizzard's Forever recap](https://worldofwarcraft.blizzard.com/en-us/news/24304071/world-of-warcraft-forever-found-photos-panel-recap), [the revealed map atlas](https://warcraftforever.games/maps), [published transport data](https://forever-codex.com/zones/?zone=riverglades), and [the Zephras Isle guide](https://www.wowhead.com/forever/guide/zephras-isle-zone-overview).
 

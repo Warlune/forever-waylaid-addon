@@ -29,6 +29,10 @@ local function land(point)
 end
 function R.WalkDistance(a,b)
   if land(a)~=land(b) then return math.huge end
+  if F.Roads then
+    local distance,segments=F.Roads.Path(a,b)
+    if distance then return distance,segments end
+  end
   return R.Distance(a,b)
 end
 
@@ -78,9 +82,14 @@ function R.Leg(start, finish, flights, useFlights, travel, elapsed, used)
     visited[at] = true
     for to = 1, #points do
       if not visited[to] then
-        local weight, mode,detail = R.WalkDistance(points[at], points[to]) / 7, "Travel",nil
+        local yards,road=R.WalkDistance(points[at],points[to])
+        local weight, mode,detail = yards/7, "Travel",road and {roadSegments=road} or nil
+        -- A walking edge already contains the whole road path. Chaining
+        -- walks through unused taxi/dock nodes could replace a traced bend
+        -- with two artificially shorter, unmapped straight-line estimates.
+        if modes[at]=="Travel" then weight=math.huge end
         local taxi = flightEdges[at] and flightEdges[at][to]
-        if taxi and taxi < weight then weight, mode = taxi, "Fly" end
+        if taxi and taxi < weight then weight, mode,detail = taxi, "Fly",nil end
         local link=links[at] and links[at][to]
         if link and link.seconds<weight then weight,mode,detail=link.seconds,link.mode,link end
         for _,entry in ipairs(personal)do
@@ -100,7 +109,12 @@ function R.Leg(start, finish, flights, useFlights, travel, elapsed, used)
   end
   local steps, at = {}, 2
   while previous[at] do
-    table.insert(steps, 1, { from = points[previous[at]], to = points[at], mode = modes[at],detail=details[at] })
+    local road=details[at] and details[at].roadSegments
+    if road then
+      for i=#road,1,-1 do table.insert(steps,1,road[i])end
+    else
+      table.insert(steps, 1, { from = points[previous[at]], to = points[at], mode = modes[at],detail=details[at],road=modes[at]=="Travel" and "unknown" or nil })
+    end
     at = previous[at]
   end
   return costs[2] or math.huge, steps

@@ -39,7 +39,11 @@ function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small)
     p:SetScript("OnClick",function()if stop then F.TrackDelivery(stop.questID)end end)
   end
   for _,step in ipairs(segments)do
-    local ax,ay=project(step.from);local bx,by=project(step.to)
+    -- A direct bearing is not a traversable path. Do not draw unknown ground
+    -- or off-road approaches as a solid line through walls and mountains.
+    local draw=step.mode~="Travel" or step.road=="mapped"
+    local ax,ay,bx,by
+    if draw then ax,ay=project(step.from);bx,by=project(step.to)end
     if ax and bx then
       local x,y,u,v=clip(ax,ay,bx,by)
       if x and (math.abs(x-u)+math.abs(y-v))>0.1 then

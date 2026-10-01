@@ -31,7 +31,8 @@ C_QuestLog={IsOnQuest=function()return false end,IsComplete=function()return fal
 C_Item={GetItemCount=function()return 0 end}
 Enum={}
 local function load(name) assert(loadfile('ForeverWaylaid/'..name..'.lua'))('ForeverWaylaid',F) end
-for _,name in ipairs({'Catalog','Recipes','Core','Pricing','Scanner','Peers','Crafting','Style','Accessibility','AuctionScanUI','Geometry','Routing','TransportData','Travel','Tracking','Tooltips','UI','Map','Navigator'}) do load(name) end
+for _,name in ipairs({'Catalog','Recipes','Core','Pricing','Scanner','Peers','Crafting','Style','Accessibility','AuctionScanUI','Geometry','Routing','RoadData','Roads','TransportData','Travel','Tracking','Tooltips','UI','Map','Navigator'}) do load(name) end
+local roadData=F.roadData;F.roadData={lines={}} -- Generic fixtures have no real map scale.
 F.events.scripts.OnEvent(nil,'ADDON_LOADED','ForeverWaylaid')
 F.events.scripts.OnEvent(nil,'PLAYER_LOGIN')
 for _,tab in ipairs({'Crates','Writs','Route','Settings'}) do F.tab=tab;F.Render() end
@@ -154,12 +155,12 @@ local customer=p(7100);customer.mapID=1454;customer.x=0.7;customer.y=0.5
 local stop={questID=first.questId,writ=first,point=customer,ready=true,npc='Test Customer'}
 F.char.flights=flights;F.db.settings.flights=true;F.char.navQuest=first.questId
 F.active={stop};F.route={{stop=stop}};UnitOnTaxi=function()return false end
-F.UpdateGuidance();assert(F.guidance.target==flights.nodes.a and F.guidance.action=='Go to flight master')
+F.UpdateGuidance();assert(F.guidance.target==flights.nodes.a and F.guidance.action=='Direction only')
 player.wx=0;F.UpdateGuidance();assert(F.guidance.action:find('Take flight',1,true))
 UnitOnTaxi=function()return true end;player.wx=4000
 F.UpdateGuidance();assert(F.guidance.target==flights.nodes.b and F.guidance.action=='In flight')
 UnitOnTaxi=function()return false end;player.wx=7000
-F.UpdateGuidance();assert(F.guidance.target==customer and F.guidance.action=='Deliver to customer')
+F.UpdateGuidance();assert(F.guidance.target==customer and F.guidance.action=='Direction only')
 F.Route.Player=oldPlayer
 Minimap=object();Minimap.GetZoom=function()return 0 end
 C_Minimap={GetViewRadius=function()return 200 end}
@@ -216,3 +217,4 @@ end
 
 assert(loadfile('tests/requirements.lua'))(F)
 assert(loadfile('tests/reroute.lua'))(F)
+assert(loadfile('tests/roads.lua'))(F,roadData)

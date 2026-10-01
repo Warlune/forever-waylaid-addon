@@ -1,10 +1,12 @@
-## 0.9.11 — Replan remaining writ deliveries
+## 0.9.12 — Traced road navigation preview
 
-- Immediately remove abandoned and turned-in writs from the compass and route overlay, then replan remaining turn-ins from the current position.
-- Prevent delayed quest-log updates from restoring a removed writ. Reaccepting it adds it back normally.
-- Remove the single-writ compass lock so it follows the planner's next customer and displays the full remaining itinerary.
-- Rename the tracking button to Follow route. Clear the compass when the final writ is removed.
+- Added manually traced road geometry for selected streets/roads in Orgrimmar, Durotar and Tirisfal.
+- Use the same road bends for walking distance, compass targets, the world map, the compass map and the native minimap.
+- Advance the compass to the next bend as you approach it.
+- Stop drawing unverified straight ground lines through terrain. Unmapped or off-road approaches show Direction only / Join the mapped road, with a tooltip explaining the missing path.
+- Prevent unused taxi/dock nodes from creating artificial straight walking shortcuts around the traced geometry.
+- Retain immediate abandonment/turn-in rerouting and the full remaining delivery itinerary from 0.9.11.
 
-Route selection uses the existing travel estimates and known flight data. Personal-travel itineraries and sets above nine stops still use estimated visit ordering; map lines remain schematic.
+Coverage is partial. Other zones, building interiors and tower ramps are not mapped, and road traces still need in-game verification. Transport lines remain schematic; untraced walking times remain direct-distance estimates.
 
-Reload after installing; the addon should report v0.9.11. This remains a preview release.
+Reload after installing; the addon should report v0.9.12. This remains a preview release.
