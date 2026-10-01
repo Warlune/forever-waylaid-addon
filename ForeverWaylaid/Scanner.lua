@@ -80,10 +80,9 @@ function F.UpdateScanUI()
   end
   if F.scanButton then
     F.scanFooter:SetShown(info.nativeAvailable)
-    F.ledgerHeight=info.nativeAvailable and 774 or 704
+    F.ledgerHeight=(info.nativeAvailable and 774 or 704)+(F.Style.MinimumTextSize()>=14 and 24 or 0)
     F.window:SetHeight(F.ledgerHeight)
-    F.footerNote:SetPoint("TOPLEFT",27,-F.ledgerHeight+20)
-    F.versionLabel:SetPoint("TOPLEFT",948,-F.ledgerHeight+20)
+
     F.ApplyAccessibility()
     F.cancelScanButton:SetShown(info.active)
     F.scanButton:SetText(info.active and "Scanning…" or "Scan AH prices")

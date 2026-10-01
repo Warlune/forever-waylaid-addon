@@ -170,8 +170,13 @@ function F.BuildUI()
   F.mapButton=S.Button(w,"Show on map",827,-645,187,function()
     if F.detailEntry and F.detailEntry.stop then F.Navigate(F.detailEntry.stop.point,F.detailEntry.stop.questID) end
   end)
-  F.footerNote=S.Text(w,"Personal & opt-in peer scans  •  market estimates, not guaranteed purchase prices",27,-684,730,"GameFontDisableSmall")
-  F.versionLabel=S.Text(w,"v"..F.version,948,-684,65,"GameFontDisableSmall")
+  F.footerNote=S.Text(w,"Personal & opt-in peer prices  •  Estimates, not guaranteed buyouts",27,-684,850,"GameFontDisableSmall")
+  F.versionLabel=S.Text(w,"v"..F.version,948,-684,96,"GameFontDisableSmall")
+  -- Bottom anchors keep enlarged glyphs above the frame trim. The scanner
+  -- reserves extra footer height for large text, with or without scan controls.
+  F.footerNote:ClearAllPoints();F.footerNote:SetPoint("BOTTOMLEFT",27,18);F.footerNote:SetMaxLines(1)
+  F.versionLabel:ClearAllPoints();F.versionLabel:SetPoint("BOTTOMRIGHT",-27,18)
+  F.versionLabel:SetJustifyH("RIGHT");F.versionLabel:SetMaxLines(1)
   F.settings=S.Panel(w,24,-221,990,415)
   S.Text(F.settings,"Make the ledger your own",25,-18,620,"GameFontNormalLarge",S.gold)
   S.Button(F.settings,"Accessibility",740,-14,220,function()F.accessibilityView=true;F.Render()end)

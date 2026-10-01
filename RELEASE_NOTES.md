@@ -1,9 +1,7 @@
-## 0.9.3 — Flight warnings and a portable auction scanner
+## 0.9.4 — Large-text footer spacing
 
-- Added a warning icon beside Known flight points. Hover to see missing scans for Eastern Kingdoms and/or Kalimdor.
-- Moved the manual scan control to the ledger footer so it is available from every page.
-- Kept the manual fallback available with TSM and other auction addons that have no supported price import, while their AH-tab and unrelated-tooltip auto-hide behavior remains intact.
-- Away from the AH, the scan button is disabled with a prompt to open a faction-capital auction house. Cancel appears only during an active scan.
-- Added a gold twenty-cell XP progress bar and the original animated faction scribe in miniature while the AH is open. Both scan views share progress and cooldown; reduced motion applies to both.
+- Anchored the footer note and version number inside the bottom border.
+- Added breathing room at 14- and 16-point text sizes, with or without the scan controls.
+- Shortened the footer note and widened its text area to keep it on one line.
 
-Reload after installing; the addon should report v0.9.3. Releases remain on 0.x until the project owner authorizes 1.0.
+Reload after installing; the addon should report v0.9.4. Releases remain on 0.x until the project owner authorizes 1.0.
