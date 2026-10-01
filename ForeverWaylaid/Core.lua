@@ -1,6 +1,6 @@
 local _, F = ...
-F.version = "0.9.0"
-F.defaults = { ledgerScale=1, compassScale=1, largeText=false, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
+F.version = "0.9.1"
+F.defaults = { ledgerScale=1, compassScale=1, textSize=0, valuePalette="default", highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
 
 function F.ApplySettings()
   F.Style.ApplyTheme()
@@ -40,6 +40,8 @@ events:SetScript("OnEvent", function(_, event, name, success)
     ForeverWaylaidCharDB = ForeverWaylaidCharDB or {}
     F.db, F.char = ForeverWaylaidDB, ForeverWaylaidCharDB
     F.db.settings = F.db.settings or {}
+    if F.db.settings.textSize==nil then F.db.settings.textSize=F.db.settings.largeText and 13 or 0 end
+    F.db.settings.largeText=nil
     for key, value in pairs(F.defaults) do if F.db.settings[key] == nil then F.db.settings[key] = value end end
     F.char.flights = F.char.flights or { nodes = {}, edges = {} }
     F.char.pins = F.char.pins or {}

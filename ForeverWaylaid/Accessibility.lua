@@ -1,6 +1,8 @@
 local _,F=...
 local S=F.Style
-local sizes={1,1.15,1.3,1.5}
+local sizeOptions={{1,"100% (default)"},{1.15,"115%"},{1.3,"130%"},{1.5,"150%"}}
+local textOptions={{0,"Default"},{12,"12 point"},{13,"13 point"},{14,"14 point"},{16,"16 point"}}
+local paletteOptions={{"default","Original colors"},{"sunset","Blue / orange"},{"mono","Monochrome"}}
 function F.AccessibleScale(requested,width,height)
   requested=tonumber(requested) or 1
   if requested~=requested then requested=1 end
@@ -11,43 +13,75 @@ function F.ApplyAccessibility()
   if not F.db then return end
   local settings=F.db.settings
   if F.window then F.window:SetScale(F.AccessibleScale(settings.ledgerScale,1040,704))end
-  if F.compass then F.compass:SetScale(F.AccessibleScale(settings.compassScale,300,372))end
-  if F.accessibilitySizes then
-    for key,button in pairs(F.accessibilitySizes)do
-      button:SetText((key=="ledgerScale" and "Ledger size: " or "Compass size: ")..math.floor((tonumber(settings[key]) or 1)*100+0.5).."%")
-    end
+  if F.compass then F.compass:SetScale(F.AccessibleScale(settings.compassScale,300,450))end
+  for key,control in pairs(F.accessibilityDropdowns or {})do
+    local label=control.options[1][2]
+    for _,option in ipairs(control.options)do if option[1]==settings[key] then label=option[2];break end end
+    control.button:SetText(label.."  |TInterface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up:16:16|t")
+  end
+  for index,preview in ipairs(F.accessibilityPreview or {})do
+    local color=S.HighContrast() and {1,1,1} or S.ValueColor(index)
+    preview.swatch:SetColorTexture(unpack(color))
+    S.TextColor(preview.label,S.ValueTextColor(index))
   end
 end
 function F.ResetAccessibility()
-  for _,key in ipairs({"ledgerScale","compassScale","largeText","highContrast","reduceMotion"})do
+  for _,key in ipairs({"ledgerScale","compassScale","textSize","valuePalette","highContrast","reduceMotion"})do
     F.db.settings[key]=F.defaults[key]
   end
   F.ApplySettings()
-  if F.accessibilityChecks then
-    for key,check in pairs(F.accessibilityChecks)do check:SetChecked(F.db.settings[key])end
-  end
+  for key,check in pairs(F.accessibilityChecks or {})do check:SetChecked(F.db.settings[key])end
 end
 function F.BuildAccessibility(parent)
   local panel=S.Panel(parent,24,-221,990,415);F.accessibility=panel
   S.Text(panel,"Accessibility",25,-18,620,"GameFontNormalLarge",S.gold)
   S.Button(panel,"Back to settings",740,-14,220,function()F.accessibilityView=false;F.Render()end)
-  S.Text(panel,"Make the ledger easier to read",25,-57,800,"GameFontHighlight",S.gold)
-  F.accessibilitySizes={}
-  for index,key in ipairs({"ledgerScale","compassScale"})do
-    F.accessibilitySizes[key]=S.Button(panel,"",25+(index-1)*475,-88,430,function()
-      local current=tonumber(F.db.settings[key]) or 1
-      local nextSize=sizes[1]
-      for _,size in ipairs(sizes)do if size>current+0.001 then nextSize=size;break end end
-      F.db.settings[key]=nextSize;F.ApplySettings()
+  -- One shared popup closes on selection, outside click, Escape or leaving this panel.
+  local popup=CreateFrame("Frame","ForeverWaylaidAccessibilityMenu",panel)
+  popup:SetAllPoints(parent);popup:SetFrameStrata("DIALOG");popup:EnableMouse(true)
+  popup:SetScript("OnMouseDown",function(self)self:Hide()end)
+  local menu=S.Panel(popup,0,0,430,160);menu:EnableMouse(true)
+  popup.choices={};F.accessibilityMenu=popup
+  UISpecialFrames[#UISpecialFrames+1]="ForeverWaylaidAccessibilityMenu"
+  panel:SetScript("OnHide",function()popup:Hide()end)
+  F.accessibilityDropdowns={}
+  local function dropdown(key,title,x,y,options)
+    S.Text(panel,title,x,y,430,"GameFontNormal",S.gold)
+    local button=S.Button(panel,"",x,y-24,430,function()
+      if popup:IsShown() and popup.key==key then popup:Hide();return end
+      popup.key=key
+      menu:ClearAllPoints();menu:SetPoint("TOPLEFT",F.accessibilityDropdowns[key].button,"BOTTOMLEFT",0,-2)
+      menu:SetHeight(#options*29+12)
+      for i,option in ipairs(options)do
+        local choice=popup.choices[i]
+        if not choice then choice=S.Button(menu,"",6,-6-(i-1)*29,418,function()end);popup.choices[i]=choice end
+        local value,label=option[1],option[2]
+        choice:SetText((F.db.settings[key]==value and "|TInterface\\Buttons\\UI-CheckBox-Check:16:16|t " or "")..label)
+        choice:SetScript("OnClick",function()F.db.settings[key]=value;popup:Hide();F.ApplySettings()end)
+        choice:Show()
+      end
+      for i=#options+1,#popup.choices do popup.choices[i]:Hide()end
+      popup:Show()
     end)
+    F.accessibilityDropdowns[key]={button=button,options=options}
   end
-  S.Text(panel,"Click to cycle 100%, 115%, 130% and 150%. Windows stay within your screen.",25,-126,930,"GameFontHighlightSmall",S.muted)
+  dropdown("ledgerScale","Ledger size",25,-60,sizeOptions)
+  dropdown("compassScale","Compass size",500,-60,sizeOptions)
+  dropdown("textSize","Minimum text size",25,-128,textOptions)
+  dropdown("valuePalette","Color-blind options: value colors",500,-128,paletteOptions)
+  S.Text(panel,"Size is limited to fit your screen. Text size keeps headings at least as large as body text.",25,-194,930,"GameFontHighlightSmall",S.muted)
   F.accessibilityChecks={}
-  F.accessibilityChecks.largeText=S.Check(panel,"Larger text (minimum 13-point)",23,-157,"largeText")
-  F.accessibilityChecks.highContrast=S.Check(panel,"High contrast: white text, dark backgrounds",23,-198,"highContrast")
-  F.accessibilityChecks.reduceMotion=S.Check(panel,"Reduced motion: pause the auction scribe",23,-239,"reduceMotion")
-  S.Text(panel,"Value ratings always include words, such as Best value or High cost.\nHigh contrast removes the colored row fills and parchment. Item icons keep their rarity borders.\nThe navigation arrow still updates so it can guide you.",25,-284,930,"GameFontHighlightSmall",S.muted)
-  S.Button(panel,"Reset accessibility",25,-367,260,F.ResetAccessibility)
-  S.Text(panel,"These settings apply immediately and are saved for your account.",310,-375,640,"GameFontHighlightSmall",S.muted)
-  panel:Hide()
+  F.accessibilityChecks.highContrast=S.Check(panel,"High contrast (overrides value colors)",23,-222,"highContrast")
+  F.accessibilityChecks.reduceMotion=S.Check(panel,"Reduced motion: pause the scribe",498,-222,"reduceMotion")
+  S.Text(panel,"Value preview",25,-265,930,"GameFontNormal",S.gold)
+  F.accessibilityPreview={}
+  for index,label in ipairs(F.valueLabels)do
+    local x=25+(index-1)*188
+    local swatch=panel:CreateTexture(nil,"ARTWORK");swatch:SetPoint("TOPLEFT",x,-293);swatch:SetSize(170,6)
+    F.accessibilityPreview[index]={swatch=swatch,label=S.Text(panel,label,x,-308,178,"GameFontHighlightSmall")}
+  end
+  S.Text(panel,"Ratings always have words. These palettes affect value ratings; item rarity and map colors stay the same.",25,-339,930,"GameFontHighlightSmall",S.muted)
+  S.Button(panel,"Reset accessibility",25,-375,260,F.ResetAccessibility)
+  S.Text(panel,"Applies immediately; saved for your account.",310,-382,640,"GameFontHighlightSmall",S.muted)
+  popup:Hide();panel:Hide()
 end

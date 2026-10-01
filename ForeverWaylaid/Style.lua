@@ -15,10 +15,33 @@ end
 function S.ReadableFont(text,font)
   text.fwFont=font
   text:SetFontObject(font)
-  local path,size,flags=text:GetFont()
-  if path and size and F.db and F.db.settings.largeText then
-    text:SetFont(path,math.max(size,13),flags)
+  -- SetFont overrides survive SetFontObject on the client. Read the shared
+  -- source font rather than the label's previously enlarged font.
+  local source=_G[font]
+  local path,size,flags
+  if source and source.GetFont then path,size,flags=source:GetFont()
+  else path,size,flags=text:GetFont()end
+  if path and size and F.db then
+    text:SetFont(path,math.max(size,S.MinimumTextSize()),flags)
   end
+end
+function S.MinimumTextSize()
+  local size=tonumber(F.db and F.db.settings.textSize)
+  if size==12 or size==13 or size==14 or size==16 then return size end
+  return 0
+end
+-- Five steps from Paul Tol's sunset scheme. Alternate palettes use neutral text.
+-- https://sronpersonalpages.nl/~pault/
+S.valuePalettes={
+  sunset={{74/255,123/255,183/255},{152/255,202/255,225/255},{234/255,236/255,204/255},{253/255,179/255,102/255},{221/255,61/255,45/255}},
+  mono={{1,1,1},{0.8,0.8,0.8},{0.6,0.6,0.6},{0.4,0.4,0.4},{0.2,0.2,0.2}},
+}
+function S.ValueColor(band)
+  local palette=S.valuePalettes[F.db.settings.valuePalette] or F.valueColors
+  return palette[band]
+end
+function S.ValueTextColor(band)
+  return S.valuePalettes[F.db.settings.valuePalette] and {1,1,1} or S.ValueColor(band)
 end
 function S.Faction()
   return F.db and F.db.settings.debugAlliance and "Alliance" or UnitFactionGroup("player")

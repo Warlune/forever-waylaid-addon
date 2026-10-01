@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.9.0 preview
+# Forever Waylaid — v0.9.1 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.9.0.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.9.1.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -40,8 +40,9 @@ Craft costs value the full batch, including materials you already own; bag count
 
 Open **Settings → Accessibility**, or type `/fwl accessibility`.
 
-- Separate ledger and compass sizes: 100%, 115%, 130% and 150%, capped to fit the available screen.
-- **Larger text** gives addon labels a minimum 13-point font. Detail text wraps and the detail panel scrolls; long list labels can still be truncated, so select an entry for its full information.
+- **Ledger size** and **Compass size** dropdowns offer 100%, 115%, 130% and 150%, capped to fit the screen.
+- **Minimum text size** offers Default, 12, 13, 14 and 16 points. Larger headings retain their size. The former Larger text preference migrates to 13 points. At 16 points, lists show five taller rows; long item names may still truncate, with full names in the detail panel.
+- **Color-blind options: value colors** offers Original colors, Blue / orange and Monochrome with a live labeled preview. Blue / orange uses five colors from [Paul Tol's sunset scheme](https://sronpersonalpages.nl/~pault/). Alternate palettes keep rating text white. Palettes affect value rows only, not item rarity or map colors; written ratings remain in every mode. No palette is a universal substitute for those labels.
 - **High contrast** uses white text on dark surfaces, removes parchment and colored value fills, and keeps the written value ratings. Icon rarity borders remain colored.
 - **Reduced motion** pauses the decorative scribe animation. The directional arrow and scan progress continue to update.
 - **Reset accessibility** restores these controls to their defaults without changing prices, routes or other preferences.
@@ -141,3 +142,7 @@ The website's separate vendor-location catalogue remains on the website. Recursi
 Original addon code is [MIT licensed](LICENSE). Game names, data, and built-in UI assets belong to their respective owners; MIT does not relicense those assets or third-party addons. This project is not affiliated with Blizzard Entertainment.
 
 The catalogue was imported from Warlune's MIT-licensed [forever-waylaid-ledger](https://github.com/Warlune/forever-waylaid-ledger) at `6a7913d`; its metadata records the original data sources. WoW API signatures were checked against the [Forever UI source](https://github.com/Gethe/wow-ui-source/tree/forever). Auctioneer integration calls the [scan-image API](https://gitlab.com/norganna-wow/auctioneer/auc-advanced/-/blob/master/CoreScan.lua); Auctioneer source is not included.
+
+## Release policy
+
+Keep releases on 0.x. Do not publish version 1.0 until the project owner explicitly authorizes it.

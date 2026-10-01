@@ -128,12 +128,16 @@ function F.UpdateNavigator()
   c:SetShown(F.db.settings.navigator)
   local expanded=F.char.navExpanded
   local guide=F.guidance
-  local baseHeight=guide and 126 or 78
+  local large=S.MinimumTextSize()>=14
+  local baseHeight=guide and (large and 156 or 126) or (large and 108 or 78)
+  c.writ:ClearAllPoints();c.writ:SetPoint("TOPLEFT",60,large and -51 or -44);c.writ:SetHeight(large and 40 or 28)
+  c.recipient:ClearAllPoints();c.recipient:SetPoint("TOPLEFT",60,large and -97 or -76)
+  c.location:ClearAllPoints();c.location:SetPoint("TOPLEFT",10,large and -128 or -98)
   local needsScan=F.NeedsFlightScan()
-  local height=baseHeight+(needsScan and 34 or 0)
+  local height=baseHeight+(needsScan and (large and 48 or 34) or 0)
   c.flightNotice:SetShown(needsScan)
   c.flightNotice:ClearAllPoints();c.flightNotice:SetPoint("TOPLEFT",11,-baseHeight+3)
-  c:SetHeight(height+(expanded and 212 or 0));c.map:SetShown(expanded);c.legend:SetShown(expanded)
+  c:SetHeight(height+(expanded and (large and 238 or 212) or 0));c.map:SetShown(expanded);c.legend:SetShown(expanded)
   c.expand:ClearAllPoints();c.expand:SetPoint("TOPLEFT",210,-baseHeight+32)
   c.ledger:ClearAllPoints();c.ledger:SetPoint("TOPLEFT",251,-baseHeight+32)
   c.map:ClearAllPoints();c.map:SetPoint("TOPLEFT",8,-height-3)

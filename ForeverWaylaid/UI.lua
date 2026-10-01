@@ -308,6 +308,7 @@ function F.RenderDetail(entry)
 end
 
 function F.Render()
+  pageSize=S.MinimumTextSize()>=16 and 5 or 6
   if not F.window then return end
   F.craftButton:SetText(F.db.settings.craftGoods and "Goods: Craft" or "Goods: Buy at AH")
   F.status:SetText(F.char.realm.." • "..UnitFactionGroup("player").."\nPersonal scans"..(F.db.settings.peerSharing and " + unverified peer prices" or " • peer sharing off"))
@@ -320,7 +321,7 @@ function F.Render()
   local ready=0;for _,stop in ipairs(F.active or {})do if stop.ready then ready=ready+1 end end
   local flightCount=0;for _ in pairs(F.char.flights.nodes)do flightCount=flightCount+1 end
   local stats={{"YOUR DELIVERY BOOK",#(F.active or {}).." accepted writs"},{"READY TO HAND IN",ready.." customers waiting"},{"KNOWN FLIGHT POINTS",flightCount.." destinations"},{"PLANNED JOURNEY","~"..math.ceil((F.routeSeconds or 0)/60).." min • estimate"}}
-  if F.NeedsFlightScan()then stats[3]={"FLIGHT PATHS NOT SCANNED","Visit a flight master"}end
+  if F.NeedsFlightScan()then stats[3]={S.MinimumTextSize()>=16 and "FLIGHTS NOT SCANNED" or "FLIGHT PATHS NOT SCANNED","Visit a flight master"}end
   for i,stat in ipairs(stats)do F.stats[i].caption:SetText(stat[1]);F.stats[i].value:SetText(stat[2])end
   S.TextColor(F.stats[3].caption,F.NeedsFlightScan() and S.gold or S.muted)
   if settings then F.trackButton:Hide();F.mapButton:Hide();return end
@@ -334,12 +335,16 @@ function F.Render()
   for _,e in ipairs(entries)do if e.item.id==F.selected[F.tab] then selected=e end end
   selected=selected or entries[F.offset+1];F.selected[F.tab]=selected and selected.item.id
   for i,row in ipairs(F.rows)do
-    local entry=entries[F.offset+i];row:SetShown(entry~=nil)
+    local large=S.MinimumTextSize()>=16
+    row:ClearAllPoints();row:SetPoint("TOPLEFT",7,-31-(i-1)*(large and 74 or 62));row:SetHeight(large and 72 or 60)
+    row.detail:ClearAllPoints();row.detail:SetPoint("TOPLEFT",64,large and -30 or -26)
+    row.reward:ClearAllPoints();row.reward:SetPoint("TOPLEFT",64,large and -52 or -43)
+    local entry=i<=pageSize and entries[F.offset+i] or nil;row:SetShown(entry~=nil)
     if entry then
       row.entry=entry;row.itemID=entry.item.id;S.SetIcon(row.icon,entry.item.id)
       local r,g,b=S.RarityColor(entry.item.id)
       S.TextColor(row.text,{r,g,b})
-      local color=entry.band and F.valueColors[entry.band] or neutral
+      local color=entry.band and S.ValueColor(entry.band) or neutral
       if S.HighContrast() then row.bg:SetColorTexture(1,1,1,entry==selected and 0.2 or 0.025)
       else row.bg:SetColorTexture(color[1],color[2],color[3],entry==selected and 0.27 or 0.11)end
       if S.HighContrast() then row.stripe:SetColorTexture(1,1,1,entry==selected and 1 or 0.3)
@@ -355,7 +360,7 @@ function F.Render()
         row.detail:SetText(entry.best and entry.best.option.qty.." × "..entry.best.option.name or entry.item.questId and entry.item.qty.." × "..entry.item.targetName or "Price missing / short stock")
         local status=entry.stop and (entry.stop.ready and " • Ready" or " • Accepted") or ""
         row.reward:SetText((entry.reward or 0)..(F.tab=="Crates" and " favor" or " rep").." • "..(entry.band and F.valueLabels[entry.band] or entry.fullyPriced and "Stock / value unverified" or "Unpriced")..status)
-        S.TextColor(row.reward,entry.band and F.valueColors[entry.band] or neutral)
+        S.TextColor(row.reward,entry.band and S.ValueTextColor(entry.band) or neutral)
       end
     end
   end
