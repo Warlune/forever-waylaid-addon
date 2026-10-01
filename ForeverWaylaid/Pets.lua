@@ -121,7 +121,15 @@ end
 P.recentKills={}
 function P.CombatKill(event,sourceGUID,destGUID)
   if event~="PARTY_KILL" or not P.state or not UnitGUID then return end
+  -- Forever's standalone kill event may carry restricted identities. Never
+  -- compare, parse, stringify or retain those values in addon code.
+  local function readable(value)
+    if canaccessvalue then return canaccessvalue(value)end
+    return not issecretvalue or not issecretvalue(value)
+  end
+  if not readable(sourceGUID) or not readable(destGUID) then return end
   local playerGUID,combatPetGUID=UnitGUID("player"),UnitGUID("pet")
+  if not readable(playerGUID) or not readable(combatPetGUID) then return end
   if not sourceGUID or (sourceGUID~=playerGUID and sourceGUID~=combatPetGUID) then return end
   if type(destGUID)~="string" or destGUID==playerGUID or destGUID==combatPetGUID then return end
   local isPlayer=destGUID:match("^Player%-")~=nil
@@ -250,13 +258,12 @@ function P.Share()
   elseif IsInGroup and IsInGroup()then pcall(C_ChatInfo.SendAddonMessage,prefix,packet,"PARTY")end
 end
 local events=CreateFrame("Frame");P.events=events;events:RegisterEvent("CHAT_MSG_ADDON")
-events:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+-- COMBAT_LOG_EVENT_UNFILTERED is forbidden to addons on Forever. PARTY_KILL
+-- is a separate supported event with (attackerGUID, targetGUID) payload.
+events:RegisterEvent("PARTY_KILL")
 events:SetScript("OnEvent",function(_,event,p,message,channel,sender)
-  if event=="COMBAT_LOG_EVENT_UNFILTERED" then
-    if CombatLogGetCurrentEventInfo then
-      local _,kind,_,sourceGUID,_,_,_,destGUID=CombatLogGetCurrentEventInfo()
-      P.CombatKill(kind,sourceGUID,destGUID)
-    end
+  if event=="PARTY_KILL" then
+    P.CombatKill(event,p,message)
   elseif p==prefix then P.Receive(message,channel,sender)end
 end)
 local elapsed=0

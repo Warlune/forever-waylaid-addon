@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.11.2 preview
+# Forever Waylaid — v0.11.3 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.11.2.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.11.3.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -34,7 +34,7 @@ Open **Pets** on the ledger or use `/fwl pets`. Adopt a pixel Murloc, Whelp, Wol
 
 The turn-based tower has 100 increasingly difficult floors, a boss every ten floors, strikes, guard, a special attack, healing herbs and retreat. Clear floors in order; repeat floors award reduced XP. Closing the game during battle counts as a retreat and keeps damage and spent supplies. Retreat before losing all health.
 
-Pet XP comes from tower victories and your character's **killing blows**: NPCs give 3 XP and players give 10 XP. Your combat pet's killing blows also count. Other group members' kills, unrelated deaths and enemy-pet kills do not. Combat XP is limited to 60 per minute, with the same target GUID eligible once every five minutes; these session-local checks are abuse deterrents, not secure enforcement. Only the living active companion gains XP, up to level 100. Hover its XP readout for these rules. Combat event handling still needs confirmation in the live Forever client.
+Pet XP comes from tower victories and your character's **killing blows**: NPCs give 3 XP and players give 10 XP. Your combat pet's killing blows also count. Other group members' kills, unrelated deaths and enemy-pet kills do not. Combat XP is limited to 60 per minute, with the same target GUID eligible once every five minutes; these session-local checks are abuse deterrents, not secure enforcement. Only the living active companion gains XP, up to level 100. Hover its XP readout for these rules. Kill XP uses Forever's standalone `PARTY_KILL` event; the addon never registers the restricted combat-log events. If the client marks an attacker or target identity as secret, the event is skipped without trying to read it, so some kills may not award pet XP. This still needs live Forever testing.
 
 **Social** has a separate, default-off sharing toggle. Browse an alphabetical pet viewer with portraits, rarity, level, active lifespan, highest tower floor and tower wins. Guild/group members share their active pet roughly every two minutes; cached pets expire after about ten minutes. To inspect someone outside your group, target that player and click **Inspect targeted player**. Both players need this version and pet sharing enabled; normal game messaging restrictions still apply. Requests are throttled and replies use hidden addon messages, not chat. Pet sharing is independent of auction-price sharing.
 

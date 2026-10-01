@@ -43,12 +43,22 @@ for turn=1,30 do
 end
 assert(not pet.deadAt and pet.best==100 and pet.level==100 and pet.xp==0,'Final boss is beatable with guard/heal timing and level stays capped')
 assert(not P.StartBattle(101))
-local oldGUID,oldCombat,oldNow=UnitGUID,CombatLogGetCurrentEventInfo,F.Now
+local oldGUID,oldAccess,oldSecret,oldNow=UnitGUID,canaccessvalue,issecretvalue,F.Now
 local clock=10000;F.Now=function()return clock end
 UnitGUID=function(unit)return unit=='player' and 'Player-self' or unit=='pet' and 'Pet-self' end
 pet.level=1;pet.xp=0;P.recentKills={};P.combatWindow=nil
-CombatLogGetCurrentEventInfo=function()return clock,'PARTY_KILL',false,'Player-self','Me',0,0,'Creature-first' end
-P.events.scripts.OnEvent(nil,'COMBAT_LOG_EVENT_UNFILTERED');assert(pet.xp==3,'Actual combat event awards NPC XP')
+assert(P.events.events.PARTY_KILL,'Standalone Forever kill event registered')
+P.events.scripts.OnEvent(nil,'PARTY_KILL','Player-self','Creature-first');assert(pet.xp==3,'Standalone kill event awards NPC XP')
+local secret=setmetatable({},{__eq=function()error('Restricted value compared')end,__tostring=function()error('Restricted value stringified')end})
+canaccessvalue=function(value)return not rawequal(value,secret)end
+P.events.scripts.OnEvent(nil,'PARTY_KILL',secret,'Creature-secret')
+P.events.scripts.OnEvent(nil,'PARTY_KILL','Player-self',secret)
+UnitGUID=function()return secret end;P.events.scripts.OnEvent(nil,'PARTY_KILL','Player-self','Creature-secret')
+UnitGUID=function(unit)return unit=='player' and 'Player-self' or unit=='pet' and 'Pet-self' end
+canaccessvalue=nil;issecretvalue=function(value)return rawequal(value,secret)end
+P.events.scripts.OnEvent(nil,'PARTY_KILL',secret,'Creature-secret')
+assert(pet.xp==3 and not P.recentKills['Creature-secret'],'Restricted identities ignored without comparison or XP')
+canaccessvalue,issecretvalue=oldAccess,oldSecret
 P.CombatKill('PARTY_KILL','Player-self','Creature-first');assert(pet.xp==3,'Duplicate kill ignored')
 P.CombatKill('UNIT_DIED','Player-self','Creature-other')
 P.CombatKill('PARTY_KILL','Player-other','Creature-other')
@@ -62,7 +72,7 @@ clock=clock+240;P.CombatKill('PARTY_KILL','Player-self','Player-enemy');assert(p
 pet.level=100;pet.xp=0;P.CombatKill('PARTY_KILL','Player-self','Creature-cap');assert(pet.xp==0,'Max-level pet gains no XP')
 P.Die(pet,'test');P.CombatKill('PARTY_KILL','Player-self','Creature-dead');assert(pet.xp==0,'Dead pet gains no XP')
 assert(P.Adopt());pet=P.Active()
-UnitGUID,CombatLogGetCurrentEventInfo,F.Now=oldGUID,oldCombat,oldNow
+UnitGUID,canaccessvalue,issecretvalue,F.Now=oldGUID,oldAccess,oldSecret,oldNow
 P.SetSharing(true);P.Receive('2,1,2,20,100,3,3','PARTY','Other')
 assert(P.peers.Other)
 P.Receive('2,1,2,999,100,3,3','PARTY','Invalid');assert(not P.peers.Invalid)

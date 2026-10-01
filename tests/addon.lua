@@ -4,6 +4,10 @@ local frames = {}
 local function object()
   local o = {scripts={},shown=true}
   return setmetatable(o,{__index=function(self,key)
+    if key=="RegisterEvent" then return function(s,event)
+      assert(event~="COMBAT_LOG_EVENT_UNFILTERED" and event~="COMBAT_LOG_EVENT",'Forever forbids addon combat-log registration')
+      s.events=rawget(s,'events') or {};s.events[event]=true
+    end end
     if key=="SetScript" or key=="HookScript" then return function(s,event,fn) s.scripts[event]=fn end end
     if key=="Show" then return function(s) s.shown=true end end
     if key=="Hide" then return function(s) s.shown=false end end
