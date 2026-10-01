@@ -27,7 +27,8 @@ export function buildPackage(stage) {
     copyFileSync(resolve(source, file), target);
     bytes += statSync(target).size;
   }
-  for (const file of ['README.md','LICENSE','RELEASE_NOTES.md']) copyFileSync(resolve(root, file), resolve(stage, file));
+  // CurseForge requires every file, including documentation, inside the addon folder.
+  for (const file of ['README.md','LICENSE','RELEASE_NOTES.md']) copyFileSync(resolve(root, file), resolve(stage, 'ForeverWaylaid', file));
   return {files: files.length, bytes, MiB: Number((bytes / 1048576).toFixed(2)), stage};
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
