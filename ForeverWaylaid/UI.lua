@@ -121,7 +121,6 @@ function F.BuildUI()
   for i=1,pageSize do
     local row=CreateFrame("Button",nil,F.body);row:SetPoint("TOPLEFT",7,-31-(i-1)*62);row:SetSize(574,60)
     row.bg=row:CreateTexture(nil,"BACKGROUND");row.bg:SetAllPoints();row.bg:SetColorTexture(1,0.78,0.34,0.035)
-    row.rarityBorder=S.InnerBorder(row,4)
     row.stripe=row:CreateTexture(nil,"ARTWORK");row.stripe:SetPoint("TOPLEFT");row.stripe:SetPoint("BOTTOMLEFT");row.stripe:SetWidth(3)
     row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight","ADD")
     row.icon=S.Icon(row,5,-5,48)
@@ -330,7 +329,6 @@ function F.Render()
     if entry then
       row.entry=entry;row.itemID=entry.item.id;S.SetIcon(row.icon,entry.item.id)
       local r,g,b=S.RarityColor(entry.item.id)
-      S.ColorBorder(row.rarityBorder,r,g,b)
       row.text:SetTextColor(r,g,b)
       local color=entry.band and F.valueColors[entry.band] or neutral
       row.bg:SetColorTexture(color[1],color[2],color[3],entry==selected and 0.27 or 0.11)

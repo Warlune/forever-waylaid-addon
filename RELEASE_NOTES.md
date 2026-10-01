@@ -1,7 +1,7 @@
-## 0.3.5 — Crate and writ rarity colors
+## 0.3.6 — Rarity on icons and names only
 
-- Crate and writ names, inset card borders, and inner icon borders now use their in-game item rarity colors, including the selected detail heading and route entries.
-- Existing card backgrounds and value indicators still show value for money.
-- Uncached item colors update when the game finishes loading their information.
+- Removed rarity-colored borders from the full crate and writ cards.
+- Kept rarity colors on inner icon borders and item names, including the detail title.
+- Card backgrounds and value indicators retain their value colors.
 
-Install the ForeverWaylaid folder in Interface/AddOns, then /reload. Live accepted-writ delivery testing remains pending.
+Install the ForeverWaylaid folder in Interface/AddOns, then /reload.
