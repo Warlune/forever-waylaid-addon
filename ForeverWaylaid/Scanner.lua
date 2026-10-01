@@ -6,13 +6,20 @@ local state,opened
 local status="Open a faction-capital AH to scan."
 
 function F.HasAuctionScanner()
-  if Auctionator or AucAdvanced then return true end
-  local info=C_AddOns and C_AddOns.GetAddOnInfo or GetAddOnInfo
-  if info then
-    for _,name in ipairs({"Auctionator","Auc-Advanced"})do
-      local ok,value=pcall(info,name)
-      if ok and value then return true end
+  local enabled=C_AddOns and C_AddOns.GetAddOnEnableState
+  local character=UnitName and UnitName("player")
+  for _,name in ipairs({"Auctionator","Auc-Advanced"})do
+    local checked=false
+    if enabled then
+      local ok,value=pcall(enabled,name,character)
+      if ok and type(value)=="number" then
+        checked=true
+        if value>0 then return true end
+      end
     end
+    -- Older clients can still detect a running scanner. A known disabled
+    -- state wins even if its globals remain until the next reload.
+    if not checked and ((name=="Auctionator" and Auctionator) or (name=="Auc-Advanced" and AucAdvanced))then return true end
   end
   return false
 end

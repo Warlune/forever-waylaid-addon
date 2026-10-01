@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.4.0 preview
+# Forever Waylaid — v0.4.1 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.4.0.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.4.1.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -38,7 +38,7 @@ Craft costs value the full batch, including materials you already own; bag count
 
 ## Built-in auction scanner
 
-The built-in scanner controls appear only when neither Auctionator nor Auctioneer Advanced is installed (even a disabled installation hides them). Without either addon, open an auction house in your faction capital, then choose **Settings → Scan AH prices**. Keep the AH open until the progress text reports completion. **Cancel** or closing the AH discards any unfinished scan. The scanner requests one full snapshot, reads it in small batches, and saves the lowest unit buyout and total buyout stock for relevant items. It makes no purchases and does not run automatically.
+The built-in scanner controls appear when neither Auctionator nor Auctioneer Advanced is enabled for your character. Installed but disabled copies do not hide the scanner. With both disabled or absent, open an auction house in your faction capital, then choose **Settings → Scan AH prices**. Keep the AH open until the progress text reports completion. **Cancel** or closing the AH discards any unfinished scan. The scanner requests one full snapshot, reads it in small batches, and saves the lowest unit buyout and total buyout stock for relevant items. It makes no purchases and does not run automatically.
 
 Full snapshots have a 15-minute local cooldown, including a known Auctionator snapshot cooldown. Server throttling can also delay a response. Missing listings retain their previous price and original age; incomplete rows do not replace valid prices. Newer eligible peer observations can win while sharing is enabled. Personal scan prices must be enabled in Settings. Opening or closing the AH never initiates a scan.
 
@@ -86,7 +86,7 @@ pnpm check
 node tools/build-recipes.mjs
 ```
 
-The Lua suite loads the addon and renders every panel against a simulated API. It tests cost arithmetic, market isolation, scan timestamps, directed flights, unknown destinations, and route ordering against brute-force permutations. It also checks route clipping, cardinal bearings, rotating minimap coordinates, material filtering, compass independence, launcher controls, and departure/in-flight/customer guidance. Scanner tests cover manual starts, batching, cancellation, timeouts, cooldowns and hidden controls when third-party scanners are installed. Peer tests cover opt-in/out, scopes, freshness, malformed messages, response throttling and direct-only sharing. CI also runs the Lua suite with Lua 5.1. Crafting tests compare all 246 catalogue requests with the website engine for both factions (492 comparisons), plus nested batching, vendor fallback, shortages, and item-hover binding. Simulated checks do not replace real delivery tests.
+The Lua suite loads the addon and renders every panel against a simulated API. It tests cost arithmetic, market isolation, scan timestamps, directed flights, unknown destinations, and route ordering against brute-force permutations. It also checks route clipping, cardinal bearings, rotating minimap coordinates, material filtering, compass independence, launcher controls, and departure/in-flight/customer guidance. Scanner tests cover manual starts, batching, cancellation, timeouts, cooldowns and visibility based on whether third-party scanners are enabled for the current character. Peer tests cover opt-in/out, scopes, freshness, malformed messages, response throttling and direct-only sharing. CI also runs the Lua suite with Lua 5.1. Crafting tests compare all 246 catalogue requests with the website engine for both factions (492 comparisons), plus nested batching, vendor fallback, shortages, and item-hover binding. Simulated checks do not replace real delivery tests.
 
 Before calling the preview stable, verify in Forever: each tooltip toggle; Auctionator full/incremental completion; an Auctioneer home-faction scan; accepting and completing a writ; learning two flight masters; map pins at zone and continent zoom; `/reload`; and a second character/faction. Report the game build and full Lua error if one occurs.
 
