@@ -8,6 +8,59 @@ local function centered(parent,text,y,width,font,color)
   return label
 end
 
+function F.CreateScanScribe(parent,size)
+  local art=parent:CreateTexture(nil,"ARTWORK")
+  art:SetSize(size,size);art:SetPoint("CENTER")
+  art:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\AuctionScribes.tga")
+  local ui={art=art}
+  local phase,elapsed=0,0
+  local function pose()
+    local row=S.Faction()=="Alliance" and 1 or 0
+    art:SetTexCoord(phase/4,(phase+1)/4,row/2,(row+1)/2)
+  end
+  pose()
+  ui.pose=pose
+  ui.animate=function(_,dt)
+    if F.db.settings.reduceMotion then return end
+    elapsed=elapsed+dt
+    local interval=ui.active and 0.22 or 0.48
+    if elapsed>=interval then elapsed=elapsed%interval;phase=(phase+1)%4;pose()end
+  end
+  return ui
+end
+
+function F.CreateScanProgressBar(parent,width)
+  local bar=CreateFrame("StatusBar",nil,parent)
+  bar:SetSize(width,12)
+  bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+  bar:SetStatusBarColor(unpack(S.gold));bar:SetMinMaxValues(0,1);bar:SetValue(0)
+  local bg=bar:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints();bg:SetColorTexture(0.18,0.13,0.08,1)
+  -- Native Classic XP-bar trim and nineteen dividers make twenty cells.
+  local xpTexture="Interface\\MainMenuBar\\UI-XP-Bar"
+  local left=bar:CreateTexture(nil,"OVERLAY")
+  left:SetTexture(xpTexture);left:SetSize(14,14)
+  left:SetPoint("RIGHT",bar,"LEFT",11,0)
+  left:SetTexCoord(0.1875,0.4375,0.015625,0.265625)
+  local right=bar:CreateTexture(nil,"OVERLAY")
+  right:SetTexture(xpTexture);right:SetSize(14,14)
+  right:SetPoint("LEFT",bar,"RIGHT",-11,0)
+  right:SetTexCoord(0.1875,0.4375,0.296875,0.546875)
+  local middle=bar:CreateTexture(nil,"OVERLAY")
+  middle:SetTexture("Interface\\MainMenuBar\\UI-XP-Mid")
+  middle:SetHorizTile(true)
+  middle:SetPoint("TOPLEFT",left,"TOPRIGHT")
+  middle:SetPoint("BOTTOMRIGHT",right,"BOTTOMLEFT")
+  for _,trim in ipairs({left,right,middle})do trim:SetVertexColor(0.7451,0.6353,0.5176)end
+  for i=1,19 do
+    local divider=bar:CreateTexture(nil,"OVERLAY")
+    divider:SetTexture(xpTexture);divider:SetSize(9,9)
+    divider:SetTexCoord(0.015625,0.15625,0.015625,0.171875)
+    divider:SetPoint("CENTER",bar,"LEFT",width*i/20,1)
+    divider:SetVertexColor(0.7451,0.6353,0.5176)
+  end
+  return bar
+end
+
 function F.UpdateAuctionScanUI(info)
   local ui=F.auctionScanUI
   if not ui then return end
@@ -47,23 +100,10 @@ function F.InstallAuctionScanUI()
 
   centered(page,"THE AUCTION SCRIBE",-15,600,"GameFontNormalLarge",S.gold)
   ui.caption=centered(page,"Your faction's auction scribe",-40,600,"GameFontHighlightSmall",S.muted)
-  local art=page:CreateTexture(nil,"ARTWORK")
-  art:SetSize(218,218);art:SetPoint("TOP",0,-55)
-  art:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\AuctionScribes.tga")
-  ui.art=art
-  local phase,elapsed=0,0
-  local function pose()
-    local row=S.Faction()=="Alliance" and 1 or 0
-    art:SetTexCoord(phase/4,(phase+1)/4,row/2,(row+1)/2)
-  end
-  pose()
-  ui.pose=pose
-  page:SetScript("OnUpdate",function(_,dt)
-    if F.db.settings.reduceMotion then return end
-    elapsed=elapsed+dt
-    local interval=ui.active and 0.22 or 0.48
-    if elapsed>=interval then elapsed=elapsed%interval;phase=(phase+1)%4;pose()end
-  end)
+  local scribe=F.CreateScanScribe(page,218)
+  scribe.art:ClearAllPoints();scribe.art:SetPoint("TOP",0,-55)
+  ui.art=scribe.art;ui.pose=scribe.pose
+  page:SetScript("OnUpdate",function(_,dt)scribe.active=ui.active;scribe.animate(nil,dt)end)
   local labels={"Auctions read","All item types","Relevant items","Prices saved","Time elapsed"}
   local strip=CreateFrame("Frame",nil,page);strip:SetSize(742,62);strip:SetPoint("TOP",0,-280)
   for i,label in ipairs(labels)do
@@ -71,34 +111,7 @@ function F.InstallAuctionScanUI()
     ui.stats[i]=centered(box,i==1 and "—" or (i==5 and "0:00" or "0"),-11,132,"GameFontNormal",S.ink)
     centered(box,label,-38,132,"GameFontHighlightSmall",S.ink)
   end
-  local bar=CreateFrame("StatusBar",nil,page)
-  bar:SetSize(624,12);bar:SetPoint("TOP",0,-352)
-  bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
-  bar:SetStatusBarColor(unpack(S.gold));bar:SetMinMaxValues(0,1);bar:SetValue(0)
-  local bg=bar:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints();bg:SetColorTexture(0.18,0.13,0.08,1)
-  -- Native Classic XP-bar trim and nineteen dividers make twenty cells.
-  local xpTexture="Interface\\MainMenuBar\\UI-XP-Bar"
-  local left=bar:CreateTexture(nil,"OVERLAY")
-  left:SetTexture(xpTexture);left:SetSize(14,14)
-  left:SetPoint("RIGHT",bar,"LEFT",11,0)
-  left:SetTexCoord(0.1875,0.4375,0.015625,0.265625)
-  local right=bar:CreateTexture(nil,"OVERLAY")
-  right:SetTexture(xpTexture);right:SetSize(14,14)
-  right:SetPoint("LEFT",bar,"RIGHT",-11,0)
-  right:SetTexCoord(0.1875,0.4375,0.296875,0.546875)
-  local middle=bar:CreateTexture(nil,"OVERLAY")
-  middle:SetTexture("Interface\\MainMenuBar\\UI-XP-Mid")
-  middle:SetHorizTile(true)
-  middle:SetPoint("TOPLEFT",left,"TOPRIGHT")
-  middle:SetPoint("BOTTOMRIGHT",right,"BOTTOMLEFT")
-  for _,trim in ipairs({left,right,middle})do trim:SetVertexColor(0.7451,0.6353,0.5176)end
-  for i=1,19 do
-    local divider=bar:CreateTexture(nil,"OVERLAY")
-    divider:SetTexture(xpTexture);divider:SetSize(9,9)
-    divider:SetTexCoord(0.015625,0.15625,0.015625,0.171875)
-    divider:SetPoint("CENTER",bar,"LEFT",624*i/20,1)
-    divider:SetVertexColor(0.7451,0.6353,0.5176)
-  end
+  local bar=F.CreateScanProgressBar(page,624);bar:SetPoint("TOP",0,-352)
   ui.progress=bar
   ui.status=centered(page,"",-375,710,"GameFontHighlightSmall",S.gold);ui.status:SetHeight(30)
   ui.start=S.Button(page,"Scan auction house",0,0,200,F.StartNativeScan)

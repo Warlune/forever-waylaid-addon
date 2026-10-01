@@ -48,6 +48,7 @@ function S.ApplyTheme()
   if F.banner then S.Accent(F.banner);F.crest:SetTexture(theme.crest)end
   if F.compassStripe then S.Accent(F.compassStripe)end
   if F.auctionScanUI then F.auctionScanUI.pose()end
+  if F.scanFooter then F.scanFooter.scribe.pose()end
 end
 function S.RarityColor(id)
   local info=C_Item and C_Item.GetItemInfo or GetItemInfo

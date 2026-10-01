@@ -29,6 +29,7 @@ PanelTemplates_SelectTab=function(tab)tab.selected=true end
 PanelTemplates_DeselectTab=function(tab)tab.selected=false end
 C_AuctionHouse={ReplicateItems=function()calls=calls+1 end,GetNumReplicateItems=function()return 251 end,
   GetReplicateItemInfo=function()return nil,nil,2,nil,nil,nil,nil,nil,nil,100,nil,nil,nil,nil,nil,nil,2840 end}
+F.scanFrame.scripts.OnEvent(nil,'AUCTION_HOUSE_SHOW')
 F.InstallAuctionScanUI()
 local ui=F.auctionScanUI
 assert(ui and ui.tab:IsShown() and not ui.page:IsShown())
@@ -80,6 +81,7 @@ now=now+901;ui.start.scripts.OnClick();assert(F.nativeScanActive)
 F.db.settings.autoHideAuction=true;F.ApplySettings()
 assert(not ui.tab:IsShown() and not F.nativeScanActive,'Re-enabling auto-hide cancels an active native scan without committing it')
 enabled=0;F.UpdateScanUI();assert(ui.tab:IsShown(),'Disabled installed scanners expose the Scan tab')
+F.scanFrame.scripts.OnEvent(nil,'AUCTION_HOUSE_CLOSED')
 F.auctionScanUI=nil
 AuctionHouseFrame,C_AuctionHouse,C_AddOns,AuctionHouseFrameDisplayMode=oldAH,oldAPI,oldAddons,oldMode
 hooksecurefunc,PanelTemplates_TabResize,PanelTemplates_SelectTab,PanelTemplates_DeselectTab=oldHook,oldResize,oldSelect,oldDeselect

@@ -102,15 +102,32 @@ UnitGUID=function()return 'Player-Test-123' end
 local states={Auctionator=0,['Auc-Advanced']=0}
 C_AddOns={GetAddOnEnableState=function(name,character)assert(character=='Player-Test-123');return states[name]end}
 Auctionator={};AucAdvanced={}
-F.UpdateScanUI();assert(F.scanButton.shown and F.cancelScanButton.shown and F.scanStatus.shown,'Disabled installations must expose native controls, including before reload')
+F.UpdateScanUI();assert(F.scanFooter.shown and not F.cancelScanButton.shown and not F.scanFooter.progress.shown,'Disabled installations expose idle controls without cancel or progress away from the AH')
 states.Auctionator=1
-F.UpdateScanUI();assert(not F.scanButton.shown and not F.cancelScanButton.shown and not F.scanStatus.shown,'Auctionator enabled for this character hides native controls')
+F.UpdateScanUI();assert(not F.scanFooter.shown,'Auctionator enabled for this character hides native controls')
 states.Auctionator=0;states['Auc-Advanced']=2
-F.UpdateScanUI();assert(not F.scanButton.shown,'Enabled Auctioneer hides native controls')
+F.UpdateScanUI();assert(not F.scanFooter.shown,'Enabled Auctioneer hides native controls')
 states['Auc-Advanced']=0;Auctionator=nil;AucAdvanced=nil
-F.UpdateScanUI();assert(F.scanButton.shown,'Both disabled exposes native controls')
+F.UpdateScanUI();assert(F.scanFooter.shown,'Both disabled exposes native controls')
+-- TSM hides the AH tab, but cannot supply prices through a supported import.
+states.TradeSkillMaster=2
+C_AuctionHouse={ReplicateItems=function()calls=calls+1 end,GetNumReplicateItems=function()return 0 end,GetReplicateItemInfo=function()end}
+now=now+901
+F.UpdateScanUI()
+assert(F.ShouldHideAuctionExtras() and not F.ShouldHideNativeScan())
+assert(F.scanFooter.shown and not F.GetScanProgress().canStart)
+local beforeOpen=calls
+event('AUCTION_HOUSE_SHOW')
+assert(F.GetScanProgress().canStart and F.scanFooter.progress.shown and F.scanFooter.scribe.art.shown)
+assert(calls==beforeOpen,'Opening the AH never starts the fallback scanner')
+assert(F.StartNativeScan() and calls==beforeOpen+1)
+assert(F.cancelScanButton.shown,'Cancel appears only for an active scan')
+F.ApplySettings();assert(F.nativeScanActive,'TSM auto-hide must not cancel the fallback scan')
+event('AUCTION_HOUSE_CLOSED')
+assert(not F.nativeScanActive and not F.cancelScanButton.shown and not F.scanFooter.progress.shown and not F.scanFooter.scribe.art.shown)
+states.TradeSkillMaster=0
 UnitName=oldUnitName;UnitGUID=oldGUID
-C_AddOns=nil;F.UpdateScanUI();assert(F.scanButton.shown,'No third-party scanner exposes native controls')
+C_AddOns=nil;F.UpdateScanUI();assert(F.scanFooter.shown,'No third-party scanner exposes native controls')
 C_AddOns=oldAddons
 C_AuctionHouse,Auctionator,AuctionHouseFrame=oldAH,oldAuctionator,oldFrame
 AucAdvanced=oldAuc

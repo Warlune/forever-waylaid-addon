@@ -11,7 +11,7 @@ end
 function F.ApplyAccessibility()
   if not F.db then return end
   local settings=F.db.settings
-  if F.window then F.window:SetScale(F.AccessibleScale(settings.ledgerScale,1040,704))end
+  if F.window then F.window:SetScale(F.AccessibleScale(settings.ledgerScale,1040,F.ledgerHeight or 704))end
   if F.compass then F.compass:SetScale(F.AccessibleScale(settings.compassScale,300,450))end
   for key,control in pairs(F.accessibilityDropdowns or {})do
     local label=control.options[1][2]

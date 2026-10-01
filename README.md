@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.9.2 preview
+# Forever Waylaid — v0.9.3 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.9.2.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.9.3.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -24,7 +24,7 @@ The addon has no bundled auction prices or external price service. Until you sca
 - Numbered deliveries and flight-master pins on Blizzard's world map: gold travel legs and blue flight legs. Select a delivery and click **Track delivery** or **Show on map**. Optional TomTom waypoint support.
 - A movable **Courier's Compass** that stays available when the ledger and main map close: direction arrow, distance, current writ, recipient information, and destination coordinates. Its down-arrow button unfolds a small map using the game's actual map artwork.
 - Route lines on the native minimap, clipped to its circular edge and adjusted for zoom and rotating-map settings. The compass guides to a flight master, keeps the arrival target during flight, then points toward the customer.
-- Flight points and directed routes learned by opening flight masters. Unlearned routes are not invented. Visit order is optimized for up to nine located stops, with a nearest-next estimate for larger sets.
+- Flight points and directed routes learned by opening flight masters. Unlearned routes are not invented. Visit order is optimized for up to nine located stops, with a nearest-next estimate for larger sets. The warning icon beside Known flight points lists Eastern Kingdoms and/or Kalimdor when no recorded flight-master departure exists for that continent. Hover it for details; open a flight master's map there without buying a flight. A recorded visit does not mean every route on the continent is known.
 
 ## Buy or craft your cargo
 
@@ -51,7 +51,9 @@ Settings apply immediately and are saved account-wide. These controls affect thi
 
 ## Built-in auction scanner
 
-The built-in **Scan** tab appears along the bottom of the auction house, beside Buy / Sell / Auctions. By default, another supported auction addon enabled for your character hides our tab and scan controls. Installed but disabled copies do not hide them. Open an auction house in your faction capital, choose **Scan**, then click **Scan auction house**. Opening the tab never starts a scan. The original **Settings → Scan AH prices** control remains available too, with the same visibility rule.
+The built-in **Scan** tab appears along the bottom of the auction house, beside Buy / Sell / Auctions. By default, another recognized auction addon enabled for your character hides our AH tab and unrelated item tooltips. Installed but disabled copies do not hide them. Open an auction house in your faction capital, choose **Scan**, then click **Scan auction house**. Opening the tab never starts a scan.
+
+**Scan AH prices** also appears at the bottom of every ledger page. Auctionator and Auctioneer hide this fallback when auto-hide is enabled because they have supported personal-price integrations. TSM and other addons without an import integration leave it available. Away from the AH it is disabled with an instruction to open a faction-capital auction house. While the AH is open, a gold twenty-cell XP bar displays scan progress beside a small animated Horde or Alliance scribe. Cancel appears only during an active scan. Both scan views share one scan, progress report and cooldown. Reduced motion pauses both scribes.
 
 An animated orc (Horde) or human (Alliance) scribe copies prices into a ledger. The original four-frame orc and human sprites are restored, with their original timing: 0.48 seconds per pose while idle and 0.22 seconds while scanning. Alliance panels use dark slate with a subdued blue-gray header gradient. Beneath the scribe, live counters show auctions read, all distinct item IDs encountered (including bid-only and unrelated items), relevant items with buyouts, prices saved, and elapsed time. The progress bar reflects records processed, not a simulated timer. Prices saved stays at zero until a complete snapshot is committed; the final report remains visible until the next scan. Keep the AH open until completion. **Cancel** or closing the AH discards any unfinished scan. The scanner requests one full snapshot, reads it in small batches, and saves the lowest unit buyout and total buyout stock for **every item with a valid buyout**, including items unrelated to Waylaid deliveries. It makes no purchases and does not run automatically.
 

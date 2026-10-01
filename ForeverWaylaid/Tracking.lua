@@ -54,6 +54,21 @@ function F.NeedsFlightScan()
   return not next(F.char.flights.edges)
 end
 
+-- World instance 0 is Eastern Kingdoms; 1 is Kalimdor. Use recorded
+-- departures, not discovered nodes, so an unvisited map is never called scanned.
+function F.MissingFlightContinents()
+  if not F.db.settings.flights then return {} end
+  local seen={}
+  for id in pairs(F.char.flights.edges)do
+    local point=F.char.flights.nodes[id]
+    if point and point.instance~=nil then seen[point.instance]=true end
+  end
+  local missing={}
+  if not seen[0] then missing[#missing+1]="Eastern Kingdoms" end
+  if not seen[1] then missing[#missing+1]="Kalimdor" end
+  return missing
+end
+
 function F.LearnFlights()
   if not C_TaxiMap or not C_TaxiMap.GetTaxiNodesForMap then return end
   local mapID = C_Map.GetBestMapForUnit("player")

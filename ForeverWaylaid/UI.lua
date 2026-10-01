@@ -117,6 +117,17 @@ function F.BuildUI()
     box.caption=S.Text(box,"",12,-8,214,"GameFontHighlightSmall",S.muted)
     box.value=S.Text(box,"",12,-25,214,"GameFontNormal",S.gold);F.stats[i]=box
   end
+  local warning=CreateFrame("Button",nil,F.stats[3]);F.flightWarning=warning
+  warning:SetSize(24,24);warning:SetPoint("RIGHT",-8,0)
+  warning:SetNormalTexture("Interface\\DialogFrame\\UI-Dialog-Icon-AlertNew")
+  warning:SetScript("OnEnter",function(self)
+    GameTooltip:SetOwner(self,"ANCHOR_RIGHT");GameTooltip:SetText("Flight points not scanned")
+    for _,name in ipairs(F.MissingFlightContinents())do GameTooltip:AddLine(name,1,0.82,0)end
+    GameTooltip:AddLine("Open a flight master's map on each missing continent. No flight purchase needed.",1,1,1,true)
+    GameTooltip:AddLine("Only discovered destinations and observed routes are recorded.",0.7,0.7,0.7,true)
+    GameTooltip:Show()
+  end)
+  warning:SetScript("OnLeave",function()GameTooltip:Hide()end)
   F.body=S.Panel(w,24,-221,588,415);F.listTitle=S.Text(F.body,"",12,-11,550,"GameFontNormalSmall",S.gold)
   F.rows={}
   for i=1,pageSize do
@@ -159,8 +170,8 @@ function F.BuildUI()
   F.mapButton=S.Button(w,"Show on map",827,-645,187,function()
     if F.detailEntry and F.detailEntry.stop then F.Navigate(F.detailEntry.stop.point,F.detailEntry.stop.questID) end
   end)
-  S.Text(w,"Personal & opt-in peer scans  •  market estimates, not guaranteed purchase prices",27,-684,730,"GameFontDisableSmall")
-  S.Text(w,"v"..F.version,948,-684,65,"GameFontDisableSmall")
+  F.footerNote=S.Text(w,"Personal & opt-in peer scans  •  market estimates, not guaranteed purchase prices",27,-684,730,"GameFontDisableSmall")
+  F.versionLabel=S.Text(w,"v"..F.version,948,-684,65,"GameFontDisableSmall")
   F.settings=S.Panel(w,24,-221,990,415)
   S.Text(F.settings,"Make the ledger your own",25,-18,620,"GameFontNormalLarge",S.gold)
   S.Button(F.settings,"Accessibility",740,-14,220,function()F.accessibilityView=true;F.Render()end)
@@ -185,11 +196,18 @@ function F.BuildUI()
   F.peerStatus=S.Text(F.settings,"Peer sharing is off.",25,-311,476,"GameFontHighlightSmall",S.muted)
   S.Button(F.settings,"Read personal prices",515,-309,200,function()F.ImportPersonal();F.Refresh()end)
   S.Button(F.settings,"Reset compass position",727,-309,231,function()F.ResetNavigator()end)
-  F.scanButton=S.Button(F.settings,"Scan AH prices",25,-344,200,F.StartNativeScan)
-  F.cancelScanButton=S.Button(F.settings,"Cancel",235,-344,90,function()F.CancelNativeScan()end)
-  F.scanStatus=S.Text(F.settings,"",340,-350,615,"GameFontHighlightSmall",S.muted)
+  local footer=CreateFrame("Frame",nil,w);footer:SetPoint("TOPLEFT",24,-681);footer:SetSize(990,64)
+  F.scanFooter=footer
+  F.scanButton=S.Button(footer,"Scan AH prices",0,-3,170,F.StartNativeScan)
+  F.cancelScanButton=S.Button(footer,"Cancel",180,-3,80,function()F.CancelNativeScan()end)
+  F.scanStatus=S.Text(footer,"",180,-8,725,"GameFontHighlightSmall",S.muted)
+  F.scanStatus:SetHeight(35)
+  footer.progress=F.CreateScanProgressBar(footer,895);footer.progress:SetPoint("TOPLEFT",4,-47)
+  footer.scribe=F.CreateScanScribe(footer,64)
+  footer.scribe.art:ClearAllPoints();footer.scribe.art:SetPoint("BOTTOMRIGHT",0,0)
+  footer:SetScript("OnUpdate",footer.scribe.animate)
   F.UpdateScanUI()
-  S.Text(F.settings,"Debug changes appearance only. Auto-hide affects our Scan tab and unrelated AH tooltips; Waylaid details remain.\nPeer prices are unverified and expire after 24 hours. Sharing sends observed prices, stock and scan times.",25,-380,920,"GameFontHighlightSmall",S.muted)
+  S.Text(F.settings,"Debug changes appearance only. Auto-hide affects our Scan tab and unrelated AH tooltips; Waylaid details remain.\nPeer prices are unverified and expire after 24 hours. Sharing sends observed prices, stock and scan times.",25,-354,920,"GameFontHighlightSmall",S.muted)
   w:EnableMouseWheel(true);w:SetScript("OnMouseWheel",function(_,delta)
     if F.detailPanel:IsMouseOver() and F.tab~="Settings" then F.ScrollDetails(delta);return end
     if F.tab~="Settings" then F.offset=math.max(0,math.min(F.lastPage or 0,(F.offset or 0)-delta*pageSize));F.Render()end
@@ -323,6 +341,9 @@ function F.Render()
   local stats={{"YOUR DELIVERY BOOK",#(F.active or {}).." accepted writs"},{"READY TO HAND IN",ready.." customers waiting"},{"KNOWN FLIGHT POINTS",flightCount.." destinations"},{"PLANNED JOURNEY","~"..math.ceil((F.routeSeconds or 0)/60).." min • estimate"}}
   if F.NeedsFlightScan()then stats[3]={S.MinimumTextSize()>=16 and "FLIGHTS NOT SCANNED" or "FLIGHT PATHS NOT SCANNED","Visit a flight master"}end
   for i,stat in ipairs(stats)do F.stats[i].caption:SetText(stat[1]);F.stats[i].value:SetText(stat[2])end
+  local missing=F.MissingFlightContinents()
+  F.flightWarning:SetShown(#missing>0)
+  F.stats[3].value:SetWidth(#missing>0 and 185 or 214)
   S.TextColor(F.stats[3].caption,F.NeedsFlightScan() and S.gold or S.muted)
   if settings then F.trackButton:Hide();F.mapButton:Hide();return end
   F.tierButton:SetShown(F.tab=="Crates");F.tierButton:SetText("Tier: "..(tiers[F.tierIndex or 1] or "All"))

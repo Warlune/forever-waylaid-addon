@@ -73,7 +73,7 @@ function F.ImportPersonal(silent)
       used[#used + 1] = "Auctioneer"
     end
   end
-  if not silent then F.Print(#used > 0 and ("Read personal prices: " .. table.concat(used, ", ") .. ".") or "Use Scan AH prices in Settings to collect prices without another scanner.")end
+  if not silent then F.Print(#used > 0 and ("Read personal prices: " .. table.concat(used, ", ") .. ".") or "Use Scan AH prices at the bottom of the ledger to collect prices.")end
 end
 
 local capitals = {

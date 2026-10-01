@@ -62,5 +62,18 @@ assert(not F.NeedsFlightScan(),'A valid scan with no reachable destinations must
 F.UpdateNavigator();assert(not F.compass.flightNotice.shown)
 F.char.flights={nodes={},edges={}};F.db.settings.flights=false
 assert(not F.NeedsFlightScan(),'Do not warn when flight routing is disabled')
+F.db.settings.flights=true
+F.char.flights={nodes={},edges={}}
+assert(table.concat(F.MissingFlightContinents(),', ')=='Eastern Kingdoms, Kalimdor')
+F.Render();assert(F.flightWarning.shown)
+F.char.flights.nodes[1]={instance=1}
+assert(#F.MissingFlightContinents()==2,'Unvisited nodes do not prove a continent scan')
+F.char.flights.edges[1]={}
+assert(table.concat(F.MissingFlightContinents())=='Eastern Kingdoms')
+F.char.flights.nodes[2]={instance=0};F.char.flights.edges[2]={}
+F.Render();assert(#F.MissingFlightContinents()==0 and not F.flightWarning.shown)
+F.char.flights.edges[1]=nil
+assert(table.concat(F.MissingFlightContinents())=='Kalimdor')
+F.db.settings.flights=false;assert(#F.MissingFlightContinents()==0)
 F.char.flights=flights;F.guidance=guide;F.db.settings.flights=true
 print('PASS: Shift-click focused text fields, uncached names, no submission, ordinary clicks and flight scan warning lifecycle')

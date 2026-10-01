@@ -14,37 +14,36 @@ F.auctionAddons={
   {"AuctionBuddy","AuctionBuddy"},{"Midas","Midas"},{"GoldCap","GoldCap"},
 }
 
-function F.HasAuctionScanner()
+local function addonEnabled(name)
   local enabled=C_AddOns and C_AddOns.GetAddOnEnableState
-  -- Match Blizzard's AddOnList: Forever display names need not identify the
-  -- character's saved addon overrides. The GUID does.
   local character=(UnitGUID and UnitGUID("player")) or (UnitName and UnitName("player"))
+  if enabled then
+    local ok,value=pcall(enabled,name,character)
+    if ok and type(value)=="number" then return value>0 end
+  end
   local loaded=C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
+  if loaded then local ok,value=pcall(loaded,name);if ok and value then return true end end
+  return not not ((name=="Auctionator" and Auctionator) or (name=="Auc-Advanced" and AucAdvanced))
+end
+function F.HasAuctionScanner()
   for _,addon in ipairs(F.auctionAddons)do
-    local name,label=addon[1],addon[2]
-    local checked=false
-    if enabled then
-      local ok,value=pcall(enabled,name,character)
-      if ok and type(value)=="number" then
-        checked=true
-        if value>0 then return true,label end
-      end
-    end
-    -- Older clients can still detect a running scanner. A known disabled
-    -- state wins even if its globals remain until the next reload.
-    if not checked then
-      if loaded then local ok,value=pcall(loaded,name);if ok and value then return true,label end end
-      if (name=="Auctionator" and Auctionator) or (name=="Auc-Advanced" and AucAdvanced)then return true,label end
-    end
+    if addonEnabled(addon[1]) then return true,addon[2] end
   end
   return false
+end
+-- Only these integrations can currently supply personal prices to Waylaid.
+-- Other auction addons may hide our AH tab, but must not hide the manual fallback.
+function F.ShouldHideNativeScan()
+  return F.db.settings.autoHideAuction~=false and
+    (addonEnabled("Auctionator") or addonEnabled("Auc-Advanced") or addonEnabled("Auctioneer"))
 end
 function F.ShouldHideAuctionExtras()
   return F.db.settings.autoHideAuction~=false and F.HasAuctionScanner()
 end
 
 local function isOpen()
-  return opened or (AuctionHouseFrame and AuctionHouseFrame:IsShown())
+  if opened~=nil then return opened end
+  return AuctionHouseFrame and AuctionHouseFrame:IsShown()
 end
 local function supported()
   return C_AuctionHouse and C_AuctionHouse.ReplicateItems and C_AuctionHouse.GetNumReplicateItems and C_AuctionHouse.GetReplicateItemInfo
@@ -67,10 +66,10 @@ function F.GetScanProgress()
     elseif wait>0 then text=text.." Next scan in "..math.ceil(wait/60).."m." end
   end
   local available=not F.ShouldHideAuctionExtras()
-  return {active=state~=nil,available=available,status=text,phase=report.phase,
+  return {active=state~=nil,available=available,nativeAvailable=not F.ShouldHideNativeScan(),open=not not isOpen(),status=text,phase=report.phase,
     processed=report.index or 0,total=report.total,unique=report.unique or 0,matched=report.matched or 0,
     saved=report.saved or 0,elapsed=report.elapsed or 0,cooldown=wait,
-    canStart=not not (available and not state and isOpen() and supported() and F.db.settings.personal and F.PersonalScanScope() and wait==0)}
+    canStart=not not (not F.ShouldHideNativeScan() and not state and isOpen() and supported() and F.db.settings.personal and F.PersonalScanScope() and wait==0)}
 end
 function F.UpdateScanUI()
   if not F.db then return end
@@ -80,10 +79,23 @@ function F.UpdateScanUI()
     F.auctionCompatibility:SetText(found and ("Detected: "..label..(F.db.settings.autoHideAuction~=false and " • extras hidden" or " • auto-hide off")) or "No supported auction addon enabled.")
   end
   if F.scanButton then
-    F.scanButton:SetShown(info.available);F.cancelScanButton:SetShown(info.available);F.scanStatus:SetShown(info.available)
+    F.scanFooter:SetShown(info.nativeAvailable)
+    F.ledgerHeight=info.nativeAvailable and 774 or 704
+    F.window:SetHeight(F.ledgerHeight)
+    F.footerNote:SetPoint("TOPLEFT",27,-F.ledgerHeight+20)
+    F.versionLabel:SetPoint("TOPLEFT",948,-F.ledgerHeight+20)
+    F.ApplyAccessibility()
+    F.cancelScanButton:SetShown(info.active)
     F.scanButton:SetText(info.active and "Scanning…" or "Scan AH prices")
     F.scanButton:SetEnabled(info.canStart);F.cancelScanButton:SetEnabled(info.active)
     F.scanStatus:SetText(info.status)
+    F.scanStatus:ClearAllPoints();F.scanStatus:SetPoint("TOPLEFT",info.active and 270 or 180,-8)
+    F.scanStatus:SetWidth(info.active and 635 or 725)
+    F.scanFooter.progress:SetShown(info.open)
+    F.scanFooter.scribe.art:SetShown(info.open)
+    F.scanFooter.scribe.active=info.active
+    F.scanFooter.scribe.pose()
+    F.scanFooter.progress:SetValue(info.phase=="complete" and 1 or (info.total and info.total>0 and info.processed/info.total or 0))
   end
   if F.UpdateAuctionScanUI then F.UpdateAuctionScanUI(info)end
 end
@@ -99,10 +111,10 @@ function F.CancelNativeScan(message)
 end
 function F.StartNativeScan()
   if state then return false end
-  if F.ShouldHideAuctionExtras() then status="Use your enabled auction scanner.";F.UpdateScanUI();return false end
+  if F.ShouldHideNativeScan() then status="Use your enabled auction scanner.";F.UpdateScanUI();return false end
   if not isOpen() then status="Open a faction-capital AH to scan.";F.UpdateScanUI();return false end
   if not supported() then status="This client's auction snapshot API is unavailable.";F.UpdateScanUI();return false end
-  if not F.db.settings.personal then status="Enable personal scan prices above first.";F.UpdateScanUI();return false end
+  if not F.db.settings.personal then status="Enable personal scan prices in Waylaid Settings first.";F.UpdateScanUI();return false end
   local scope,city=F.PersonalScanScope()
   if not scope then status="Scan at your faction's capital AH, not a neutral AH.";F.UpdateScanUI();return false end
   if remaining()>0 then status="Auction snapshot is on cooldown.";F.UpdateScanUI();return false end
