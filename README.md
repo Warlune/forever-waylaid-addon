@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.7.0 preview
+# Forever Waylaid — v0.8.0 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.7.0.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.8.0.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -40,7 +40,7 @@ Craft costs value the full batch, including materials you already own; bag count
 
 The built-in **Scan** tab appears along the bottom of the auction house, beside Buy / Sell / Auctions. By default, another supported auction addon enabled for your character hides our tab and scan controls. Installed but disabled copies do not hide them. Open an auction house in your faction capital, choose **Scan**, then click **Scan auction house**. Opening the tab never starts a scan. The original **Settings → Scan AH prices** control remains available too, with the same visibility rule.
 
-An animated orc (Horde) or human (Alliance) scribe copies prices into a ledger, using the original four-frame artwork and slower animation. Beneath the scribe, live counters show auctions read, all distinct item IDs encountered (including bid-only and unrelated items), relevant items with buyouts, prices saved, and elapsed time. The progress bar reflects records processed, not a simulated timer. Prices saved stays at zero until a complete snapshot is committed; the final report remains visible until the next scan. Keep the AH open until completion. **Cancel** or closing the AH discards any unfinished scan. The scanner requests one full snapshot, reads it in small batches, and saves the lowest unit buyout and total buyout stock for **every item with a valid buyout**, including items unrelated to Waylaid deliveries. It makes no purchases and does not run automatically.
+An animated orc (Horde) or human (Alliance) scribe copies prices into a ledger. Each has 16 authored poses with writing, head movement and candle flicker; eased transitions include the last-to-first join. The loop takes four seconds while idle and 2.88 seconds while scanning. Alliance panels use dark slate with a subdued blue-gray header gradient. Beneath the scribe, live counters show auctions read, all distinct item IDs encountered (including bid-only and unrelated items), relevant items with buyouts, prices saved, and elapsed time. The progress bar reflects records processed, not a simulated timer. Prices saved stays at zero until a complete snapshot is committed; the final report remains visible until the next scan. Keep the AH open until completion. **Cancel** or closing the AH discards any unfinished scan. The scanner requests one full snapshot, reads it in small batches, and saves the lowest unit buyout and total buyout stock for **every item with a valid buyout**, including items unrelated to Waylaid deliveries. It makes no purchases and does not run automatically.
 
 **Comparing scan counts:** every auction row in Blizzard's returned snapshot is read, and prices are retained across the entire market. All item types counts distinct item IDs; Relevant items counts the Waylaid subset; Prices saved counts valid price observations committed by this scan. Bid-only listings do not supply buyout values. Prices are grouped by base item ID, so differently enchanted or random-suffix versions share a lowest-price estimate. This scanner does not reproduce Auctionator/Auctioneer's broader shopping, selling, or historical valuation tools. We have not measured accuracy or counts against both addons on a matching market snapshot, so no parity claim is made.
 

@@ -1,5 +1,14 @@
 # Auction scribe artwork
 
+## Current sixteen-pose sprites (v0.8.0)
+
+- Original generated sources: `auction-scribe-horde-16.png` and `auction-scribe-alliance-16.png`.
+- Built-in imagegen edit mode using the original scribes as reference. Full prompts: [scribes-16-prompts.txt](scribes-16-prompts.txt).
+- `tools/pack-scribes.py` finds transparent gutters, aligns desk baselines and widths, and converts the poses into separate 1024 × 1024 RGBA TGA atlases with four rows and four columns. Source PNGs remain unchanged. Packed PNG copies allow inspection.
+- Runtime files: `AuctionScribeHorde16.tga` and `AuctionScribeAlliance16.tga` in `ForeverWaylaid/Art`.
+- Sixteen authored poses per faction, with eased adjacent-pose blending, including frame 16 to frame 1. Four seconds per idle loop; 2.88 seconds during scans. Head, writing hand and candle flame vary across the poses.
+- Previous four/eight-pose source and runtime assets are retained for reference; the new scanner loads the sixteen-pose files.
+
 ## Archived eight-frame sprites (v0.5.1)
 
 - Source: `auction-scribes-8.png` (1254 × 1254 transparent RGBA).
@@ -16,7 +25,7 @@ Use case: identity-preserve. Edit the supplied game sprite atlas into a smoother
 
 Edit this sprite atlas for production use. Preserve these exact Warcraft orc and Alliance human scribes and all sixteen poses. CRITICAL layout repair: output SQUARE canvas, strict FOUR columns by FOUR rows of equally sized SQUARE cells. Each individual sprite must be smaller inside its cell: maximum 80 percent of cell width and 80 percent cell height. At least 10 percent fully transparent margin on ALL FOUR sides of EACH sprite. No pixels touch any cell boundary. Same baseline and desk size in every cell. Top two rows = 8 orc frames; bottom two rows = 8 human frames. Read order left to right then down. Preserve gradual quill writing and glance animation; keep bodies and desks consistently anchored. Transparent RGBA background. No gridlines, lettering or labels. Layout and padding correction only, do not redesign characters. Exact 2048x2048 preferred.
 
-## Current four-frame sprites (restored in v0.6.0)
+## Archived four-frame sprites (restored in v0.6.0)
 
 - Source: `auction-scribes.png` (transparent RGBA, 1774 × 887).
 - Runtime: `../ForeverWaylaid/Art/AuctionScribes.tga` (1024 × 512 RGBA, uncompressed TGA).

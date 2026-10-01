@@ -63,7 +63,7 @@ function F.BuildNavigator()
   c:SetScript("OnDragStart",c.StartMoving);c:SetScript("OnDragStop",function(self)
     self:StopMovingOrSizing();local point,_,_,x,y=self:GetPoint();F.char.navPosition={point=point,x=x,y=y}
   end)
-  local stripe=c:CreateTexture(nil,"ARTWORK");stripe:SetPoint("TOPLEFT",5,-5);stripe:SetSize(290,19);stripe:SetColorTexture(unpack(S.Theme().accent));stripe:SetAlpha(0.55)
+  local stripe=c:CreateTexture(nil,"ARTWORK");stripe:SetPoint("TOPLEFT",5,-5);stripe:SetSize(290,19);S.Accent(stripe);stripe:SetAlpha(0.55)
   F.compassStripe=stripe
   S.Text(c,"COURIER'S COMPASS",11,-9,210,"GameFontNormalSmall",S.gold)
   c.arrow=c:CreateTexture(nil,"ARTWORK");c.arrow:SetTexture("Interface\\Minimap\\MinimapArrow");c.arrow:SetPoint("TOPLEFT",10,-31);c.arrow:SetSize(40,40)

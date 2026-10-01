@@ -27,22 +27,29 @@ for _=1,3 do
 end
 assert(calls==0,'Opening and switching Scan tabs never requests a scan')
 ui.tab.scripts.OnClick()
-local coords
+local coords,nextCoords,alpha,texture
 ui.art.SetTexCoord=function(_,...)coords={...}end
+ui.nextArt.SetTexCoord=function(_,...)nextCoords={...}end
+ui.nextArt.SetAlpha=function(_,value)alpha=value end
+ui.art.SetTexture=function(_,value)texture=value end
 local poses={}
-for _=1,4 do
-  ui.page.scripts.OnUpdate(nil,0.48)
-  assert(coords[3]==0 and coords[4]==0.5,'Horde uses the original upper row')
+for _=1,16 do
+  ui.page.scripts.OnUpdate(nil,0.25)
+  assert(coords[2]-coords[1]==0.25 and coords[4]-coords[3]==0.25,'Each pose occupies one complete atlas cell')
   poses[coords[1]..':'..coords[3]]=true
 end
 local count=0;for _ in pairs(poses)do count=count+1 end
-assert(count==4,'The original four writing poses animate at the slower cadence')
+assert(count==16 and coords[1]==0 and coords[3]==0,'All 16 authored poses run and wrap to the start')
+ui.page.scripts.OnUpdate(nil,0.125)
+assert(math.abs(alpha-0.5)<0.00001 and nextCoords[1]==0.25,'Adjacent poses blend smoothly at the midpoint')
+ui.page.scripts.OnUpdate(nil,3.625)
+assert(coords[1]==0.75 and coords[3]==0.75 and nextCoords[1]==0 and nextCoords[3]==0,'The final pose blends into the first without a hold or reset')
 local oldFaction=UnitFactionGroup;UnitFactionGroup=function()return 'Alliance'end
-ui.page.scripts.OnUpdate(nil,0.48);assert(coords[3]==0.5 and coords[4]==1,'Alliance uses the original lower row')
+ui.pose();assert(texture:find('AuctionScribeAlliance16'),'Alliance uses its own 16-pose atlas')
 UnitFactionGroup=oldFaction
 F.db.settings.debugAlliance=true;F.Style.ApplyTheme()
-assert(coords[3]==0.5 and UnitFactionGroup('player')=='Horde','Debug preview switches the scribe immediately without changing faction')
-F.db.settings.debugAlliance=false;F.Style.ApplyTheme();assert(coords[3]==0,'Turning the preview off restores the actual faction')
+assert(texture:find('Alliance16') and UnitFactionGroup('player')=='Horde','Debug preview switches the scribe immediately without changing faction')
+F.db.settings.debugAlliance=false;F.Style.ApplyTheme();assert(texture:find('Horde16'),'Turning the preview off restores the actual faction')
 ui.start.scripts.OnClick();assert(calls==1 and F.GetScanProgress().phase=='waiting')
 F.scanFrame.scripts.OnEvent(nil,'REPLICATE_ITEM_LIST_UPDATE')
 F.scanFrame.scripts.OnUpdate(nil,0.25)

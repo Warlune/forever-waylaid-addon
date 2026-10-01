@@ -11,8 +11,8 @@ function S.ApplyTheme()
   local theme=S.Theme()
   for _,panel in ipairs(S.panels)do panel:SetBackdropColor(unpack(theme.panel))end
   if F.window then F.window:SetBackdropColor(unpack(theme.bg))end
-  if F.banner then F.banner:SetColorTexture(unpack(theme.accent));F.crest:SetTexture(theme.crest)end
-  if F.compassStripe then F.compassStripe:SetColorTexture(unpack(theme.accent))end
+  if F.banner then S.Accent(F.banner);F.crest:SetTexture(theme.crest)end
+  if F.compassStripe then S.Accent(F.compassStripe)end
   if F.auctionScanUI then F.auctionScanUI.pose()end
 end
 function S.RarityColor(id)
@@ -49,9 +49,18 @@ function S.ColorBorder(lines,r,g,b,alpha)
 end
 function S.Theme()
   if S.Faction()=="Alliance" then
-    return {bg={0.043,0.09,0.16,1},panel={0.09,0.16,0.26,1},accent={0.23,0.43,0.70,1},crest="Interface\\Timer\\Alliance-Logo"}
+    return {bg={0.065,0.071,0.080,1},panel={0.10,0.113,0.124,1},accent={0.26,0.32,0.37,1},fade={0.08,0.092,0.11,1},crest="Interface\\Timer\\Alliance-Logo"}
   end
   return {bg={0.09,0.075,0.055,1},panel={0.15,0.12,0.09,1},accent={0.55,0.20,0.14,1},crest="Interface\\Timer\\Horde-Logo"}
+end
+function S.Accent(texture)
+  local theme=S.Theme()
+  texture:SetColorTexture(unpack(theme.accent))
+  if texture.SetGradient and CreateColor then
+    -- Explicitly reset both ends when returning from the Alliance preview.
+    texture:SetColorTexture(1,1,1,1)
+    texture:SetGradient("HORIZONTAL",CreateColor(unpack(theme.accent)),CreateColor(unpack(theme.fade or theme.accent)))
+  end
 end
 function S.BindItem(frame,id)
   frame.itemID=id;frame:EnableMouse(id~=nil)
