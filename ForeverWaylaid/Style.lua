@@ -53,16 +53,18 @@ function S.Theme()
   end
   return {bg={0.09,0.075,0.055,1},panel={0.15,0.12,0.09,1},accent={0.55,0.20,0.14,1},crest="Interface\\Timer\\Horde-Logo"}
 end
-function S.Accent(texture)
+function S.Accent(texture,opacity)
   local theme=S.Theme()
-  local opacity=texture:GetAlpha()
-  texture:SetColorTexture(unpack(theme.accent))
+  texture.fwAccentOpacity=opacity or rawget(texture,"fwAccentOpacity") or 1
+  opacity=texture.fwAccentOpacity
+  texture:SetAlpha(1)
+  texture:SetColorTexture(theme.accent[1],theme.accent[2],theme.accent[3],opacity)
   if texture.SetGradient and CreateColor then
-    -- Explicitly reset both ends when returning from the Alliance preview.
+    -- This client takes gradient opacity from its vertex colors.
+    local fade=theme.fade or theme.accent
     texture:SetColorTexture(1,1,1,1)
-    texture:SetGradient("HORIZONTAL",CreateColor(unpack(theme.accent)),CreateColor(unpack(theme.fade or theme.accent)))
+    texture:SetGradient("HORIZONTAL",CreateColor(theme.accent[1],theme.accent[2],theme.accent[3],opacity),CreateColor(fade[1],fade[2],fade[3],opacity))
   end
-  texture:SetAlpha(opacity or 1)
 end
 function S.BindItem(frame,id)
   frame.itemID=id;frame:EnableMouse(id~=nil)

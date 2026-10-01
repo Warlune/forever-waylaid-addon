@@ -85,7 +85,7 @@ function F.BuildUI()
   local backing=w:CreateTexture(nil,"BACKGROUND",nil,-8);backing:SetPoint("TOPLEFT",10,-10);backing:SetPoint("BOTTOMRIGHT",-10,10);backing:SetColorTexture(0.055,0.039,0.025,0.98)
   w:EnableMouse(true);w:SetMovable(true);w:SetClampedToScreen(true);w:RegisterForDrag("LeftButton")
   w:SetScript("OnDragStart",w.StartMoving);w:SetScript("OnDragStop",w.StopMovingOrSizing)
-  local banner=w:CreateTexture(nil,"ARTWORK");banner:SetPoint("TOPLEFT",14,-14);banner:SetSize(1012,60);S.Accent(banner);banner:SetAlpha(0.32)
+  local banner=w:CreateTexture(nil,"ARTWORK");banner:SetPoint("TOPLEFT",14,-14);banner:SetSize(1012,60);S.Accent(banner,0.32)
   local crest=w:CreateTexture(nil,"OVERLAY");crest:SetPoint("TOPLEFT",25,-18);crest:SetSize(58,58);crest:SetTexture(S.Theme().crest)
   F.banner,F.crest=banner,crest
   S.Text(w,"FOREVER WAYLAID",94,-22,470,"GameFontNormalHuge",S.gold)

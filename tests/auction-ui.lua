@@ -1,4 +1,17 @@
 local F=...
+do
+  local oldColor=CreateColor
+  CreateColor=function(r,g,b,a)return {r,g,b,a}end
+  local ends
+  local texture={SetAlpha=function()end,SetColorTexture=function()end,
+    SetGradient=function(_,_,left,right)ends={left,right}end}
+  F.Style.Accent(texture,0.32)
+  F.db.settings.debugAlliance=true;F.Style.Accent(texture)
+  assert(ends[1][4]==0.32 and ends[2][4]==0.32,'Both gradient endpoints retain opacity after a faction change')
+  F.db.settings.debugAlliance=false;F.Style.Accent(texture)
+  assert(ends[1][4]==0.32 and ends[2][4]==0.32,'Returning to Horde retains opacity')
+  CreateColor=oldColor
+end
 local oldAH,oldAPI,oldAddons,oldMode=AuctionHouseFrame,C_AuctionHouse,C_AddOns,AuctionHouseFrameDisplayMode
 local oldHook,oldResize,oldSelect,oldDeselect=hooksecurefunc,PanelTemplates_TabResize,PanelTemplates_SelectTab,PanelTemplates_DeselectTab
 local oldNow,oldLast,oldRefresh=F.Now,F.char.nativeScanLastAttempt,F.Refresh

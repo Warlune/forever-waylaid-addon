@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.8.1"
+F.version = "0.8.2"
 F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
 
 function F.ApplySettings()
