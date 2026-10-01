@@ -29,11 +29,11 @@ function P.Rescue()
 end
 function P.Adopt(index)
   index=index or 1
-  if not integer(index,1,6)then return false,"Choose an adoption pack." end
+  if not integer(index,1,6)then return false,"Choose an adoption crate." end
   local ok,msg=room();if not ok then return ok,msg end
   local s,pack=P.state,D.packs[index]
   local owned=s.packs[index]>0
-  if not owned and s.tokens<pack.cost then return false,"This pack costs "..pack.cost.." pet tokens." end
+  if not owned and s.tokens<pack.cost then return false,"This adoption crate costs "..pack.cost.." pet tokens." end
   local roll,total,rarity=P.random(1,100),0,1
   for i,chance in ipairs(pack.odds)do total=total+chance;if roll<=total then rarity=i;break end end
   local species=P.random(1,84) -- Raid bosses never come from purchased packs.

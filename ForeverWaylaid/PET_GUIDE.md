@@ -1,21 +1,21 @@
-# Waylaid companions — 0.13.2 preview
+# Waylaid companions — 0.13.3 preview
 
-Open **Pets → Adopt**, choose a pack, then select the new companion in the stable and click **Equip**. Browsing a pet does not change the equipped companion. The first living companion is equipped automatically. The compass and large window share the same pet and battle.
+Open **Pets → Adopt**, choose a adoption crate, then select the new companion in the stable and click **Equip**. Browsing a pet does not change the equipped companion. The first living companion is equipped automatically. The compass and large window share the same pet and battle.
 
-## Packs and collection
+## Adoption crates and collection
 
-All 100 species are Warcraft creatures. The 84 regular species are equally likely within every pack. The remaining 16 are raid rewards. Rarity is rolled separately from species; duplicates are possible. Packs use only virtual pet tokens, never real money or in-game gold.
+All 100 species are Warcraft creatures. The 84 regular species are equally likely within every adoption crate. The remaining 16 are raid rewards. Rarity is rolled separately from species; duplicates are possible. Adoption crates use only virtual pet tokens, never real money or in-game gold.
 
-| Pack | Tokens | Common | Uncommon | Rare | Epic | Legendary |
+| Adoption crate | Tokens | Common | Uncommon | Rare | Epic | Legendary |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Traveler's Satchel | 25 | 90% | 10% | — | — | — |
-| Scout's Satchel | 40 | 75% | 20% | 5% | — | — |
-| Adventurer's Crate | 55 | 50% | 35% | 10% | 5% | — |
-| Veteran's Cache | 70 | 25% | 45% | 20% | 9% | 1% |
-| Champion's Cache | 85 | 10% | 40% | 30% | 17% | 3% |
-| Azeroth's Reliquary | 100 | — | 30% | 40% | 25% | 5% |
+| Traveler's Adoption Crate | 25 | 90% | 10% | — | — | — |
+| Scout's Adoption Crate | 40 | 75% | 20% | 5% | — | — |
+| Adventurer's Adoption Crate | 55 | 50% | 35% | 10% | 5% | — |
+| Veteran's Adoption Crate | 70 | 25% | 45% | 20% | 9% | 1% |
+| Champion's Adoption Crate | 85 | 10% | 40% | 30% | 17% | 3% |
+| Azeroth's Adoption Crate | 100 | — | 30% | 40% | 25% | 5% |
 
-Earned packs are opened free before charging tokens for that pack type. If no living pets remain, **Free common rescue** supplies a common companion without spending tokens. Old pets, rarity, progress and memorial records are preserved. The stable holds 100 living pets and 512 total living/memorial records.
+Earned adoption crates are opened free before charging tokens for that adoption crate type. If no living pets remain, **Free common rescue** supplies a common companion without spending tokens. Old pets, rarity, progress and memorial records are preserved. The stable holds 100 living pets and 512 total living/memorial records.
 
 ## Stats and abilities
 
@@ -49,7 +49,7 @@ Automated preview checks cover all 500 species/rarity combinations at level 100 
 
 These are **virtual addon rewards**, separate from WoW loot. A matching `ENCOUNTER_START` and successful `ENCOUNTER_END` in a dungeon or raid are required. Wipes, outdoor elites, unpaired events and changing instances do not count.
 
-- Dungeon boss: 3 tokens, with a 20% chance for a free pack. That pack is Scout's (60%), Adventurer's (30%), or Veteran's (10%). One reward roll per boss per 24 hours.
+- Dungeon boss: 3 tokens, with a 20% chance for a free adoption crate. That adoption crate is Scout's (60%), Adventurer's (30%), or Veteran's (10%). One reward roll per boss per 24 hours.
 - Raid boss: 10 tokens, with a 5% chance for that boss's **Epic** companion when it is in the supported roster. One reward roll per boss per seven days.
 - The local reward cooldown is independent of the game's raid reset. Successful and failed rolls both consume it. It survives reload.
 - Boss companions wait in **Adopt → Claim raid companion** until claimed, including if the stable was full or a tower fight was active. Hover the button for the next waiting boss's name.

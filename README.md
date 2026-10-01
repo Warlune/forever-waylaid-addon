@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.13.2 preview
+# Forever Waylaid — v0.13.3 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.13.2.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.13.3.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -30,7 +30,7 @@ The addon has no bundled auction prices or external price service. Until you sca
 
 Click **Pet** in the compass header for the compact game, or **Pets** in the ledger (`/fwl pets`) for the larger camp, stable and inspection screen. Horde and Alliance each have their own pixel camp and tower scenes; the Alliance debug preview switches these too. **Open** and **Compass view** move between the two sizes. The route arrow remains above the compact game, which shares the expandable area with the route map.
 
-Collect **100 Warcraft species**, including 16 raid-boss companions. Open **Adopt** for six packs costing 25–100 tokens with exact rarity odds. Select a pet to preview it; click **Equip** to make it your traveling companion. Four care icons handle feeding, play, rest and healing; hover for descriptions, supply counts and costs. If an item runs out, clicking its care icon buys one with pet tokens and uses it. No real gold is involved. A free common rescue is available when no living pets remain. Earn two tokens per five minutes online with a living equipped pet, and more from tower victories and boss encounters. The Store sells treats, toys and herbs. Eligible personal NPC kills have a 1% treat chance, capped at one per 30 minutes; first tower clears have a 10% chance. Earned dungeon packs open free. See the [companion guide](ForeverWaylaid/PET_GUIDE.md) for all pack odds, abilities, income and drop rules.
+Collect **100 Warcraft species**, including 16 raid-boss companions. Open **Adopt** for six adoption crates costing 25–100 tokens with exact rarity odds. Select a pet to preview it; click **Equip** to make it your traveling companion. Four care icons handle feeding, play, rest and healing; hover for descriptions, supply counts and costs. If an item runs out, clicking its care icon buys one with pet tokens and uses it. No real gold is involved. A free common rescue is available when no living pets remain. Earn two tokens per five minutes online with a living equipped pet, and more from tower victories and boss encounters. The Store sells treats, toys and herbs. Eligible personal NPC kills have a 1% treat chance, capped at one per 30 minutes; first tower clears have a 10% chance. Earned dungeon adoption crates open free. See the [companion guide](ForeverWaylaid/PET_GUIDE.md) for all adoption crate odds, abilities, income and drop rules.
 
 **Death is permanent.** Tower defeat or prolonged starvation kills the active pet, retaining its level and active lifespan in the memorial. Stabled and offline pets do not age or lose needs. The stable holds 100 living pets; the stable and memorial together hold 512 records.
 

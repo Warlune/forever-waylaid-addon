@@ -46,10 +46,10 @@ for id,entry in ipairs(entries)do
   if id>=85 then D.bosses[entry[1]]=id end
 end
 D.packs={
-  {name="Traveler's Satchel",cost=25,odds={90,10,0,0,0},icon="INV_Misc_Bag_10"},
-  {name="Scout's Satchel",cost=40,odds={75,20,5,0,0},icon="INV_Misc_Bag_07"},
-  {name="Adventurer's Crate",cost=55,odds={50,35,10,5,0},icon="INV_Crate_01"},
-  {name="Veteran's Cache",cost=70,odds={25,45,20,9,1},icon="INV_Box_01"},
-  {name="Champion's Cache",cost=85,odds={10,40,30,17,3},icon="INV_Misc_TreasureChest02"},
-  {name="Azeroth's Reliquary",cost=100,odds={0,30,40,25,5},icon="INV_Misc_TreasureChest03"},
+  {name="Traveler's Adoption Crate",cost=25,odds={90,10,0,0,0},icon="INV_Crate_01"},
+  {name="Scout's Adoption Crate",cost=40,odds={75,20,5,0,0},icon="INV_Crate_01"},
+  {name="Adventurer's Adoption Crate",cost=55,odds={50,35,10,5,0},icon="INV_Crate_01"},
+  {name="Veteran's Adoption Crate",cost=70,odds={25,45,20,9,1},icon="INV_Crate_01"},
+  {name="Champion's Adoption Crate",cost=85,odds={10,40,30,17,3},icon="INV_Crate_01"},
+  {name="Azeroth's Adoption Crate",cost=100,odds={0,30,40,25,5},icon="INV_Crate_01"},
 }

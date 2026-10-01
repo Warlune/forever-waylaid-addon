@@ -2,7 +2,7 @@
 
 Created with the built-in image-generation tool on 2026-10-01. Original generated Warcraft-inspired fan art, not extracted game textures.
 
-`PetScenesAlliance.png` and `PetScenesHorde.png` are the original source atlases. The matching `.tga` files are 2048 by 1024 RGB exports resized with nearest-neighbor sampling. Each atlas contains a camp (left) and tower arena (right). The UI chooses the real or debug-preview faction and crops each scene without changing sprite scale.
+`PetScenesAlliance.png` and `PetScenesHorde.png` are the original source atlases. The matching `.tga` files are 2048 by 1024 uncompressed 32-bit RGBA exports with fully opaque alpha resized with nearest-neighbor sampling. Each atlas contains a camp (left) and tower arena (right). The UI chooses the real or debug-preview faction and crops each scene without changing sprite scale. Scene textures draw above the panel fill and below pet sprites.
 
 ## Alliance / original generation prompt
 

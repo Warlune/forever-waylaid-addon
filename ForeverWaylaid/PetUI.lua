@@ -64,7 +64,8 @@ end
 local function stage(parent,x,y,width,height)
   local f=S.Panel(parent,x,y,width,height);f.width=width;f.height=height
   f.displayEnemies={};f.round=false;f.tower=false
-  f.bg=f:CreateTexture(nil,"BACKGROUND");f.bg:SetPoint("TOPLEFT",3,-3);f.bg:SetPoint("BOTTOMRIGHT",-3,3)
+  -- Above the BackdropTemplate's fill, below the ARTWORK pet sprites.
+  f.bg=f:CreateTexture(nil,"BORDER",nil,1);f.bg:SetPoint("TOPLEFT",6,-6);f.bg:SetPoint("BOTTOMRIGHT",-6,6)
   f.pet=sprite(f,height*0.88);f.enemies={};f.enemyHP={}
   for i=1,3 do f.enemies[i]=sprite(f,height*0.88);f.enemyHP[i]=meter(f,width*0.48+(i-1)*width*0.17,-36,width*0.15,"",{0.75,0.25,0.2})end
   f.enemy=f.enemies[1]
@@ -109,7 +110,7 @@ local function stage(parent,x,y,width,height)
 end
 local function renderStage(f,pet,tower)
   f.tower=tower
-  f.bg:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\PetScenes"..S.Faction(),"CLAMP","CLAMP","NEAREST")
+  f.bg:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\PetScenes"..S.Faction()..".tga","CLAMP","CLAMP","NEAREST")
   f.bg:SetTexCoord(tower and 0.5 or 0,tower and 1 or 0.5,0.2,0.8);f.bg:SetAlpha(S.HighContrast() and 0.25 or 1)
   local b=P.state.battle;local result=tower and P.CurrentVictory()
   local r=result and result.round or P.lastRound
@@ -202,7 +203,7 @@ end
 function P.BuildUI()
   if P.window then return end
   local w=S.Panel(UIParent,0,0,780,610);P.window=w;P.mode="collection";P.page=1;P.floor=P.floor or 1
-  w:ClearAllPoints();w:SetPoint("CENTER");w:SetFrameStrata("HIGH");w:SetClampedToScreen(true);w:SetMovable(true);w:EnableMouse(true);w:RegisterForDrag("LeftButton")
+  w:ClearAllPoints();w:SetPoint("CENTER");w:SetFrameStrata("DIALOG");w:SetFrameLevel(100);w:SetToplevel(true);w:SetClampedToScreen(true);w:SetMovable(true);w:EnableMouse(true);w:RegisterForDrag("LeftButton")
   w:SetScript("OnDragStart",w.StartMoving);w:SetScript("OnDragStop",w.StopMovingOrSizing)
   local close=CreateFrame("Button",nil,w,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-3,-3);close:SetScript("OnClick",function()w:Hide()end)
   text(w,"WAYLAID COMPANIONS",22,-16,680,26)
@@ -258,7 +259,7 @@ function P.Toggle()P.BuildUI();P.window:SetShown(not P.window:IsShown());P.Rende
 function P.OpenStore()
   if not P.store then
     local w=S.Panel(UIParent,0,0,396,364);P.store=w
-    w:ClearAllPoints();w:SetPoint("CENTER");w:SetFrameStrata("DIALOG");w:SetClampedToScreen(true)
+    w:ClearAllPoints();w:SetPoint("CENTER");w:SetFrameStrata("DIALOG");w:SetFrameLevel(300);w:SetToplevel(true);w:EnableMouse(true);w:SetClampedToScreen(true)
     local close=CreateFrame("Button",nil,w,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-3,-3);close:SetScript("OnClick",function()w:Hide()end)
     text(w,"COMPANION SUPPLIES",16,-14,350,26)
     w.wallet=text(w,"",16,-46,364,24);w.rows={};w.buy={}
@@ -288,9 +289,9 @@ end
 function P.OpenAdopt()
   if not P.adoption then
     local a=S.Panel(UIParent,0,0,820,680);P.adoption=a
-    a:ClearAllPoints();a:SetPoint("CENTER");a:SetFrameStrata("DIALOG");a:SetClampedToScreen(true)
+    a:ClearAllPoints();a:SetPoint("CENTER");a:SetFrameStrata("DIALOG");a:SetFrameLevel(200);a:SetToplevel(true);a:EnableMouse(true);a:SetClampedToScreen(true)
     local close=CreateFrame("Button",nil,a,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-3,-3);close:SetScript("OnClick",function()a:Hide()end)
-    text(a,"ADOPT A COMPANION",22,-16,750,28)
+    text(a,"ADOPTION CRATES",22,-16,750,28)
     a.cards={}
     for i,pack in ipairs(P.packs)do
       local index=i;local x=16+((i-1)%2)*400;local y=-58-math.floor((i-1)/2)*156
@@ -301,7 +302,7 @@ function P.OpenAdopt()
       text(c,table.concat(odds,"  |  "),12,-47,364,56,{1,1,1})
       c.open=S.Button(c,"",12,-112,226,function()act(function()return P.Adopt(index)end)end)
       c.owned=text(c,"",248,-112,128,24)
-      tip(c,"Pack contents","One of 84 Warcraft species, equally likely. Quality uses the exact odds shown. Raid bosses come only from raid rewards. Duplicate species are possible. These are virtual pet tokens, never gold or money.")
+      tip(c,"Adoption crate contents","One of 84 Warcraft species, equally likely. Quality uses the exact odds shown. Raid bosses come only from raid rewards. Duplicate species are possible. These are virtual pet tokens, never gold or money.")
     end
     a.info=text(a,"",20,-534,778,44,S.muted)
     a.rescue=S.Button(a,"Free common rescue",20,-590,244,function()act(P.Rescue)end)
@@ -316,7 +317,7 @@ function P.RenderAdopt()
   a:SetScale(F.AccessibleScale(F.db.settings.ledgerScale,820,680))
   local s=P.state
   for i,c in ipairs(a.cards)do
-    c.open:SetText(s.packs[i]>0 and "Open earned pack - free" or "Adopt - "..P.packs[i].cost.." tokens")
+    c.open:SetText(s.packs[i]>0 and "Open earned crate - free" or "Adopt - "..P.packs[i].cost.." tokens")
     c.open:SetEnabled(not s.battle and (s.packs[i]>0 or s.tokens>=P.packs[i].cost) and P.LivingCount()<100 and #s.pets<512)
     c.owned:SetText("Owned: "..s.packs[i])
   end
@@ -326,7 +327,7 @@ function P.RenderAdopt()
   a.bossSpecies=false;for i=85,100 do if (s.bossEggs[i] or 0)>0 then a.bossSpecies=i;break end end
   a.claim:SetEnabled(not not a.bossSpecies and not s.battle and P.LivingCount()<100)
   tip(a.claim,"Raid companion",a.bossSpecies and ("Claim epic "..P.species[a.bossSpecies]..". Other waiting boss companions remain saved.") or "Supported raid bosses have a 5% chance to grant their own epic companion. One roll per boss per seven days.")
-  a.notice:SetText(P.notice or "Choose a pack to adopt. Your equipped pet stays with you.")
+  a.notice:SetText(P.notice or "Choose an adoption crate. Your equipped pet stays with you.")
 end
 function P.Render()
   P.RenderStore();P.RenderAdopt();P.RenderCompass();local w=P.window;if not w or not P.state or not w:IsShown()then return end

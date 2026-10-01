@@ -156,6 +156,8 @@ P.SetSharing(false);P.Share();P.Receive('ASK3','WHISPER','Off');assert(sends==be
 C_ChatInfo,IsInGuild,IsInGroup,IsInRaid=oldChat,oldGuild,oldGroup,oldRaid
 UnitIsPlayer,UnitIsUnit,GetUnitName=oldIsPlayer,oldIsUnit,oldGetName
 P.window=nil;P.BuildUI();P.window:Show()
+assert(F.window.frameStrata=='HIGH' and P.window.frameStrata=='DIALOG','Pet window renders above every ledger child')
+assert(P.window.mouseEnabled and P.window.scene.bg.drawLayer=='BORDER' and P.window.scene.pet.drawLayer=='ARTWORK','Scene lies above panel fill and below sprites')
 local oldPreview=F.db.settings.debugAlliance
 local background
 P.window.scene.bg.SetTexture=function(_,path)background=path end
@@ -198,6 +200,8 @@ local equipped=P.state.active
 P.window.collection.rows[1].scripts.OnClick(P.window.collection.rows[1])
 assert(P.state.active==equipped and P.viewID==P.state.pets[1].id)
 P.OpenAdopt();assert(P.adoption:IsShown() and #P.adoption.cards==6)
+assert(P.adoption.frameStrata=='DIALOG' and P.adoption.frameLevel>P.window.frameLevel and P.adoption.mouseEnabled,'Adoption stays above pets and blocks clicks through the panel')
+for _,crate in ipairs(P.packs)do assert(crate.name:find('Adoption Crate',1,true) and crate.icon=='INV_Crate_01')end
 P.RenderAdopt();P.adoption:Hide()
 local priorSpecies=P.Active().species;P.viewID=P.Active().id
 P.window.scene.pet.SetTexCoord=function(_,left,right,top,bottom)
@@ -328,6 +332,7 @@ do
   P.state.rewardSeconds=299;P.Tick(1);assert(P.state.tokens==20)
   assert(P.Rescue());companion=P.Active();P.Tick(1);assert(P.state.tokens==22)
   P.OpenStore();local food=P.state.inventory.food;local hunger=companion.food
+  assert(P.store.frameLevel>P.window.frameLevel and P.store.mouseEnabled,'Store stays above pets and blocks clicks through the panel')
   P.store.buy.food.scripts.OnClick()
   assert(P.state.inventory.food==food+1 and P.state.tokens==20 and companion.food==hunger)
   P.store:Hide()
