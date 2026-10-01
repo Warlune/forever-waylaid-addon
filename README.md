@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.8.5 preview
+# Forever Waylaid — v0.9.0 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.8.5.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.9.0.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -35,6 +35,18 @@ Craft mode uses the website's 208 verified recipes and 143 raw materials. The se
 Hover only the **picture** of a required good, reagent, crafted step, writ, or crate to see the normal in-game item tooltip. The faction theme follows your character: warm Horde tones or Alliance blue with a native crest. **Settings → Debug: preview Alliance appearance** switches the colors, crest, heading, compass accent and scribe immediately. This preview changes appearance only; prices, recipes, routes and peer sharing still use your real faction. Turn it off to restore your character's theme.
 
 Craft costs value the full batch, including materials you already own; bag counts are shown separately. Vendor values are undiscounted base prices, and recipes are not assumed to be learned. These are planning lists: the addon does not craft, buy, or consume items for you. Gathered goods keep their purchase cost instead of inventing a recipe.
+
+## Accessibility
+
+Open **Settings → Accessibility**, or type `/fwl accessibility`.
+
+- Separate ledger and compass sizes: 100%, 115%, 130% and 150%, capped to fit the available screen.
+- **Larger text** gives addon labels a minimum 13-point font. Detail text wraps and the detail panel scrolls; long list labels can still be truncated, so select an entry for its full information.
+- **High contrast** uses white text on dark surfaces, removes parchment and colored value fills, and keeps the written value ratings. Icon rarity borders remain colored.
+- **Reduced motion** pauses the decorative scribe animation. The directional arrow and scan progress continue to update.
+- **Reset accessibility** restores these controls to their defaults without changing prices, routes or other preferences.
+
+Settings apply immediately and are saved account-wide. These controls affect this addon's interface, not the game's global font size, native item tooltips or other addons. They do not provide screen-reader or full keyboard navigation support.
 
 ## Built-in auction scanner
 

@@ -1,9 +1,10 @@
 local _, F = ...
-F.version = "0.8.5"
-F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
+F.version = "0.9.0"
+F.defaults = { ledgerScale=1, compassScale=1, largeText=false, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
 
 function F.ApplySettings()
   F.Style.ApplyTheme()
+  F.ApplyAccessibility()
   if F.ShouldHideAuctionExtras() then F.CancelNativeScan("Another auction addon is enabled. Previous prices kept.")end
   F.UpdateScanUI();F.Refresh()
 end
@@ -47,7 +48,7 @@ events:SetScript("OnEvent", function(_, event, name, success)
     F.char.recipients = F.char.recipients or {}
     F.char.realm = GetRealmName()
   elseif event == "PLAYER_LOGIN" then
-    F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.BuildNavigator(); F.RegisterAuctionator(); F.Refresh()
+    F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.BuildNavigator(); F.RegisterAuctionator(); F.Style.ApplyTheme(); F.ApplyAccessibility(); F.Refresh()
     F.InitializePeers()
     F.Print("v" .. F.version .. " — /fwl to open. Scan AH prices or opt into peer sharing in Settings.")
     if F.NeedsFlightScan()then F.Print("Flight paths not scanned: open a flight master's map to learn your routes. No flight purchase needed; until then, routing uses walking estimates.")end
@@ -91,6 +92,7 @@ SlashCmdList.FOREVERWAYLAID = function(msg)
   end
   local clear = tonumber(msg:match("^unpin%s+(%d+)$"))
   if clear then F.char.pins[clear] = nil; F.Refresh(); return end
+  if msg == "accessibility" then F.tab="Settings";F.accessibilityView=true;F.window:Show();F.Render();return end
   if msg == "prices" then F.ImportPersonal(); F.Refresh(); return end
   if msg == "compass" then F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator();return end
   if msg == "reset" then F.ResetNavigator();return end

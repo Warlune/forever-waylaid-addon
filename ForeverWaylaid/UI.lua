@@ -162,7 +162,9 @@ function F.BuildUI()
   S.Text(w,"Personal & opt-in peer scans  •  market estimates, not guaranteed purchase prices",27,-684,730,"GameFontDisableSmall")
   S.Text(w,"v"..F.version,948,-684,65,"GameFontDisableSmall")
   F.settings=S.Panel(w,24,-221,990,415)
-  S.Text(F.settings,"Make the ledger your own",25,-18,800,"GameFontNormalLarge",S.gold)
+  S.Text(F.settings,"Make the ledger your own",25,-18,620,"GameFontNormalLarge",S.gold)
+  S.Button(F.settings,"Accessibility",740,-14,220,function()F.accessibilityView=true;F.Render()end)
+  F.BuildAccessibility(w)
   S.Text(F.settings,"TOOLTIPS & PRICES",25,-57,400,"GameFontNormalSmall",S.muted)
   S.Check(F.settings,"Show cheapest crate fill",23,-80,"cheapest")
   S.Check(F.settings,"Include crate price in tooltip totals",23,-110,"includeCrate")
@@ -211,10 +213,10 @@ local function detailWriter()
     local height=heading and 58 or (icon and 43 or description and 42 or 25)
     row:ClearAllPoints();row:SetPoint("TOPLEFT",0,-y);row:SetHeight(height);row:Show();row.icon:SetShown(icon~=nil)
     row.title:ClearAllPoints();row.title:SetPoint("TOPLEFT",icon and 43 or 4,-5);row.title:SetWidth(amount and 170 or (icon and 286 or 326))
-    row.title:SetFontObject(heading and "GameFontNormalLarge" or "GameFontNormal");row.title:SetTextColor(unpack(S.ink));row.title:SetText(title)
+    S.ReadableFont(row.title,heading and "GameFontNormalLarge" or "GameFontNormal");S.TextColor(row.title,S.ink);row.title:SetText(title)
     local cargo=icon and (F.cratesByID[icon] or F.writsByID[icon])
     row.title:SetShadowColor(0,0,0,cargo and 1 or 0);row.title:SetShadowOffset(1,-1)
-    if cargo then local r,g,b=S.RarityColor(icon);row.title:SetTextColor(r,g,b)end
+    if cargo then local r,g,b=S.RarityColor(icon);S.TextColor(row.title,{r,g,b})end
     row.description:ClearAllPoints();row.description:SetPoint("TOPLEFT",icon and 43 or 4,heading and -43 or -26);row.description:SetWidth(icon and 286 or 326);row.description:SetText(description or "")
     row.amount:SetText(amount or "");if icon then S.SetIcon(row.icon,icon)end
     local titleHeight=row.title:GetStringHeight() or 16
@@ -311,7 +313,7 @@ function F.Render()
   F.status:SetText(F.char.realm.." • "..UnitFactionGroup("player").."\nPersonal scans"..(F.db.settings.peerSharing and " + unverified peer prices" or " • peer sharing off"))
   F.factionTitle:SetText(S.Faction()=="Horde" and "DUROTAR SUPPLY & LOGISTICS  /  FIELD LEDGER" or "AZEROTH COMMERCE AUTHORITY  /  FIELD LEDGER")
   local settings=F.tab=="Settings"
-  F.settings:SetShown(settings);F.body:SetShown(not settings);F.detailPanel:SetShown(not settings)
+  F.settings:SetShown(settings and not F.accessibilityView);F.accessibility:SetShown(settings and F.accessibilityView);F.body:SetShown(not settings);F.detailPanel:SetShown(not settings)
   F.filters:SetShown(F.tab=="Crates" or F.tab=="Writs")
   F.prev:SetShown(not settings);F.next:SetShown(not settings);F.pageLabel:SetShown(not settings)
   for tab,b in pairs(F.tabButtons) do b:SetEnabled(tab~=F.tab)end
@@ -320,7 +322,7 @@ function F.Render()
   local stats={{"YOUR DELIVERY BOOK",#(F.active or {}).." accepted writs"},{"READY TO HAND IN",ready.." customers waiting"},{"KNOWN FLIGHT POINTS",flightCount.." destinations"},{"PLANNED JOURNEY","~"..math.ceil((F.routeSeconds or 0)/60).." min • estimate"}}
   if F.NeedsFlightScan()then stats[3]={"FLIGHT PATHS NOT SCANNED","Visit a flight master"}end
   for i,stat in ipairs(stats)do F.stats[i].caption:SetText(stat[1]);F.stats[i].value:SetText(stat[2])end
-  F.stats[3].caption:SetTextColor(unpack(F.NeedsFlightScan() and S.gold or S.muted))
+  S.TextColor(F.stats[3].caption,F.NeedsFlightScan() and S.gold or S.muted)
   if settings then F.trackButton:Hide();F.mapButton:Hide();return end
   F.tierButton:SetShown(F.tab=="Crates");F.tierButton:SetText("Tier: "..(tiers[F.tierIndex or 1] or "All"))
   F.sortButton:SetText("Sort: "..({"Best value","Lowest total","Name"})[F.sortIndex or 1])
@@ -336,22 +338,24 @@ function F.Render()
     if entry then
       row.entry=entry;row.itemID=entry.item.id;S.SetIcon(row.icon,entry.item.id)
       local r,g,b=S.RarityColor(entry.item.id)
-      row.text:SetTextColor(r,g,b)
+      S.TextColor(row.text,{r,g,b})
       local color=entry.band and F.valueColors[entry.band] or neutral
-      row.bg:SetColorTexture(color[1],color[2],color[3],entry==selected and 0.27 or 0.11)
-      row.stripe:SetColorTexture(color[1],color[2],color[3],1)
+      if S.HighContrast() then row.bg:SetColorTexture(1,1,1,entry==selected and 0.2 or 0.025)
+      else row.bg:SetColorTexture(color[1],color[2],color[3],entry==selected and 0.27 or 0.11)end
+      if S.HighContrast() then row.stripe:SetColorTexture(1,1,1,entry==selected and 1 or 0.3)
+      else row.stripe:SetColorTexture(color[1],color[2],color[3],1)end
       row.text:SetText((entry.index and entry.index..". " or "")..short(entry.item.name))
       if F.tab=="Route" then
-        row.reward:SetTextColor(unpack(S.muted))
+        S.TextColor(row.reward,S.muted)
         row.cost:SetText(entry.leg and "~"..math.ceil(entry.leg.seconds/60).." min" or "Needs location")
         row.detail:SetText(entry.stop.npc or entry.stop.deliveryText or F.DestinationText(entry.stop.point))
-        row.reward:SetText(entry.stop.ready and "|cff88cc77Ready|r" or "Preparing")
+        row.reward:SetText(entry.stop.ready and (S.HighContrast() and "Ready" or "|cff88cc77Ready|r") or "Preparing")
       else
         row.cost:SetText((entry.item.questId and "Writ " or "Crate ")..S.Money(entry.purchase and entry.purchase.price).."\nGoods "..S.Money(entry.cost).."\nTotal "..S.Money(entry.total))
         row.detail:SetText(entry.best and entry.best.option.qty.." × "..entry.best.option.name or entry.item.questId and entry.item.qty.." × "..entry.item.targetName or "Price missing / short stock")
         local status=entry.stop and (entry.stop.ready and " • Ready" or " • Accepted") or ""
         row.reward:SetText((entry.reward or 0)..(F.tab=="Crates" and " favor" or " rep").." • "..(entry.band and F.valueLabels[entry.band] or entry.fullyPriced and "Stock / value unverified" or "Unpriced")..status)
-        row.reward:SetTextColor(unpack(entry.band and F.valueColors[entry.band] or neutral))
+        S.TextColor(row.reward,entry.band and F.valueColors[entry.band] or neutral)
       end
     end
   end

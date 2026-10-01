@@ -59,6 +59,7 @@ function F.InstallAuctionScanUI()
   pose()
   ui.pose=pose
   page:SetScript("OnUpdate",function(_,dt)
+    if F.db.settings.reduceMotion then return end
     elapsed=elapsed+dt
     local interval=ui.active and 0.22 or 0.48
     if elapsed>=interval then elapsed=elapsed%interval;phase=(phase+1)%4;pose()end

@@ -4,12 +4,36 @@ S.gold = {0.94,0.77,0.42}; S.ink = {0.22,0.13,0.07}; S.muted = {0.66,0.61,0.49}
 S.icons = {crate="Interface\\Icons\\INV_Crate_01", writ="Interface\\Icons\\INV_Misc_Note_01", flight="Interface\\Icons\\Ability_Druid_FlightForm", route="Interface\\Icons\\INV_Misc_Map_01"}
 S.qualityPending={}
 S.panels={}
+S.texts={}
+function S.HighContrast()
+  return F.db and F.db.settings.highContrast
+end
+function S.TextColor(text,color)
+  text.fwColor=color
+  text:SetTextColor(unpack(S.HighContrast() and {1,1,1} or color))
+end
+function S.ReadableFont(text,font)
+  text.fwFont=font
+  text:SetFontObject(font)
+  local path,size,flags=text:GetFont()
+  if path and size and F.db and F.db.settings.largeText then
+    text:SetFont(path,math.max(size,13),flags)
+  end
+end
 function S.Faction()
   return F.db and F.db.settings.debugAlliance and "Alliance" or UnitFactionGroup("player")
 end
 function S.ApplyTheme()
   local theme=S.Theme()
-  for _,panel in ipairs(S.panels)do panel:SetBackdropColor(unpack(theme.panel))end
+  for _,panel in ipairs(S.panels)do
+    panel:SetBackdropColor(unpack(theme.panel))
+    if rawget(panel,"paper") then panel.paper:SetShown(not S.HighContrast())end
+    panel:SetBackdropBorderColor(unpack(S.HighContrast() and {0.8,0.8,0.8,1} or {0.52,0.40,0.22,1}))
+  end
+  for _,text in ipairs(S.texts)do
+    S.ReadableFont(text,text.fwFont)
+    S.TextColor(text,text.fwColor)
+  end
   if F.window then F.window:SetBackdropColor(unpack(theme.bg))end
   if F.banner then S.Accent(F.banner);F.crest:SetTexture(theme.crest)end
   if F.compassStripe then S.Accent(F.compassStripe)end
@@ -48,6 +72,9 @@ function S.ColorBorder(lines,r,g,b,alpha)
   for _,line in ipairs(lines)do line:SetColorTexture(r,g,b,alpha or 0.8)end
 end
 function S.Theme()
+  if S.HighContrast() then
+    return {bg={0.025,0.025,0.025,1},panel={0.035,0.035,0.035,1},accent={0.22,0.22,0.22,1},fade={0.04,0.04,0.04,1},crest=S.Faction()=="Alliance" and "Interface\\Timer\\Alliance-Logo" or "Interface\\Timer\\Horde-Logo"}
+  end
   if S.Faction()=="Alliance" then
     return {bg={0.065,0.071,0.080,1},panel={0.10,0.113,0.124,1},accent={0.26,0.32,0.37,1},fade={0.08,0.092,0.11,1},crest="Interface\\Timer\\Alliance-Logo"}
   end
@@ -118,7 +145,10 @@ end
 function S.Text(parent, text, x, y, width, font, color)
   local t=parent:CreateFontString(nil,"OVERLAY",font or "GameFontHighlight")
   t:SetPoint("TOPLEFT",x,y); t:SetWidth(width); t:SetJustifyH("LEFT"); t:SetText(text or "")
-  if color then t:SetTextColor(unpack(color)) end
+  t.fwFont=font or "GameFontHighlight"
+  S.ReadableFont(t,t.fwFont)
+  S.TextColor(t,color or {1,1,1})
+  S.texts[#S.texts+1]=t
   return t
 end
 function S.Panel(parent, x, y, w, h, parchment)
@@ -133,11 +163,17 @@ function S.Panel(parent, x, y, w, h, parchment)
     if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo("QuestBG-Parchment") then tex:SetAtlas("QuestBG-Parchment")
     else tex:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Parchment-Horizontal") end
     p.paper=tex
+    tex:SetShown(not S.HighContrast())
   end
   return p
 end
 function S.Button(parent, text, x, y, w, fn)
-  local b=CreateFrame("Button",nil,parent,"UIPanelButtonTemplate");b:SetPoint("TOPLEFT",x,y);b:SetSize(w,26);b:SetText(text);b:SetScript("OnClick",fn);return b
+  local b=CreateFrame("Button",nil,parent,"UIPanelButtonTemplate");b:SetPoint("TOPLEFT",x,y);b:SetSize(w,26);b:SetText(text);b:SetScript("OnClick",fn)
+  local label=b:GetFontString()
+  if label then
+    label.fwFont="GameFontNormal";S.ReadableFont(label,label.fwFont);S.TextColor(label,S.gold);S.texts[#S.texts+1]=label
+  end
+  return b
 end
 function S.Icon(parent, x,y,size, itemID, fallback)
   local p=S.Panel(parent,x,y,size,size)
@@ -159,7 +195,7 @@ function S.Rule(parent,x,y,w)
   local t=parent:CreateTexture(nil,"ARTWORK");t:SetPoint("TOPLEFT",x,y);t:SetSize(w,1);t:SetColorTexture(0.5,0.35,0.15,0.4);return t
 end
 function S.Money(value)
-  if not value then return "|cff978977Unpriced|r" end
+  if not value then return S.HighContrast() and "Unpriced" or "|cff978977Unpriced|r" end
   value=math.ceil(value)
   local g,s,c=math.floor(value/10000),math.floor(value/100)%100,value%100
   local result=""

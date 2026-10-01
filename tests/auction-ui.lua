@@ -52,6 +52,10 @@ for _=1,3 do ui.page.scripts.OnUpdate(nil,0.48)end
 assert(coords[1]==0,'Four-frame animation wraps to the first pose')
 ui.active=true;ui.page.scripts.OnUpdate(nil,0.22);ui.active=false
 assert(coords[1]==0.25,'Original scan cadence advances every 0.22 seconds')
+F.db.settings.reduceMotion=true
+ui.page.scripts.OnUpdate(nil,10)
+assert(coords[1]==0.25,'Reduced motion holds the scribe pose')
+F.db.settings.reduceMotion=false
 F.db.settings.debugAlliance=true;F.Style.ApplyTheme()
 assert(coords[1]==0.25 and coords[3]==0.5 and UnitFactionGroup('player')=='Horde','Preview selects the original human row without changing faction or pose')
 F.db.settings.debugAlliance=false;F.Style.ApplyTheme()
