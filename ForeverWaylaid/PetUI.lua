@@ -79,7 +79,12 @@ function P.BuildUI()
   S.Button(t,"Retreat",14,-290,454,function()act(function()return P.BattleAction('retreat')end)end)
   w.social=S.Panel(w,252,-88,488,342);local p=w.social
   p.share=S.Button(p,"",12,-12,458,function()P.SetSharing(not P.state.share);P.Render()end)
-  p.text=S.Text(p,"",14,-54,458,"GameFontHighlightSmall");p.text:SetHeight(272)
+  S.Button(p,"Inspect targeted player",12,-50,458,function()act(P.InspectTarget)end)
+  p.text=S.Text(p,"",14,-94,290,"GameFontHighlightSmall");p.text:SetHeight(185)
+  p.art=portrait(p,138);p.art:SetPoint("TOPRIGHT",-14,-110)
+  S.Button(p,"<",12,-290,50,function()P.inspectName=nil;P.page=math.max(1,P.page-1);P.Render()end)
+  S.Button(p,">",420,-290,50,function()P.inspectName=nil;P.page=P.page+1;P.Render()end)
+  p.page=S.Text(p,"",76,-297,330,"GameFontHighlightSmall");p.page:SetJustifyH("CENTER")
   w.buyFood=S.Button(w,"Treat: 2",260,-441,147,function()act(function()return P.Buy('food')end)end)
   S.Button(w,"Toy: 3",417,-441,147,function()act(function()return P.Buy('toy')end)end)
   S.Button(w,"Herbs: 4",574,-441,147,function()act(function()return P.Buy('medicine')end)end)
@@ -128,18 +133,14 @@ function P.Render()
     w.tower.start:SetEnabled(not b and pet~=nil)
   else
     w.social.share:SetText(s.share and "Pet stats: sharing with guild / group" or "Pet stats: sharing OFF (click to opt in)")
-    local lines={"Guild/group standings • self-reported, unverified."}
-    if s.review then lines[#lines+1]="Your save needs integrity review; excluded from ranking." end
     local rows={};for name,entry in pairs(P.peers)do rows[#rows+1]={name=name,pet=entry}end
-    table.sort(rows,function(a,b)if a.pet.best==b.pet.best then return a.name<b.name end;return a.pet.best>b.pet.best end)
-    for i=1,math.min(3,#rows)do local row=rows[i];local p=row.pet
-      lines[#lines+1]=row.name:sub(1,24)..": "..P.rarities[p.rarity].." "..P.species[p.species].."\nLv "..p.level.." • Floor "..p.best.." • Alive "..P.Age(p.age)
-    end
-    if #rows==0 then lines[#lines+1]="No sharing peers seen in your guild or group yet." end
-    local flags=0;for _ in pairs(P.flags)do flags=flags+1 end
-    lines[#lines+1]="Integrity review: "..flags.." record(s) excluded."
-    local shown=0;for name,entry in pairs(P.flags)do if shown<2 then lines[#lines+1]=name:sub(1,24)..": "..entry.reason;shown=shown+1 end end
-    lines[#lines+1]="Flags are not proof of cheating. Records expire in 10 minutes."
-    w.social.text:SetText(table.concat(lines,"\n"))
+    table.sort(rows,function(a,b)return a.name:lower()<b.name:lower()end)
+    if P.inspectName then for i,row in ipairs(rows)do if row.name==P.inspectName then P.page=i;break end end end
+    P.page=math.max(1,math.min(P.page,math.max(1,#rows)))
+    local row=rows[P.page];local viewed=row and row.pet
+    showPet(w.social.art,viewed)
+    w.social.text:SetText(viewed and (row.name:sub(1,28).."\n"..P.rarities[viewed.rarity].." "..P.species[viewed.species].."\nLevel "..viewed.level.."\nTime alive: "..P.Age(viewed.age).."\nHighest floor: "..viewed.best.." / 100\nTower wins: "..viewed.wins)
+      or "Target a player to inspect their companion, or browse pets shared by your guild and group.\n\nBoth players must enable pet sharing.")
+    w.social.page:SetText(#rows>0 and ("Pet "..P.page.." / "..#rows.." • Alphabetical") or "No shared pets yet")
   end
 end
