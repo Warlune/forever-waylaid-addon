@@ -1,0 +1,53 @@
+name: Verify and package
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.19.0'
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm test && pnpm check
+      - run: sudo apt-get update && sudo apt-get install -y lua5.1
+      - run: lua5.1 tests/addon.lua
+      - run: node tools/build-catalog.mjs && git diff --exit-code -- ForeverWaylaid/Catalog.lua
+      - name: Package addon
+        run: |
+          mkdir -p release/stage
+          cp -r ForeverWaylaid release/stage/
+          cp README.md LICENSE RELEASE_NOTES.md release/stage/
+          mkdir release/stage/tools
+          cp tools/sync-prices.mjs release/stage/tools/
+          cd release/stage
+          zip -r ../ForeverWaylaid-0.1.0.zip ForeverWaylaid README.md LICENSE RELEASE_NOTES.md tools
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ForeverWaylaid-0.1.0
+          path: release/ForeverWaylaid-0.1.0.zip
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ForeverWaylaid-0.1.0
+          path: release
+      - name: Publish preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release/ForeverWaylaid-0.1.0.zip --verify-tag --title "Forever Waylaid 0.1.0 preview" --notes-file RELEASE_NOTES.md --prerelease
