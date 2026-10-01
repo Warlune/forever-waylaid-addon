@@ -1,6 +1,6 @@
 local F=...
 local old={route=F.route,guidance=F.guidance,flightGuidance=F.flightGuidance,travel=F.travel}
-local oldPlayer,oldTaxi,oldPath=F.Route.Player,UnitOnTaxi,F.Roads.Path
+local oldPlayer,oldTaxi=F.Route.Player,UnitOnTaxi
 local oldFlights,oldEnabled,oldNav=F.char.flights,F.db.settings.flights,F.UpdateNavigator
 local function p(map,x,name)
   return {mapID=map,x=x/10000,y=0.5,wx=x,wy=500,instance=map==1411 and 1 or 0,name=name}
@@ -13,7 +13,6 @@ local player,flying=org,false
 F.Route.Player=function()return player end
 UnitOnTaxi=function()return flying end
 F.UpdateNavigator=function()end
-F.Roads.Path=function()return nil end -- This regression must cover unmapped walks.
 F.char.flights={nodes={a=fp,b=arrival},edges={a={b=60}}};F.db.settings.flights=true
 F.travel={links={{from=dock,to=land,mode='Zeppelin',seconds=20}},personal={},resources={}}
 local seconds,steps=F.Route.Leg(org,customer,F.char.flights,true,F.travel)
@@ -64,6 +63,6 @@ F.DrawRouteOverlay(overlay,project,clip,function()return true end,false)
 for _,line in ipairs(overlay.lines)do assert(not line.shown,'Last writ removal clears all paths')end
 assert(F.CreateJourneyPanel==nil and F.UpdateJourneyPanel==nil,'No itinerary panel remains on the map')
 F.route,F.guidance,F.flightGuidance,F.travel=old.route,old.guidance,old.flightGuidance,old.travel
-F.Route.Player,UnitOnTaxi,F.Roads.Path=oldPlayer,oldTaxi,oldPath
+F.Route.Player,UnitOnTaxi=oldPlayer,oldTaxi
 F.char.flights,F.db.settings.flights,F.UpdateNavigator=oldFlights,oldEnabled,oldNav
 print('PASS: Org walk/zeppelin/walk/flight/walk, future arrival anchoring, local-map dashes, boarding/landing, later writs and panel removal')

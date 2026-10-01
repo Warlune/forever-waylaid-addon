@@ -1,3 +1,4 @@
+import { runtimeFiles } from './package-addon.mjs';
 import { readdirSync, readFileSync } from 'node:fs';
 import { parse } from 'luaparse';
 const root = new URL('../ForeverWaylaid/', import.meta.url);
@@ -17,3 +18,8 @@ for (const faction of ['Alliance', 'Horde']) {
   }
   console.log(`Scene texture OK: ${name} (${width}x${height} RGBA)`);
 }
+
+const shipped = runtimeFiles();
+for (const file of shipped) readFileSync(new URL(file, root));
+if (shipped.some(file => /Roads?Data|Roads\.lua|\.png$|Scribes8|Scribe.*16/.test(file))) throw new Error('Unused road data or source art in runtime package');
+console.log(`Runtime package OK: ${shipped.length} files, no archived road engine or source PNGs`);

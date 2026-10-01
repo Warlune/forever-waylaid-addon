@@ -17,7 +17,7 @@ local function envelope(kind,body)
   return "1|"..realmKey().."|"..UnitFactionGroup("player").."|"..kind.."|"..body
 end
 local function validSender(sender)
-  if type(sender)~="string" or #sender>100 or sender:find("[|%c]")then return false end
+  if type(sender)~="string" or #sender==0 or #sender>100 or sender:find("[|%c]")then return false end
   local name,realm=sender:match("^([^-]+)%-(.+)$")
   if realm and realm:gsub("[%s%-]",""):lower()~=realmKey()then return false end
   name=name or sender
@@ -106,7 +106,7 @@ frame:SetScript("OnEvent",function(_,event,p,message,channel,sender)
   end
   if channel~="WHISPER" or not requestToken or F.Now()>requestUntil then return end
   local token,records=body:match("^([^|]+)|(.+)$")
-  if token~=requestToken or records:sub(-1)~=";"then return end
+  if token~=requestToken or not records or records:sub(-1)~=";" or records:sub(1,1)==";" or records:find(";;",1,true) then return end
   local limit=limits[sender]
   if not limit then
     local count=0;for _ in pairs(limits)do count=count+1 end

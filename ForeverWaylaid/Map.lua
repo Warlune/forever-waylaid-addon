@@ -7,7 +7,7 @@ function F.CreateRouteOverlay(parent)
 end
 function F.ClearRouteOverlay(overlay)
   for _,line in ipairs(overlay.lines)do line:Hide()end
-  for _,pin in ipairs(overlay.pins)do pin:Hide()end
+  for _,pin in ipairs(overlay.pins)do pin:Hide();pin.routeStop=nil;pin.pinText=nil end
 end
 function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small,player)
   F.ClearRouteOverlay(overlay)
@@ -23,6 +23,17 @@ function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small,player)
       p:SetBackdropColor(0.13,0.09,0.04,0.95);p:SetBackdropBorderColor(0.94,0.73,0.28,1)
       p.icon=p:CreateTexture(nil,"ARTWORK");p.icon:SetPoint("CENTER");p.icon:SetSize(small and 13 or 18,small and 13 or 18)
       p.text=p:CreateFontString(nil,"OVERLAY","GameFontNormalSmall");p.text:SetAllPoints()
+      p:SetScript("OnEnter",function(self)
+        GameTooltip:SetOwner(self,"ANCHOR_RIGHT");GameTooltip:SetText(self.pinText)
+        local stop=self.routeStop
+        if stop then GameTooltip:AddLine(stop.npc or stop.deliveryText or F.DestinationText(stop.point),1,0.85,0.5,true)end
+        GameTooltip:Show()
+      end)
+      p:SetScript("OnLeave",function()GameTooltip:Hide()end)
+      p:SetScript("OnClick",function(self)
+        local stop=self.routeStop
+        if stop then F.TrackDelivery(stop.questID)end
+      end)
       overlay.pins[pinIndex]=p
     end
     p:ClearAllPoints();p:SetPoint("CENTER",overlay,"TOPLEFT",x,-y);p:Show()
@@ -31,15 +42,7 @@ function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small,player)
     p:SetBackdropColor(0.13,0.09,0.04,kind=="player" and 0 or 0.95)
     p:SetBackdropBorderColor(0.94,0.73,0.28,kind=="player" and 0 or 1)
     p.icon:SetRotation(kind=="player" and (GetPlayerFacing and GetPlayerFacing()or 0)or 0)
-    p:SetScript("OnEnter",function(self)
-      GameTooltip:SetOwner(self,"ANCHOR_RIGHT");GameTooltip:SetText(text)
-      if stop then GameTooltip:AddLine(stop.npc or stop.deliveryText or F.DestinationText(stop.point),1,0.85,0.5,true)end
-      GameTooltip:Show()
-    end)
-    p:SetScript("OnLeave",function()GameTooltip:Hide()end)
-    p:SetScript("OnClick",function()
-      if stop then F.TrackDelivery(stop.questID)end
-    end)
+    p.pinText=text;p.routeStop=stop
   end
   local function line(x,y,u,v,mode,dashed)
     lineIndex=lineIndex+1;local stroke=overlay.lines[lineIndex]
@@ -50,8 +53,7 @@ function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small,player)
     stroke:SetStartPoint("TOPLEFT",overlay,x,-y);stroke:SetEndPoint("TOPLEFT",overlay,u,-v);stroke:Show()
   end
   for _,step in ipairs(segments)do
-    -- Simple dotted walking guides retain all known gate/pass bends. Fainter,
-    -- wider-spaced dots mark unverified approaches rather than claimed roads.
+    -- Walking is a dotted direction guide, never a collision-safe road claim.
     local walking=step.mode=="Travel"
     local unverified=walking and step.road~="mapped"
     local ax,ay,bx,by

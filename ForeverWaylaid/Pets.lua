@@ -194,7 +194,7 @@ function P.RegisterSharing()
   return P.registered
 end
 function P.SetSharing(enabled)
-  P.state.share=not not enabled;P.peers={};P.pendingInspect=nil;P.nextShare=F.Now()+2
+  P.state.share=not not enabled;P.peers={};P.replyTimes={};P.pendingInspect=nil;P.nextShare=F.Now()+2
   if enabled then P.RegisterSharing()end
 end
 function P.Packet()
@@ -214,7 +214,7 @@ function P.InspectTarget()
 end
 function P.Receive(message,channel,sender)
   if not P.state or not P.state.share then return end
-  if type(sender)~="string" or #sender>100 or sender:find("[|%c]") or type(message)~="string" or #message>180 then return end
+  if type(sender)~="string" or #sender==0 or #sender>100 or sender:find("[|%c]") or type(message)~="string" or #message>180 then return end
   if sender==(UnitName and UnitName("player"))then return end
   local now=F.Now()
   if channel=="WHISPER" then

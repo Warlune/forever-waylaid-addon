@@ -1,6 +1,6 @@
 local _, F = ...
-F.version = "0.13.5"
-F.defaults = { routeMode="safer", ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
+F.version = "0.13.6"
+F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
 
 function F.ApplySettings()
   F.Style.ApplyTheme()
@@ -50,6 +50,7 @@ events:SetScript("OnEvent", function(_, event, name, success,spellID)
     F.db.settings = F.db.settings or {}
     if F.db.settings.textSize==nil then F.db.settings.textSize=F.db.settings.largeText and 13 or 0 end
     F.db.settings.largeText=nil
+    F.db.settings.routeMode=nil -- Retired: writ walking is always direct guidance.
     F.db.settings.valuePalette=nil -- Retired: use the game's color filters.
     for key, value in pairs(F.defaults) do if F.db.settings[key] == nil then F.db.settings[key] = value end end
     F.char.flights = F.char.flights or { nodes = {}, edges = {} }
@@ -118,7 +119,7 @@ SlashCmdList.FOREVERWAYLAID = function(msg)
   local quest, map, x, y, npc = msg:match("^pin%s+(%d+)%s+(%d+)%s+([%d.]+)%s+([%d.]+)%s*(.*)$")
   if quest then
     quest, map, x, y = tonumber(quest), tonumber(map), tonumber(x), tonumber(y)
-    if F.writsByQuest[quest] and C_Map.GetMapInfo(map) and x >= 0 and x <= 100 and y >= 0 and y <= 100 then
+    if F.writsByQuest[quest] and C_Map.GetMapInfo(map) and x and y and x >= 0 and x <= 100 and y >= 0 and y <= 100 then
       F.char.pins[quest] = { mapID = map, x = x / 100, y = y / 100, manual = true, npc = npc~="" and npc or nil }
       F.Refresh(); F.Print("Delivery pin saved.")
     else F.Print("Invalid writ, map or coordinates.") end
@@ -128,6 +129,7 @@ SlashCmdList.FOREVERWAYLAID = function(msg)
   if clear then F.char.pins[clear] = nil; F.Refresh(); return end
   if msg == "accessibility" then F.tab="Settings";F.accessibilityView=true;F.window:Show();F.Render();return end
   if msg == "pets" then F.Pets.Toggle();return end
+  if msg == "memory" then F.ReportMemory();return end
   if msg == "prices" then F.ImportPersonal(); F.Refresh(); return end
   if msg == "compass" then F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator();return end
   if msg == "reset" then F.ResetNavigator();return end

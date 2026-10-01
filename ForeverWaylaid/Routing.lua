@@ -27,15 +27,13 @@ local function land(point)
   if point.mapID==1444 and point.x and point.x<0.38 and point.y>0.30 and point.y<0.60 then return "Sardor" end
   return point.instance
 end
+local cities={[1453]="Alliance",[1455]="Alliance",[1457]="Alliance",[1454]="Horde",[1456]="Horde",[1458]="Horde"}
 function R.WalkDistance(a,b)
   if land(a)~=land(b) then return math.huge end
-  if F.Roads then
-    local distance,segments,blocked=F.Roads.Path(a,b)
-    if distance then return distance,segments end
-    -- A known separation or faction restriction is not permission to invent
-    -- a straight walking connection through it.
-    if blocked then return math.huge end
-  end
+  -- Writ walking uses direct dotted bearings. Do not load or call the
+  -- archived street graph, even if a previous safer/fastest setting exists.
+  local faction=UnitFactionGroup("player")
+  if (cities[a.mapID] and cities[a.mapID]~=faction) or (cities[b.mapID] and cities[b.mapID]~=faction) then return math.huge end
   return R.Distance(a,b)
 end
 

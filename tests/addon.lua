@@ -39,10 +39,11 @@ C_QuestLog={IsOnQuest=function()return false end,IsComplete=function()return fal
 C_Item={GetItemCount=function()return 0 end}
 Enum={}
 local function load(name) assert(loadfile('ForeverWaylaid/'..name..'.lua'))('ForeverWaylaid',F) end
-for _,name in ipairs({'Catalog','Recipes','Core','Pricing','Scanner','Peers','Crafting','Style','Accessibility','AuctionScanUI','Geometry','Routing','RoadData','WorldRoadData','Roads','TransportData','Travel','Tracking','Tooltips','UI','Journey','Map','Navigator','PetData','Pets','PetProgression','PetUI'}) do load(name) end
-local roadData=F.roadData;F.roadData={lines={}} -- Generic fixtures have no real map scale.
+for _,name in ipairs({'Catalog','Recipes','Core','Diagnostics','Pricing','Scanner','Peers','Crafting','Style','Accessibility','AuctionScanUI','Geometry','Routing','TransportData','Travel','Tracking','Tooltips','UI','Journey','Map','Navigator','PetData','Pets','PetProgression','PetUI'}) do load(name) end
+assert(F.Roads==nil and F.roadData==nil, "Advanced road engine must not be loaded")
 F.events.scripts.OnEvent(nil,'ADDON_LOADED','ForeverWaylaid')
 F.events.scripts.OnEvent(nil,'PLAYER_LOGIN')
+F.window:Show()
 for _,tab in ipairs({'Crates','Writs','Route','Settings'}) do F.tab=tab;F.Render() end
 assert(#F.catalog.crates==30 and #F.catalog.writs==150)
 print('PASS: addon load, login, all four panels and catalogue')
@@ -225,9 +226,10 @@ end
 
 assert(loadfile('tests/requirements.lua'))(F)
 assert(loadfile('tests/reroute.lua'))(F)
-assert(loadfile('tests/roads.lua'))(F,roadData)
-assert(loadfile('tests/world-roads.lua'))(F,roadData)
 assert(loadfile('tests/map-layers.lua'))(F)
 assert(loadfile('tests/journey.lua'))(F)
-assert(loadfile('tests/gates.lua'))(F,roadData)
 assert(loadfile('tests/pets.lua'))(F)
+
+assert(loadfile('tests/security-memory.lua'))(F)
+
+print("ALL ADDON TESTS PASSED")
