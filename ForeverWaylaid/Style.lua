@@ -55,12 +55,14 @@ function S.Theme()
 end
 function S.Accent(texture)
   local theme=S.Theme()
+  local opacity=texture:GetAlpha()
   texture:SetColorTexture(unpack(theme.accent))
   if texture.SetGradient and CreateColor then
     -- Explicitly reset both ends when returning from the Alliance preview.
     texture:SetColorTexture(1,1,1,1)
     texture:SetGradient("HORIZONTAL",CreateColor(unpack(theme.accent)),CreateColor(unpack(theme.fade or theme.accent)))
   end
+  texture:SetAlpha(opacity or 1)
 end
 function S.BindItem(frame,id)
   frame.itemID=id;frame:EnableMouse(id~=nil)
