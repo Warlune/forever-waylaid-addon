@@ -64,6 +64,17 @@ end
 function F.UpdateAuctionScanUI(info)
   local ui=F.auctionScanUI
   if not ui then return end
+  -- Keep our optional tab outside the native parentArray. Other auction
+  -- addons anchor their row to the last entry in host.Tabs, even if hidden.
+  local previous=ui.host.Tabs[#ui.host.Tabs]
+  local library=LibStub and LibStub("LibAHTab-1-0",true)
+  local tabs=library and library.internalState and library.internalState.Tabs
+  if tabs then
+    for _,other in ipairs(tabs)do if other:IsShown() then previous=other end end
+  end
+  if previous then
+    ui.tab:ClearAllPoints();ui.tab:SetPoint("TOPLEFT",previous,"TOPRIGHT",3,0)
+  end
   ui.tab:SetShown(info.available)
   if not info.available and ui.page:IsShown() then
     ui.host:SetDisplayMode(AuctionHouseFrameDisplayMode.Buy)
@@ -91,11 +102,13 @@ function F.InstallAuctionScanUI()
   local page=S.Panel(host,8,-29,784,480)
   page:ClearAllPoints();page:SetPoint("TOPLEFT",8,-29);page:SetPoint("BOTTOMRIGHT",-8,29)
   page:SetFrameLevel(host:GetFrameLevel()+10);page:EnableMouse(true);page:Hide()
-  local tab=CreateFrame("Button","ForeverWaylaidAuctionScanTab",host,"AuctionHouseFrameDisplayModeTabTemplate")
+  local tabHost=CreateFrame("Frame",nil,host)
+  tabHost:SetAllPoints(host)
+  local tab=CreateFrame("Button","ForeverWaylaidAuctionScanTab",tabHost,"AuctionHouseFrameDisplayModeTabTemplate")
   -- Match PanelTemplates_AnchorTabs, which lays out the native AH tabs.
   tab:ClearAllPoints();tab:SetPoint("TOPLEFT",previous,"TOPRIGHT",3,0);tab:SetText("Scan")
   PanelTemplates_TabResize(tab,20,nil,70);PanelTemplates_DeselectTab(tab)
-  local ui={host=host,page=page,tab=tab,stats={}}
+  local ui={host=host,tabHost=tabHost,page=page,tab=tab,stats={}}
   F.auctionScanUI=ui
 
   centered(page,"THE AUCTION SCRIBE",-15,600,"GameFontNormalLarge",S.gold)
@@ -131,6 +144,9 @@ function F.InstallAuctionScanUI()
     if mode~=scanMode then page:Hide();PanelTemplates_DeselectTab(tab)end
   end)
   host:HookScript("OnHide",function()page:Hide();PanelTemplates_DeselectTab(tab)end)
+  -- Auction addons can add their tabs later in the same AH-open event.
+  host:HookScript("OnShow",function()C_Timer.After(0,F.UpdateScanUI)end)
+  C_Timer.After(0,F.UpdateScanUI)
   F.UpdateScanUI()
 end
 

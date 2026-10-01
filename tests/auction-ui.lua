@@ -15,6 +15,18 @@ end
 local oldAH,oldAPI,oldAddons,oldMode=AuctionHouseFrame,C_AuctionHouse,C_AddOns,AuctionHouseFrameDisplayMode
 local oldHook,oldResize,oldSelect,oldDeselect=hooksecurefunc,PanelTemplates_TabResize,PanelTemplates_SelectTab,PanelTemplates_DeselectTab
 local oldNow,oldLast,oldRefresh=F.Now,F.char.nativeScanLastAttempt,F.Refresh
+local oldCreate,oldLib=CreateFrame,LibStub
+local sharedTabs
+LibStub=function(name,silent)assert(name=='LibAHTab-1-0' and silent);return sharedTabs end
+CreateFrame=function(kind,name,parent,template)
+  local frame=oldCreate(kind,name,parent,template)
+  if template=='AuctionHouseFrameDisplayModeTabTemplate' then
+    -- The native XML template appends each instance to its parent's Tabs.
+    parent.Tabs=rawget(parent,'Tabs') or {};table.insert(parent.Tabs,frame)
+    frame.SetPoint=function(self,...)self.anchor={...}end
+  end
+  return frame
+end
 local now,calls,enabled=200000,0,0
 F.Now=function()return now end;F.char.nativeScanLastAttempt=nil;F.Refresh=function()end
 C_AddOns={GetAddOnEnableState=function()return enabled end}
@@ -33,6 +45,18 @@ F.scanFrame.scripts.OnEvent(nil,'AUCTION_HOUSE_SHOW')
 F.InstallAuctionScanUI()
 local ui=F.auctionScanUI
 assert(ui and ui.tab:IsShown() and not ui.page:IsShown())
+assert(#AuctionHouseFrame.Tabs==3,'Scan must not reserve a slot in the native tab list')
+assert(ui.tabHost.Tabs[1]==ui.tab,'Template registration stays in our own container')
+assert(ui.tab.anchor[2]==AuctionHouseFrame.Tabs[3])
+-- An auction addon loaded later anchors directly after Auctions, not hidden Scan.
+local addonRootAnchor=AuctionHouseFrame.Tabs[#AuctionHouseFrame.Tabs]
+local shopping,cancelling=CreateFrame('Button'),CreateFrame('Button')
+sharedTabs={internalState={Tabs={shopping,cancelling}}}
+F.UpdateScanUI()
+assert(addonRootAnchor==AuctionHouseFrame.Tabs[3])
+assert(ui.tab.anchor[2]==cancelling,'Visible Scan follows shared addon tabs without overlapping')
+cancelling:Hide();F.UpdateScanUI();assert(ui.tab.anchor[2]==shopping)
+cancelling:Show()
 F.InstallAuctionScanUI();assert(ui==F.auctionScanUI,'Installing twice must not duplicate tabs')
 for _=1,3 do
   ui.tab.scripts.OnClick();assert(ui.page:IsShown() and ui.tab.selected)
@@ -75,6 +99,7 @@ now=now+901;ui.start.scripts.OnClick();ui.cancel.scripts.OnClick()
 assert(not F.GetScanProgress().active and F.GetScanProgress().saved==0,'Cancel never reports committed prices')
 enabled=2;F.UpdateScanUI()
 assert(not ui.tab:IsShown() and not ui.page:IsShown() and AuctionHouseFrame.displayMode==AuctionHouseFrameDisplayMode.Buy)
+assert(#AuctionHouseFrame.Tabs==3 and addonRootAnchor==AuctionHouseFrame.Tabs[3],'Hiding Scan leaves no anchor gap')
 F.db.settings.autoHideAuction=false;F.ApplySettings()
 assert(ui.tab:IsShown(),'Auto-hide switch can restore the native Scan tab')
 now=now+901;ui.start.scripts.OnClick();assert(F.nativeScanActive)
@@ -83,6 +108,7 @@ assert(not ui.tab:IsShown() and not F.nativeScanActive,'Re-enabling auto-hide ca
 enabled=0;F.UpdateScanUI();assert(ui.tab:IsShown(),'Disabled installed scanners expose the Scan tab')
 F.scanFrame.scripts.OnEvent(nil,'AUCTION_HOUSE_CLOSED')
 F.auctionScanUI=nil
+CreateFrame,LibStub=oldCreate,oldLib
 AuctionHouseFrame,C_AuctionHouse,C_AddOns,AuctionHouseFrameDisplayMode=oldAH,oldAPI,oldAddons,oldMode
 hooksecurefunc,PanelTemplates_TabResize,PanelTemplates_SelectTab,PanelTemplates_DeselectTab=oldHook,oldResize,oldSelect,oldDeselect
 F.Now,F.char.nativeScanLastAttempt,F.Refresh=oldNow,oldLast,oldRefresh
