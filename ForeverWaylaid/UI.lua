@@ -291,7 +291,8 @@ function F.RenderDetail(entry)
     entry.goods,entry.quote=F.GoodsQuote(item.targetId,item.qty);entry.cost=entry.goods.cost
   end
   F.PriceEntry(entry)
-  local craft=craftMode and (item.questId and entry.goods or entry.best and entry.best.craft)
+  local hasBest=not item.questId and entry.best and entry.best.cost~=nil and entry.best.enough
+  local craft=craftMode and (item.questId and entry.goods or hasBest and entry.best.craft)
   local reward=(item.rep or item.favor or 0)..(item.questId and " reputation" or " favor")
   add(short(item.name),reward.." • "..itemLevel(item),item.id,nil,true)
   if craft then add(#craft.steps>0 and "To craft" or "Sourcing",F.CraftRequirements(craft))end
@@ -315,15 +316,17 @@ function F.RenderDetail(entry)
     end
   end
   if not item.questId then
-    local hasBest=entry.best and entry.best.cost~=nil and entry.best.enough
-    add("Choose one bundle",hasBest and "Total uses the best-value bundle below." or "No complete bundle price yet.")
-    for _,row in ipairs(entry.rows)do
-      local option=row.option
-      local bestValue=hasBest and row.enough and row.cost==entry.best.cost
-      add(option.qty.." × "..option.name,(bestValue and "Best value • " or "").."Bags "..S.Count(option.itemId).." / "..option.qty..(row.enough and "" or " • price / stock incomplete"),option.itemId,S.Money(row.cost),nil,bestValue)
-      if craftMode then
-        if row~=entry.best and #row.craft.steps>0 then add("To craft this bundle",F.CraftRequirements(row.craft))end
-        craftDetails(row.craft)
+    if craftMode and hasBest then
+      local option=entry.best.option
+      add("Fill ONE bundle","Only the bundle below is needed to complete this crate.")
+      add(option.qty.." × "..option.name,"Best value • Bags "..S.Count(option.itemId).." / "..option.qty,option.itemId,S.Money(entry.best.cost),nil,true)
+      craftDetails(entry.best.craft)
+    else
+      add("Fill ONE bundle",craftMode and "No fully priced, stocked option yet. Any ONE bundle completes the crate." or "Any ONE bundle completes the crate. Total uses the best value.")
+      for _,row in ipairs(entry.rows)do
+        local option=row.option
+        local bestValue=hasBest and row.enough and row.cost==entry.best.cost
+        add(option.qty.." × "..option.name,(bestValue and "Best value • " or "").."Bags "..S.Count(option.itemId).." / "..option.qty..(row.enough and "" or " • price / stock incomplete"),option.itemId,S.Money(row.cost),nil,bestValue)
       end
     end
   else

@@ -232,4 +232,5 @@ assert(loadfile('tests/pets.lua'))(F)
 
 assert(loadfile('tests/security-memory.lua'))(F)
 
+assert(loadfile('tests/crate-details.lua'))(F)
 print("ALL ADDON TESTS PASSED")

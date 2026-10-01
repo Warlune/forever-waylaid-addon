@@ -1,4 +1,4 @@
-# Waylaid companions — 0.13.6 preview
+# Waylaid companions — 0.13.7 preview
 
 Open **Pets → Adopt**, choose a adoption crate, then select the new companion in the stable and click **Equip**. Browsing a pet does not change the equipped companion. The first living companion is equipped automatically. The compass and large window share the same pet and battle.
 
