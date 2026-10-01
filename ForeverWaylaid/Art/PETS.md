@@ -1,6 +1,6 @@
 # Waylaid companion atlas
 
-`WaylaidPets.png` is the original generated source; `WaylaidPets.tga` is the 1024×1024 RGBA game texture, exported using nearest-neighbor sizing. The 2×2 cells are Murloc, Whelp, Wolf pup and Owl in reading order. The addon uses normalized texture coordinates, without per-frame sprite resizing. The pocket view's optional two-pixel bob is disabled by Reduced motion.
+`WaylaidPets.png` is the original generated source; `WaylaidPets.tga` is the 1024×1024 RGBA game texture, exported using nearest-neighbor sizing. The 2×2 cells are Murloc, Whelp, Wolf pup and Owl in reading order. The addon uses normalized texture coordinates, without per-frame sprite resizing. The compass pet view's optional two-pixel bob is disabled by Reduced motion.
 
 Created with the built-in image-generation tool on 2026-10-01. This is original generated fan art for the addon, not an extracted Blizzard texture. Rarity changes the UI wording/color and game stats, not the atlas pixels.
 

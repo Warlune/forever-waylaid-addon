@@ -1,6 +1,7 @@
-# Forever Waylaid 0.11.1 preview
+# Forever Waylaid 0.11.2 preview
 
-- Added **Pets** and `/fwl pets`: a separate Classic-style companion window with a stable, memorial, tower, social panel and small movable pocket view.
+- Added **Pets** and `/fwl pets`: a larger Classic-style companion screen with a stable, memorial, tower and social panel. Click **Pet** in the compass header for the compact game beneath your route directions.
+- The compass game includes care, supplies, adoption, switching pets and tower battles. **Open** switches to the larger screen; **Compass view** returns. Map and pet views share the expanding area, and scaling keeps it on screen.
 - Adopt four pixel creatures (Murloc, Whelp, Wolf pup and Owl) with Common–Legendary rarity. Feed, play, rest and heal using pet tokens and care supplies; no real gold is spent.
 - **Permanent death** from tower defeat or prolonged starvation. Dead pets stay in the memorial; offline and stabled pets do not lose needs. Lifespan records active online time. A replacement is free when no living pets remain.
 - Added 100 turn-based tower floors, bosses every ten floors, guard, special attacks, healing and retreat. Victories earn XP and tokens; repeated floors award reduced XP.

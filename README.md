@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.11.1 preview
+# Forever Waylaid — v0.11.2 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.11.1.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.11.2.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -28,7 +28,7 @@ The addon has no bundled auction prices or external price service. Until you sca
 
 ## Waylaid companions (new preview)
 
-Open **Pets** on the ledger or use `/fwl pets`. Adopt a pixel Murloc, Whelp, Wolf pup or Owl with a random Common–Legendary rarity. Care for its health, food, happiness and energy; buy treats, toys and healing herbs with **pet tokens**, never real gold. Your first pet, and a replacement when no living pets remain, are free. Further adoptions cost 25 tokens. Earn a token every five active pet minutes and more from tower wins. Use **Pocket view** for a small movable companion window while travelling.
+Open **Pets** on the ledger or use `/fwl pets`. Adopt a pixel Murloc, Whelp, Wolf pup or Owl with a random Common–Legendary rarity. Care for its health, food, happiness and energy; buy treats, toys and healing herbs with **pet tokens**, never real gold. Your first pet, and a replacement when no living pets remain, are free. Further adoptions cost 25 tokens. Earn a token every five active pet minutes and more from tower wins. Click **Pet** in the compass header for the compact game beneath your route directions. Its **Care** view has feeding, play, rest, healing, supply purchases, adoption and switching pets; **Tower** has the battle actions, retreat and floor selection. The route arrow stays visible. The map and pet game share the expandable area. **Open** shows the larger pet screen, also available from the ledger **Pets** button; **Compass view** returns to the compact game.
 
 **Death is permanent.** Defeat in the tower or prolonged starvation kills the active pet and preserves its level, best floor and active lifespan in the memorial. Stabled pets and offline time do not lose needs or age. Time alive counts active online time, not calendar time. The stable holds 24 living pets; the collection and memorial hold 128 records total.
 
@@ -40,7 +40,7 @@ Pet XP comes from tower victories and your character's **killing blows**: NPCs g
 
 This is a personal pet game: there are no leaderboards, rankings, cheating flags or obfuscated code. Unreadable saves are preserved in a backup before starting a fresh stable; malformed network messages are ignored. Previous preview integrity flags are cleared automatically.
 
-The artwork is original generated pixel fan art; source, export details and the prompt are in `ForeverWaylaid/Art/PETS.md`. The pet panels use the addon's text and contrast preferences; Reduced motion stops the pocket sprite's gentle bob. Pet gameplay, balance and layout are an early preview and still need live testing.
+The artwork is original generated pixel fan art; source, export details and the prompt are in `ForeverWaylaid/Art/PETS.md`. The pet panels use the addon's text and contrast preferences; Reduced motion stops the compass sprite's gentle bob. Compass scaling accounts for the expanded game's height. Pet gameplay, balance and layout are an early preview and still need live testing.
 
 ## Buy or craft your cargo
 

@@ -159,6 +159,7 @@ function F.BuildNavigator()
   local stripe=c:CreateTexture(nil,"ARTWORK");stripe:SetPoint("TOPLEFT",5,-5);stripe:SetSize(290,19);S.Accent(stripe,0.55)
   F.compassStripe=stripe
   S.Text(c,"COURIER'S COMPASS",11,-9,210,"GameFontNormalSmall",S.gold)
+  c.petToggle=S.Button(c,"Pet",246,-5,44,function()F.Pets.ToggleCompass()end);c.petToggle:SetHeight(20)
   c.arrow=c:CreateTexture(nil,"ARTWORK");c.arrow:SetTexture("Interface\\Minimap\\MinimapArrow");c.arrow:SetPoint("TOPLEFT",10,-31);c.arrow:SetSize(40,40)
   c.distance=S.Text(c,"",5,-76,52,"GameFontNormalSmall",S.gold);c.distance:SetJustifyH("CENTER")
   c.action=S.Text(c,"",60,-29,230,"GameFontNormalSmall",S.gold);c.action:SetMaxLines(1)
@@ -186,7 +187,7 @@ function F.BuildNavigator()
   end)
   c:SetScript("OnLeave",function()GameTooltip:Hide()end)
   c.expand=S.Button(c,unfold,210,-94,35,function()
-    F.char.navExpanded=not F.char.navExpanded;F.UpdateNavigator()
+    F.char.navExpanded=not F.char.navExpanded;F.char.navPets=false;F.UpdateNavigator()
   end)
   c.ledger=S.Button(c,"|TInterface\\Icons\\INV_Misc_Book_09:16:16|t",251,-94,35,function()F.window:SetShown(not F.window:IsShown())end)
   for _,button in ipairs({c.expand,c.ledger})do
@@ -232,12 +233,14 @@ function F.BuildNavigator()
     b:SetScript("OnLeave",function()GameTooltip:Hide()end);F.PositionMinimapButton()
     F.minimapOverlay=F.CreateRouteOverlay(Minimap);F.minimapOverlay:SetFrameLevel(Minimap:GetFrameLevel()+4)
   end
+  F.Pets.BuildCompass(c)
   F.ready=true
 end
 function F.UpdateNavigator()
   local c=F.compass;if not c then return end
   c:SetShown(F.db.settings.navigator)
-  local expanded=F.char.navExpanded
+  local petOpen=F.char.navPets
+  local expanded=F.char.navExpanded and not petOpen
   local guide=F.guidance
   local large=S.MinimumTextSize()>=14
   local baseHeight=guide and (large and 156 or 126) or (large and 108 or 78)
@@ -250,7 +253,13 @@ function F.UpdateNavigator()
   c.flightNotice:SetText(needsScan and ("Missing flights: "..table.concat(missing," / ").."\nRoutes may not be optimal.") or "")
   c.flightNotice:SetShown(needsScan)
   c.flightNotice:ClearAllPoints();c.flightNotice:SetPoint("TOPLEFT",11,-baseHeight+3)
-  c:SetHeight(height+(expanded and (large and 238 or 212) or 0));c.map:SetShown(expanded);c.legend:SetShown(expanded)
+  F.compassLayoutHeight=height+(petOpen and 310 or expanded and (large and 238 or 212) or 0)
+  c:SetHeight(F.compassLayoutHeight);c.map:SetShown(expanded);c.legend:SetShown(expanded)
+  if F.Pets.mini then
+    F.Pets.mini:ClearAllPoints();F.Pets.mini:SetPoint("TOPLEFT",8,-height-3);F.Pets.mini:SetShown(petOpen)
+    F.Pets.RenderCompass()
+  end
+  c:SetScale(F.AccessibleScale(F.db.settings.compassScale,300,F.compassLayoutHeight))
   c.expand:ClearAllPoints();c.expand:SetPoint("TOPLEFT",210,-baseHeight+32)
   c.ledger:ClearAllPoints();c.ledger:SetPoint("TOPLEFT",251,-baseHeight+32)
   c.map:ClearAllPoints();c.map:SetPoint("TOPLEFT",8,-height-3)

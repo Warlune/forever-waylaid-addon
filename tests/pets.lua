@@ -1,7 +1,7 @@
 local F=...
 local P=F.Pets
 local old=P.state;local oldRandom=P.random;local oldChar=F.char.pets
-local oldNotice,oldWindow,oldPocket=P.notice,P.window,P.pocket
+local oldNotice,oldWindow,oldMini=P.notice,P.window,P.mini
 F.char.pets=nil;P.Init();assert(not P.state.share and not P.state.review)
 local roll=1;P.random=function(a,b)return b==100 and roll or a end
 local ranges={{1,1},{55,1},{56,2},{80,2},{81,3},{94,3},{95,4},{99,4},{100,5}}
@@ -88,14 +88,24 @@ local before=sends;P.Receive('ASK2','WHISPER','Asker');assert(sends==before,'Rep
 P.SetSharing(false);P.Share();P.Receive('ASK2','WHISPER','Off');assert(sends==before and not next(P.peers),'Opt-out prevents replies and clears pets')
 C_ChatInfo,IsInGuild,IsInGroup,IsInRaid=oldChat,oldGuild,oldGroup,oldRaid
 UnitIsPlayer,UnitIsUnit,GetUnitName=oldIsPlayer,oldIsUnit,oldGetName
-P.window=nil;P.pocket=nil;P.BuildUI();P.window:Show()
+P.window=nil;P.BuildUI();P.window:Show()
 for _,mode in ipairs({'collection','tower','peers'})do P.mode=mode;P.Render()end
 P.SetSharing(true);P.Receive('2,1,2,2,100,1,1','PARTY','Alpha');P.Receive('2,4,5,100,10000,100,100','PARTY','Zulu')
 P.inspectName=nil;P.page=1;P.mode='peers';P.Render()
 assert(P.window.social.text.text:find('Alpha',1,true),'Pet viewer sorts by name, never strength')
 P.page=2;P.Render();assert(P.window.social.text.text:find('Zulu',1,true),'Every shared pet can be inspected')
 P.SetSharing(false);P.Render();assert(not P.window.social.art.shown,'Opt-out hides cached portraits')
-P.pocket:Show();P.Render();P.pocket.scripts.OnUpdate(nil,0.1)
+local oldExpanded,oldPets=F.char.navExpanded,F.char.navPets
+P.ToggleCompass(true);assert(F.char.navPets and not F.char.navExpanded and P.mini.shown and not F.compass.map.shown)
+P.window:Hide();P.Render();assert(P.mini.stats.text:find('Lv',1,true),'Compact game renders while large window is closed')
+local oldFood=P.Active().food;P.Active().food=50;P.mini.care[1].scripts.OnClick();assert(P.Active().food==85,'Compass care uses the same active pet')
+P.Active().food=oldFood
+P.mini.towerButton.scripts.OnClick();assert(P.miniMode=='tower' and P.mini.enter.shown and not P.mini.care[1].shown)
+P.floor=1;P.Active().energy=100;P.Active().food=100;P.Active().health=100;P.mini.enter.scripts.OnClick();assert(P.state.battle,'Tower starts inside compass')
+P.mini.battle[5].scripts.OnClick();assert(not P.state.battle,'Retreat works inside compass')
+P.mini.scripts.OnUpdate(nil,0.1)
+F.compass.expand.scripts.OnClick();assert(F.char.navExpanded and not F.char.navPets and not P.mini.shown and F.compass.map.shown,'Map and pet switch without covering route')
+F.char.navExpanded,F.char.navPets=oldExpanded,oldPets;F.UpdateNavigator()
 F.char.pets={version=1,pets='broken'};P.Init();assert(not P.state.review and F.char.petQuarantine.pets=='broken','Unreadable save is backed up without accusing the player')
-P.state=old;F.char.pets=oldChar;P.random=oldRandom;P.notice=oldNotice;P.window=oldWindow;P.pocket=oldPocket
-print('PASS: pet rarity boundaries, care/persistence, permanent death/memorials, 100-floor gates, battle actions, NPC/PvP combat XP limits, save recovery, opt-in target inspection and pet UI')
+P.state=old;F.char.pets=oldChar;P.random=oldRandom;P.notice=oldNotice;P.window=oldWindow;P.mini=oldMini
+print('PASS: pet rarity boundaries, care/persistence, permanent death/memorials, 100-floor gates, battle actions, NPC/PvP combat XP limits, save recovery, opt-in target inspection and compass/large pet UI')
