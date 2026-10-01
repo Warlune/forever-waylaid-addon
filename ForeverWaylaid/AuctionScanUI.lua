@@ -47,37 +47,10 @@ function F.InstallAuctionScanUI()
 
   centered(page,"THE AUCTION SCRIBE",-15,600,"GameFontNormalLarge",S.gold)
   ui.caption=centered(page,"Your faction's auction scribe",-40,600,"GameFontHighlightSmall",S.muted)
-  local art=page:CreateTexture(nil,"ARTWORK",nil,0)
-  art:SetSize(218,218);art:SetPoint("TOP",0,-55)
-  local nextArt=page:CreateTexture(nil,"ARTWORK",nil,1)
-  nextArt:SetAllPoints(art)
-  ui.art=art
-  ui.nextArt=nextArt
-  local phase,elapsed=0,0
-  local interval=0.25
-  local currentFaction
-  local function coordinates(texture,index)
-    local col,row=index%4,math.floor(index/4)
-    texture:SetTexCoord(col/4,(col+1)/4,row/4,(row+1)/4)
-  end
-  local function pose()
-    local faction=S.Faction()=="Alliance" and "Alliance" or "Horde"
-    if faction~=currentFaction then
-      local path="Interface\\AddOns\\ForeverWaylaid\\Art\\AuctionScribe"..faction.."16.tga"
-      art:SetTexture(path);nextArt:SetTexture(path);currentFaction=faction
-    end
-    coordinates(art,phase);coordinates(nextArt,(phase+1)%16)
-    local t=math.min(1,elapsed/interval)
-    -- Ease between adjacent authored poses, including 16 -> 1. No reset pause.
-    nextArt:SetAlpha(t*t*(3-2*t))
-  end
-  pose()
-  ui.pose=pose
+  ui.scribe=F.Scribe.Create(page)
+  ui.pose=function()ui.scribe:Update(ui.scribe.phase)end
   page:SetScript("OnUpdate",function(_,dt)
-    local nextInterval=ui.active and 0.18 or 0.25
-    elapsed=elapsed*nextInterval/interval+dt;interval=nextInterval
-    if elapsed>=interval then phase=(phase+math.floor(elapsed/interval))%16;elapsed=elapsed%interval end
-    pose()
+    ui.scribe:Update(ui.scribe.phase+dt/F.Scribe.interval)
   end)
   local labels={"Auctions read","All item types","Relevant items","Prices saved","Time elapsed"}
   local strip=CreateFrame("Frame",nil,page);strip:SetSize(742,62);strip:SetPoint("TOP",0,-280)

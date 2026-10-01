@@ -1,13 +1,22 @@
 # Auction scribe artwork
 
-## Current sixteen-pose sprites (v0.8.0)
+## Current animation (v0.8.3)
+
+- Sources: `auction-scribe-horde-pixel16.png` and `auction-scribe-alliance-pixel16.png`. Generated in built-in imagegen edit mode using the original four-frame scribes as the visual reference. Exact prompts: [scribes-pixel16-prompts.md](scribes-pixel16-prompts.md).
+- Sixteen poses per faction include quill strokes, accumulating ink lines, small head movements, a page turn and candle flicker.
+- Rebuild with `python tools/pack-pixel-scribes.py` (Pillow required). Packing uses a single scale for all poses of each faction, nearest-neighbor resampling and a fixed desk baseline. The original generated sources remain unchanged.
+- Runtime files: `AuctionScribeHordePixel16.tga` and `AuctionScribeAlliancePixel16.tga`, each a 1024 × 1024 RGBA atlas. Packed PNG copies are included for inspection.
+- `Scribe.lua` changes actual sprite frames every 0.16 seconds, without crossfading or texture deformation. The desk, banner and reference ledger always sample frame one; the scribe and flame sample the current pose.
+- Idle and scanning use the same 2.56-second loop. Animation updates only while the Scan panel is visible.
+
+## Archived separately generated poses (v0.8.0)
 
 - Original generated sources: `auction-scribe-horde-16.png` and `auction-scribe-alliance-16.png`.
 - Built-in imagegen edit mode using the original scribes as reference. Full prompts: [scribes-16-prompts.txt](scribes-16-prompts.txt).
 - `tools/pack-scribes.py` finds transparent gutters, aligns desk baselines and widths, and converts the poses into separate 1024 × 1024 RGBA TGA atlases with four rows and four columns. Source PNGs remain unchanged. Packed PNG copies allow inspection.
 - Runtime files: `AuctionScribeHorde16.tga` and `AuctionScribeAlliance16.tga` in `ForeverWaylaid/Art`.
 - Sixteen authored poses per faction, with eased adjacent-pose blending, including frame 16 to frame 1. Four seconds per idle loop; 2.88 seconds during scans. Head, writing hand and candle flame vary across the poses.
-- Previous four/eight-pose source and runtime assets are retained for reference; the new scanner loads the sixteen-pose files.
+- These separately generated sixteen-pose files are retained for reference and no longer loaded by the scanner.
 
 ## Archived eight-frame sprites (v0.5.1)
 
