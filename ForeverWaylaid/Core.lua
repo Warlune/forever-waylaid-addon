@@ -1,6 +1,6 @@
 local _, F = ...
-F.version = "0.2.0"
-F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true }
+F.version = "0.3.0"
+F.defaults = { cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false }
 
 function F.Now() return GetServerTime and GetServerTime() or time() end
 function F.Positive(n) return type(n) == "number" and n == n and n > 0 and n < math.huge end
@@ -59,7 +59,7 @@ local poseElapsed,routeElapsed=0,0
 events:SetScript("OnUpdate",function(_,dt)
   if not F.ready then return end
   poseElapsed=poseElapsed+dt;routeElapsed=routeElapsed+dt
-  if poseElapsed>=0.1 then
+  if poseElapsed>=0.05 then
     poseElapsed=0;F.UpdateCompassPose();F.DrawMinimap()
   end
   if routeElapsed>=5 then

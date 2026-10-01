@@ -2,15 +2,17 @@
 ## Title: Forever Waylaid
 ## Notes: Crate costs, writ deliveries and learned flight routes. AHledger.com prices.
 ## Author: Warlune
-## Version: 0.2.0
+## Version: 0.3.0
 ## SavedVariables: ForeverWaylaidDB
 ## SavedVariablesPerCharacter: ForeverWaylaidCharDB
 ## OptionalDeps: Auctionator, Auc-Advanced, TomTom
 
 Catalog.lua
+Recipes.lua
 Prices.lua
 Core.lua
 Pricing.lua
+Crafting.lua
 Style.lua
 Geometry.lua
 Routing.lua

@@ -1,7 +1,7 @@
 local _,F=...
 local S,G=F.Style,F.Geometry
-local unfold="|TInterface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up:18:18|t Unfold the map"
-local fold="|TInterface\\Buttons\\UI-ScrollBar-ScrollUpButton-Up:18:18|t Fold the map"
+local unfold="|TInterface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up:18:18|t"
+local fold="|TInterface\\Buttons\\UI-ScrollBar-ScrollUpButton-Up:18:18|t"
 function F.TrackDelivery(questID)
   F.char.navQuest=questID;F.db.settings.navigator=true;F.Refresh()
 end
@@ -55,7 +55,7 @@ function F.ResetNavigator()
   if F.PositionMinimapButton then F.PositionMinimapButton()end
 end
 function F.BuildNavigator()
-  local c=S.Panel(UIParent,0,0,328,170);F.compass=c;c:ClearAllPoints()
+  local c=S.Panel(UIParent,0,0,300,126);F.compass=c;c:ClearAllPoints()
   local position=F.char.navPosition
   if position then c:SetPoint(position.point,UIParent,position.point,position.x,position.y)
   else c:SetPoint("TOPRIGHT",UIParent,"TOPRIGHT",-270,-300)end
@@ -63,20 +63,27 @@ function F.BuildNavigator()
   c:SetScript("OnDragStart",c.StartMoving);c:SetScript("OnDragStop",function(self)
     self:StopMovingOrSizing();local point,_,_,x,y=self:GetPoint();F.char.navPosition={point=point,x=x,y=y}
   end)
-  S.Text(c,"THE COURIER'S COMPASS",14,-12,290,"GameFontNormalSmall",S.gold)
-  c.arrow=c:CreateTexture(nil,"ARTWORK");c.arrow:SetTexture("Interface\\Minimap\\MinimapArrow");c.arrow:SetPoint("TOPLEFT",16,-40);c.arrow:SetSize(48,48)
-  c.distance=S.Text(c,"",8,-95,68,"GameFontNormalSmall",S.gold);c.distance:SetJustifyH("CENTER")
-  c.action=S.Text(c,"",79,-38,236,"GameFontNormalSmall",S.gold)
-  c.writ=S.Text(c,"",79,-58,234,"GameFontHighlight")
-  c.recipient=S.Text(c,"",79,-93,232,"GameFontHighlightSmall",S.muted)
-  c.location=S.Text(c,"",14,-119,300,"GameFontHighlightSmall",S.muted)
-  c.writ:SetHeight(32);c.recipient:SetHeight(24)
-  c.expand=S.Button(c,unfold,10,-140,196,function()
+  local stripe=c:CreateTexture(nil,"ARTWORK");stripe:SetPoint("TOPLEFT",5,-5);stripe:SetSize(290,19);stripe:SetColorTexture(unpack(S.Theme().accent));stripe:SetAlpha(0.55)
+  S.Text(c,"COURIER'S COMPASS",11,-9,210,"GameFontNormalSmall",S.gold)
+  c.arrow=c:CreateTexture(nil,"ARTWORK");c.arrow:SetTexture("Interface\\Minimap\\MinimapArrow");c.arrow:SetPoint("TOPLEFT",10,-31);c.arrow:SetSize(40,40)
+  c.distance=S.Text(c,"",5,-76,52,"GameFontNormalSmall",S.gold);c.distance:SetJustifyH("CENTER")
+  c.action=S.Text(c,"",60,-29,230,"GameFontNormalSmall",S.gold);c.action:SetMaxLines(1)
+  c.writ=S.Text(c,"",60,-44,230,"GameFontHighlightSmall");c.writ:SetHeight(28)
+  c.recipient=S.Text(c,"",60,-76,230,"GameFontHighlightSmall",S.muted);c.recipient:SetMaxLines(1)
+  c.location=S.Text(c,"",10,-98,192,"GameFontHighlightSmall",S.muted);c.location:SetMaxLines(1)
+  c.empty=S.Text(c,"Accept a writ to start a route.",12,-35,182,"GameFontHighlightSmall",S.muted)
+  c.expand=S.Button(c,unfold,210,-94,35,function()
     F.char.navExpanded=not F.char.navExpanded;F.UpdateNavigator()
   end)
-  S.Button(c,"Ledger",214,-140,104,function()F.window:SetShown(not F.window:IsShown())end)
-  c.map=F.CreateTravelMap(c,12,-177,304,202)
-  c.legend=S.Text(c,"Gold: travel  •  Blue: flight  •  Numbers: customers",14,-389,300,"GameFontDisableSmall")
+  c.ledger=S.Button(c,"|TInterface\\Icons\\INV_Misc_Book_09:16:16|t",251,-94,35,function()F.window:SetShown(not F.window:IsShown())end)
+  for _,button in ipairs({c.expand,c.ledger})do
+    button:SetScript("OnEnter",function(self)
+      GameTooltip:SetOwner(self,"ANCHOR_LEFT");GameTooltip:SetText(self==c.expand and "Show / hide route map" or "Open ledger");GameTooltip:Show()
+    end)
+    button:SetScript("OnLeave",function()GameTooltip:Hide()end)
+  end
+  c.map=F.CreateTravelMap(c,8,-129,284,189)
+  c.legend=S.Text(c,"Gold: travel  •  Blue: flight  •  Numbers: customers",11,-324,280,"GameFontDisableSmall")
   c.map:EnableMouse(true);c.map:SetScript("OnMouseUp",function(_,button)
     if button=="LeftButton" and F.guidance then F.Navigate(F.guidance.stop.point,F.guidance.stop.questID)end
   end)
@@ -118,19 +125,23 @@ function F.UpdateNavigator()
   local c=F.compass;if not c then return end
   c:SetShown(F.db.settings.navigator)
   local expanded=F.char.navExpanded
-  c:SetHeight(expanded and 413 or 170);c.map:SetShown(expanded);c.legend:SetShown(expanded)
-  c.expand:SetText(expanded and fold or unfold)
   local guide=F.guidance
+  local height=guide and 126 or 78
+  c:SetHeight(height+(expanded and 212 or 0));c.map:SetShown(expanded);c.legend:SetShown(expanded)
+  c.expand:ClearAllPoints();c.expand:SetPoint("TOPLEFT",210,-height+32)
+  c.ledger:ClearAllPoints();c.ledger:SetPoint("TOPLEFT",251,-height+32)
+  c.map:ClearAllPoints();c.map:SetPoint("TOPLEFT",8,-height-3)
+  c.legend:ClearAllPoints();c.legend:SetPoint("TOPLEFT",11,-height-198)
+  c.expand:SetText(expanded and fold or unfold)
+  c.empty:SetShown(not guide)
+  for _,field in ipairs({c.action,c.writ,c.recipient,c.location,c.distance})do field:SetShown(guide~=nil)end
   if guide then
     c.action:SetText(guide.action)
     c.writ:SetText(guide.stop.writ.name:gsub("^Craftsman's Writ: ",""))
-    c.recipient:SetText(guide.stop.npc or guide.stop.deliveryText or "Recipient: see quest details")
+    c.recipient:SetText(guide.target~=guide.stop.point and (guide.target.name or "Flight master") or guide.stop.npc or guide.stop.deliveryText or "See quest for recipient")
     c.location:SetText(F.DestinationText(guide.target))
   else
-    c.action:SetText("Awaiting a delivery")
-    c.writ:SetText(#(F.active or {})>0 and "Your writ needs a customer location" or "Accept a writ to start your route")
-    c.recipient:SetText("Open the ledger for requirements")
-    c.location:SetText("Drag the frame to move your compass")
+    c.empty:SetText(#(F.active or {})>0 and "Writ needs a customer pin. Open the ledger." or "Accept a writ to start a route.")
   end
   if expanded then F.UpdateTravelMap(c.map)end
   F.UpdateCompassPose()
@@ -141,7 +152,10 @@ function F.UpdateCompassPose()
   local angle=guide and G.Bearing(player,guide.target,GetPlayerFacing and GetPlayerFacing() or 0)
   c.arrow:SetShown(angle~=nil)
   if angle then
-    c.arrow:SetRotation(angle)
+    local previous=type(c.heading)=="number" and c.heading or angle
+    local delta=(angle-previous+math.pi)%(2*math.pi)-math.pi
+    c.heading=previous+delta*0.35
+    c.arrow:SetRotation(c.heading)
     local yards=F.Route.Distance(player,guide.target)
     c.distance:SetText(yards<20 and "Arrived" or yards>999 and string.format("%.1f kyd",yards/1000) or math.floor(yards).." yd")
   else c.distance:SetText("—")end

@@ -31,7 +31,7 @@ C_QuestLog={IsOnQuest=function()return false end,IsComplete=function()return fal
 C_Item={GetItemCount=function()return 0 end}
 Enum={}
 local function load(name) assert(loadfile('ForeverWaylaid/'..name..'.lua'))('ForeverWaylaid',F) end
-for _,name in ipairs({'Catalog','Prices','Core','Pricing','Style','Geometry','Routing','Tracking','Tooltips','UI','Map','Navigator'}) do load(name) end
+for _,name in ipairs({'Catalog','Recipes','Prices','Core','Pricing','Crafting','Style','Geometry','Routing','Tracking','Tooltips','UI','Map','Navigator'}) do load(name) end
 F.events.scripts.OnEvent(nil,'ADDON_LOADED','ForeverWaylaid')
 F.events.scripts.OnEvent(nil,'PLAYER_LOGIN')
 for _,tab in ipairs({'Crates','Writs','Route','Settings'}) do F.tab=tab;F.Render() end
@@ -166,3 +166,4 @@ F.BuildNavigator();F.DrawMinimap();assert(F.minimapButton and F.minimapOverlay)
 F.minimapButton.scripts.OnClick(nil,'LeftButton');assert(F.window:IsShown())
 F.db.settings.navigator=true;F.minimapButton.scripts.OnClick(nil,'RightButton');assert(not F.compass:IsShown())
 print('PASS: departure/in-flight/customer guidance, minimap overlay and launcher controls')
+assert(loadfile('tests/crafting.lua'))(F)

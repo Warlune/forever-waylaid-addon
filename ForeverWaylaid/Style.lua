@@ -2,6 +2,20 @@ local _, F = ...
 local S = {}; F.Style = S
 S.gold = {0.94,0.77,0.42}; S.ink = {0.22,0.13,0.07}; S.muted = {0.66,0.61,0.49}
 S.icons = {crate="Interface\\Icons\\INV_Crate_01", writ="Interface\\Icons\\INV_Misc_Note_01", flight="Interface\\Icons\\Ability_Druid_FlightForm", route="Interface\\Icons\\INV_Misc_Map_01"}
+function S.Theme()
+  if UnitFactionGroup("player")=="Alliance" then
+    return {bg={0.043,0.09,0.16,1},panel={0.09,0.16,0.26,1},accent={0.23,0.43,0.70,1},crest="Interface\\Timer\\Alliance-Logo"}
+  end
+  return {bg={0.09,0.075,0.055,1},panel={0.15,0.12,0.09,1},accent={0.55,0.20,0.14,1},crest="Interface\\Timer\\Horde-Logo"}
+end
+function S.BindItem(frame,id)
+  frame.itemID=id;frame:EnableMouse(id~=nil)
+  frame:SetScript("OnEnter",function(self)
+    if not self.itemID then return end
+    GameTooltip:SetOwner(self,"ANCHOR_RIGHT");GameTooltip:SetHyperlink("item:"..self.itemID);GameTooltip:Show()
+  end)
+  frame:SetScript("OnLeave",function()GameTooltip:Hide()end)
+end
 function S.Text(parent, text, x, y, width, font, color)
   local t=parent:CreateFontString(nil,"OVERLAY",font or "GameFontHighlight")
   t:SetPoint("TOPLEFT",x,y); t:SetWidth(width); t:SetJustifyH("LEFT"); t:SetText(text or "")
@@ -10,7 +24,8 @@ function S.Text(parent, text, x, y, width, font, color)
 end
 function S.Panel(parent, x, y, w, h, parchment)
   local p=CreateFrame("Frame",nil,parent,"BackdropTemplate");p:SetPoint("TOPLEFT",x,y);p:SetSize(w,h)
-  p:SetBackdrop({bgFile="Interface\\DialogFrame\\UI-DialogBox-Background",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",tile=true,tileSize=32,edgeSize=16,insets={left=4,right=4,top=4,bottom=4}})
+  p:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",tile=true,tileSize=32,edgeSize=16,insets={left=4,right=4,top=4,bottom=4}})
+  p:SetBackdropColor(unpack(S.Theme().panel))
   p:SetBackdropBorderColor(0.52,0.40,0.22,1)
   local solid=p:CreateTexture(nil,"BACKGROUND",nil,-8);solid:SetPoint("TOPLEFT",4,-4);solid:SetPoint("BOTTOMRIGHT",-4,4);solid:SetColorTexture(0.055,0.04,0.024,0.97)
   if parchment then
@@ -30,6 +45,7 @@ function S.Icon(parent, x,y,size, itemID, fallback)
   S.SetIcon(p,itemID,fallback);return p
 end
 function S.SetIcon(frame,id,fallback)
+  S.BindItem(frame,id)
   local icon=id and C_Item and C_Item.GetItemIconByID and C_Item.GetItemIconByID(id)
   if not icon and id and GetItemIcon then icon=GetItemIcon(id) end
   frame.icon:SetTexture(icon or fallback or S.icons.crate)

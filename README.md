@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.2.0 preview
+# Forever Waylaid — v0.3.0 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.2.0.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.3.0.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, choose PvP, Normal, or RP to match your realm. The faction comes from your character. No market is guessed automatically.
@@ -25,6 +25,16 @@ The folder includes an AHledger snapshot. Its actual observation date appears in
 - A movable **Courier's Compass** that stays available when the ledger and main map close: direction arrow, distance, current writ, recipient information, and destination coordinates. Its down-arrow button unfolds a small map using the game's actual map artwork.
 - Route lines on the native minimap, clipped to its circular edge and adjusted for zoom and rotating-map settings. The compass guides to a flight master, keeps the arrival target during flight, then points toward the customer.
 - Flight points and directed routes learned by opening flight masters. Unlearned routes are not invented. Visit order is optimized for up to nine located stops, with a nearest-next estimate for larger sets.
+
+## Buy or craft your cargo
+
+The top **Goods: Buy at AH / Goods: Craft** button is independent of tooltip settings. Both modes keep the auction price of the writ or crate separate from the goods cost. The detail sheet shows the full combined purchase value; a crate already in your bags also has an owned-crate total.
+
+Craft mode uses the website's 208 verified recipes and 143 raw materials. Each option includes a raw-material shopping list, bag counts and quantities still needed, vendor or auction sources, and an ordered crafting list with profession and skill requirements. Shared intermediate ingredients are combined before rounding to whole crafts. Variable yields use the guaranteed minimum; faction-only recipes are excluded for the other faction. Alternate root recipes are compared by stock availability and cost.
+
+Hover the required good, any reagent, crafted step, writ, or crate icon to see the normal in-game item tooltip. The faction theme follows your character: warm Horde tones or Alliance blue with a native crest.
+
+Craft costs value the full batch, including materials you already own; bag counts are shown separately. Vendor values are undiscounted base prices, and recipes are not assumed to be learned. These are planning lists: the addon does not craft, buy, or consume items for you. Gathered goods keep their purchase cost instead of inventing a recipe.
 
 ## AHledger updates
 
@@ -72,14 +82,14 @@ Coordinates use 0–100. The Route tab shows the quest ID for unresolved writs. 
 pnpm install --frozen-lockfile
 pnpm test
 pnpm check
-node tools/build-catalog.mjs
+node tools/build-recipes.mjs
 ```
 
-The Lua suite loads the addon and renders every panel against a simulated API. It tests cost arithmetic, market isolation, scan timestamps, directed flights, unknown destinations, and route ordering against brute-force permutations. It also checks route clipping, cardinal bearings, rotating minimap coordinates, material filtering, compass independence, launcher controls, and departure/in-flight/customer guidance. Node tests cover AHledger parsing, cache limits, and failed/older download retention. CI also runs the Lua suite with Lua 5.1. Simulated checks do not replace real delivery tests.
+The Lua suite loads the addon and renders every panel against a simulated API. It tests cost arithmetic, market isolation, scan timestamps, directed flights, unknown destinations, and route ordering against brute-force permutations. It also checks route clipping, cardinal bearings, rotating minimap coordinates, material filtering, compass independence, launcher controls, and departure/in-flight/customer guidance. Node tests cover AHledger parsing, cache limits, and failed/older download retention. CI also runs the Lua suite with Lua 5.1. Crafting tests compare all 246 catalogue requests with the website engine for both factions (492 comparisons), plus nested batching, vendor fallback, shortages, and item-hover binding. Simulated checks do not replace real delivery tests.
 
 Before calling the preview stable, verify in Forever: each tooltip toggle; Auctionator full/incremental completion; an Auctioneer home-faction scan; accepting and completing a writ; learning two flight masters; map pins at zone and continent zoom; `/reload`; and a second character/faction. Report the game build and full Lua error if one occurs.
 
-The website's crafting calculator and vendor shopping catalogue remain on the website; this initial addon quotes purchases of requested items, not recursive crafting recipes.
+The website's separate vendor-location catalogue remains on the website. Recursive crafting plans and material shopping lists are included in this addon.
 
 ## License and sources
 

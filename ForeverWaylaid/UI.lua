@@ -10,7 +10,7 @@ function F.LedgerEntries()
   for _,stop in ipairs(F.active or {}) do active[stop.questID]=stop end
   if F.tab=="Crates" then
     for _,item in ipairs(F.catalog.crates) do
-      local rows,best=F.CrateCosts(item,false);local hay=item.name
+      local rows,best=F.LedgerCrateCosts(item);local hay=item.name
       for _,o in ipairs(item.options) do hay=hay.." "..o.name end
       if match(hay,query) and (not F.tierIndex or F.tierIndex==1 or item.tier==tiers[F.tierIndex]) and
         (not F.onlyOwned or S.Count(item.id)>0) then
@@ -20,8 +20,8 @@ function F.LedgerEntries()
   elseif F.tab=="Writs" then
     for _,item in ipairs(F.catalog.writs) do
       if match(item.name.." "..item.targetName,query) and (not F.onlyOwned or active[item.questId] or S.Count(item.id)>0) then
-        local quote=F.Price(item.targetId)
-        entries[#entries+1]={item=item,cost=quote and quote.price*item.qty,reward=item.rep,quote=quote,stop=active[item.questId],owned=S.Count(item.id)}
+        local goods,quote=F.GoodsQuote(item.targetId,item.qty)
+        entries[#entries+1]={item=item,cost=goods.cost,goods=goods,reward=item.rep,quote=quote,stop=active[item.questId],owned=S.Count(item.id)}
       end
     end
   elseif F.tab=="Route" then
@@ -47,12 +47,14 @@ function F.BuildUI()
   local w=CreateFrame("Frame","ForeverWaylaidFrame",UIParent,"BackdropTemplate");F.window=w
   w:SetSize(1040,704);w:SetPoint("CENTER");w:SetFrameStrata("HIGH")
   w:SetScale(math.min(1,(UIParent:GetWidth()-40)/1040,(UIParent:GetHeight()-40)/704))
-  w:SetBackdrop({bgFile="Interface\\DialogFrame\\UI-DialogBox-Background",edgeFile="Interface\\DialogFrame\\UI-DialogBox-Border",tile=true,tileSize=32,edgeSize=32,insets={left=10,right=10,top=10,bottom=10}})
+  w:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8",edgeFile="Interface\\DialogFrame\\UI-DialogBox-Border",tile=true,tileSize=32,edgeSize=32,insets={left=10,right=10,top=10,bottom=10}})
+  w:SetBackdropColor(unpack(S.Theme().bg))
   w:SetBackdropBorderColor(0.86,0.72,0.46,1)
   local backing=w:CreateTexture(nil,"BACKGROUND",nil,-8);backing:SetPoint("TOPLEFT",10,-10);backing:SetPoint("BOTTOMRIGHT",-10,10);backing:SetColorTexture(0.055,0.039,0.025,0.98)
   w:EnableMouse(true);w:SetMovable(true);w:SetClampedToScreen(true);w:RegisterForDrag("LeftButton")
   w:SetScript("OnDragStart",w.StartMoving);w:SetScript("OnDragStop",w.StopMovingOrSizing)
-  S.Icon(w,23,-18,58,nil,S.icons.crate)
+  local banner=w:CreateTexture(nil,"ARTWORK");banner:SetPoint("TOPLEFT",14,-14);banner:SetSize(1012,60);banner:SetColorTexture(unpack(S.Theme().accent));banner:SetAlpha(0.32)
+  local crest=w:CreateTexture(nil,"OVERLAY");crest:SetPoint("TOPLEFT",25,-18);crest:SetSize(58,58);crest:SetTexture(S.Theme().crest)
   S.Text(w,"FOREVER WAYLAID",94,-22,470,"GameFontNormalHuge",S.gold)
   F.factionTitle=S.Text(w,"THE MERCHANT'S FIELD LEDGER",95,-49,500,"GameFontHighlightSmall",S.muted)
   local close=CreateFrame("Button",nil,w,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-7,-7)
@@ -62,6 +64,9 @@ function F.BuildUI()
     F.tabButtons[tab]=S.Button(w,tab,24+(i-1)*154,-82,144,function()F.tab=tab;F.offset=0;F.Render()end)
   end
   S.Button(w,"Travel compass",844,-82,168,function()F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator()end)
+  F.craftButton=S.Button(w,"Goods: Buy at AH",640,-82,194,function()
+    F.db.settings.craftGoods=not F.db.settings.craftGoods;F.offset=0;F.Render()
+  end)
   F.filters=CreateFrame("Frame",nil,w);F.filters:SetPoint("TOPLEFT",24,-120);F.filters:SetSize(988,28)
   local edit=CreateFrame("EditBox",nil,F.filters,"InputBoxTemplate");edit:SetPoint("TOPLEFT",8,0);edit:SetSize(278,26);edit:SetAutoFocus(false)
   edit:SetTextInsets(7,7,0,0);edit:SetScript("OnEscapePressed",edit.ClearFocus)
@@ -86,11 +91,11 @@ function F.BuildUI()
     row.bg=row:CreateTexture(nil,"BACKGROUND");row.bg:SetAllPoints();row.bg:SetColorTexture(1,0.78,0.34,0.035)
     row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight","ADD")
     row.icon=S.Icon(row,5,-5,48)
-    row.text=S.Text(row,"",64,-8,327,"GameFontNormal",S.gold)
-    row.detail=S.Text(row,"",64,-28,340,"GameFontHighlightSmall",S.muted)
+    row.text=S.Text(row,"",64,-8,295,"GameFontNormal",S.gold)
+    row.detail=S.Text(row,"",64,-28,295,"GameFontHighlightSmall",S.muted)
     row.text:SetMaxLines(1);row.detail:SetMaxLines(2)
-    row.reward=S.Text(row,"",421,-33,144,"GameFontHighlightSmall",S.muted);row.reward:SetJustifyH("RIGHT")
-    row.cost=S.Text(row,"",399,-9,166,"GameFontHighlight");row.cost:SetJustifyH("RIGHT")
+    row.reward=S.Text(row,"",421,-43,144,"GameFontHighlightSmall",S.muted);row.reward:SetJustifyH("RIGHT")
+    row.cost=S.Text(row,"",370,-6,195,"GameFontHighlightSmall");row.cost:SetJustifyH("RIGHT")
     row:SetScript("OnClick",function(self)F.selected[F.tab]=self.entry.item.id;F.Render()end)
     row:SetScript("OnEnter",showItem);row:SetScript("OnLeave",function()GameTooltip:Hide()end)
     F.rows[i]=row
@@ -100,6 +105,12 @@ function F.BuildUI()
   F.detailScroll=CreateFrame("ScrollFrame",nil,F.detailPanel,"UIPanelScrollFrameTemplate")
   F.detailScroll:SetPoint("TOPLEFT",10,-10);F.detailScroll:SetPoint("BOTTOMRIGHT",-30,10)
   F.detailChild=CreateFrame("Frame",nil,F.detailScroll);F.detailChild:SetSize(340,390);F.detailScroll:SetScrollChild(F.detailChild)
+  F.ScrollDetails=function(delta)
+    local range=math.max(0,F.detailChild:GetHeight()-F.detailScroll:GetHeight())
+    F.detailScroll:SetVerticalScroll(math.max(0,math.min(range,F.detailScroll:GetVerticalScroll()-delta*65)))
+  end
+  F.detailScroll:EnableMouseWheel(true)
+  F.detailScroll:SetScript("OnMouseWheel",function(_,delta)F.ScrollDetails(delta)end)
   F.detailRows={}
   F.prev=S.Button(w,"Previous",24,-645,102,function()F.offset=math.max(0,(F.offset or 0)-pageSize);F.Render()end)
   F.next=S.Button(w,"Next",135,-645,102,function()F.offset=(F.offset or 0)+pageSize;F.Render()end)
@@ -133,6 +144,7 @@ function F.BuildUI()
   S.Button(F.settings,"Reset compass position",727,-282,231,function()F.ResetNavigator()end)
   S.Text(F.settings,"The addon works on its own. The optional helper only refreshes AHledger snapshots.\nScan in a faction capital with Auctionator, or use Auctioneer's saved prices.",25,-337,920,"GameFontHighlight",S.muted)
   w:EnableMouseWheel(true);w:SetScript("OnMouseWheel",function(_,delta)
+    if F.detailPanel:IsMouseOver() and F.tab~="Settings" then F.ScrollDetails(delta);return end
     if F.tab~="Settings" then F.offset=math.max(0,math.min(F.lastPage or 0,(F.offset or 0)-delta*pageSize));F.Render()end
   end)
   w:SetScript("OnShow",F.Refresh);UISpecialFrames[#UISpecialFrames+1]="ForeverWaylaidFrame";w:Hide()
@@ -157,6 +169,7 @@ local function detailWriter()
     row.title:SetFontObject(heading and "GameFontNormalLarge" or "GameFontNormal");row.title:SetTextColor(unpack(S.ink));row.title:SetText(title)
     row.description:ClearAllPoints();row.description:SetPoint("TOPLEFT",icon and 43 or 4,heading and -43 or -26);row.description:SetWidth(icon and 286 or 326);row.description:SetText(description or "")
     row.amount:SetText(amount or "");if icon then S.SetIcon(row.icon,icon)end
+    S.BindItem(row,icon)
     local titleHeight=row.title:GetStringHeight() or 16
     local descriptionTop=math.max(heading and 43 or 26,titleHeight+10)
     row.description:ClearAllPoints();row.description:SetPoint("TOPLEFT",icon and 43 or 4,-descriptionTop)
@@ -174,20 +187,46 @@ function F.RenderDetail(entry)
   if not entry then add("A page waiting to be filled","Select a crate or writ to inspect its requirements.",nil,nil,true);return end
   local item=entry.item
   add(short(item.name),item.questId and "CRAFTSMAN'S WRIT" or (item.tier:upper().." SUPPLY CRATE"),item.id,nil,true)
+  local purchase=F.Price(item.id)
+  add(item.questId and "Writ at auction" or "Crate at auction",purchase and purchase.source.." • "..S.Age(purchase.time) or "No auction price for this item",nil,S.Money(purchase and purchase.price))
+  local function craftDetails(id,qty)
+    if not F.db.settings.craftGoods then return end
+    local craft=F.CraftQuote(id,qty)
+    add("Crafting materials",craft.reason or (#craft.steps==0 and "Gathered / purchased goods: no crafting recipe" or "Raw materials for the full batch; bag counts shown below"),nil,S.Money(craft.cost))
+    for _,mat in ipairs(craft.materials)do
+      add(mat.qty.." × "..mat.name,"Bags: "..S.Count(mat.itemId).." • need "..math.max(0,mat.qty-S.Count(mat.itemId)).."\n"..mat.source..(mat.quantity and " • "..mat.quantity.." listed" or ""),mat.itemId,S.Money(mat.cost))
+    end
+    if #craft.steps>0 then
+      add("Craft in this order","Recipe ownership is not assumed. Full material value is shown; owned materials are not free.")
+      for n,step in ipairs(craft.steps)do
+        add(n..". "..step.name,step.crafts.." crafts • "..step.profession.." "..step.skill.."\nMakes "..step.crafts*step.outputMin..(step.outputMax~=step.outputMin and "+ (minimum yield)" or ""),step.itemId)
+      end
+    end
+    if craft.alternativeCount then add("Alternate recipes",craft.alternativeCount.." recipes compared; cheapest sufficiently stocked path shown.")end
+  end
   if not item.questId then
     add("Merchant's Favor",(item.favor or 0).." favor per turn-in • requires level "..(item.level or "?"))
     local crate=F.Price(item.id);local total=entry.cost and (entry.owned>0 and entry.cost or crate and entry.cost+crate.price)
-    add("Best fill",entry.best and (entry.best.option.qty.." × "..entry.best.option.name) or "No fully priced, sufficiently stocked option",nil,S.Money(entry.cost))
+    add(F.db.settings.craftGoods and "Best crafted fill" or "Best auction fill",entry.best and (entry.best.option.qty.." × "..entry.best.option.name) or "No fully priced, sufficiently stocked option",nil,S.Money(entry.cost))
     add(entry.owned>0 and "Total • crate in your bags" or "Total • buy crate + fill",entry.cost and "Fill / favor: "..S.Money(entry.cost/item.favor) or "Some prices are unavailable",nil,S.Money(total))
     add("Choose your cargo","Each option below fills this crate on its own.")
     for _,row in ipairs(entry.rows) do
       local quote=row.quote;local status=quote and (quote.quantity and quote.quantity.." listed" or "stock unknown") or "No market price"
       add(row.option.qty.." × "..row.option.name,"Bags: "..S.Count(row.option.itemId).." • "..status..(row==entry.best and " • BEST FILL" or ""),row.option.itemId,S.Money(row.cost))
-      if quote then add(quote.source,S.Age(quote.time)..(row.enough and " • observed stock covers this fill" or " • not enough observed stock"))end
+      if quote and not row.craft then add(quote.source,S.Age(quote.time)..(row.enough and " • observed stock covers this fill" or " • not enough observed stock"))end
+      if row.craft then
+        add("Buy finished goods",nil,nil,S.Money(quote and quote.price*row.option.qty))
+        craftDetails(row.option.itemId,row.option.qty)
+      end
     end
   else
     add("Reputation reward",item.rep.." reputation • keep the writ in your bags")
-    add("Required goods",S.Count(item.targetId).." / "..item.qty.." in bags",item.targetId,S.Money(entry.cost or (F.Price(item.targetId) and F.Price(item.targetId).price*item.qty)))
+    local goods=entry.goods or F.GoodsQuote(item.targetId,item.qty)
+    local auction=F.Price(item.targetId)
+    add(item.qty.." × "..item.targetName,"Required goods • "..S.Count(item.targetId).." / "..item.qty.." in bags",item.targetId,S.Money(goods.cost))
+    add("Buy finished goods",auction and auction.source or "Auction price unavailable",nil,S.Money(auction and auction.price*item.qty))
+    add(F.db.settings.craftGoods and "Writ + craft materials" or "Writ + finished goods","Full purchase value; writ owned: "..S.Count(item.id),nil,S.Money(purchase and goods.cost and purchase.price+goods.cost))
+    craftDetails(item.targetId,item.qty)
     local quote=entry.quote or F.Price(item.targetId)
     if quote then add("Market estimate",quote.source.." • "..S.Age(quote.time).."\n"..(quote.quantity and quote.quantity.." units listed" or "Stock unknown"),nil,S.Money(quote.price*item.qty/item.rep).." / rep")end
     if entry.stop then
@@ -208,6 +247,7 @@ end
 
 function F.Render()
   if not F.window then return end
+  F.craftButton:SetText(F.db.settings.craftGoods and "Goods: Craft" or "Goods: Buy at AH")
   local market=F.Market();local feed=market and F.bundledPrices[market]
   F.status:SetText((market or "Choose your market in Settings").."\n"..(feed and "AHledger snapshot • "..S.Age(feed.time) or "Personal scans available • no AHledger snapshot"))
   F.factionTitle:SetText(UnitFactionGroup("player")=="Horde" and "DUROTAR SUPPLY & LOGISTICS  /  FIELD LEDGER" or "AZEROTH COMMERCE AUTHORITY  /  FIELD LEDGER")
@@ -241,7 +281,8 @@ function F.Render()
         row.detail:SetText(entry.stop.npc or entry.stop.deliveryText or F.DestinationText(entry.stop.point))
         row.reward:SetText(entry.stop.ready and "|cff88cc77Ready|r" or "Preparing")
       else
-        row.cost:SetText(S.Money(entry.cost))
+        local purchase=F.Price(entry.item.id)
+        row.cost:SetText((entry.item.questId and "Writ " or "Crate ")..S.Money(purchase and purchase.price).."\n"..(F.db.settings.craftGoods and "Craft " or "Goods ")..S.Money(entry.cost))
         row.detail:SetText(entry.best and entry.best.option.qty.." × "..entry.best.option.name or entry.item.questId and entry.item.qty.." × "..entry.item.targetName or "Price missing / short stock")
         row.reward:SetText(entry.stop and (entry.stop.ready and "|cff88cc77Ready to deliver|r" or "|cffffd36aAccepted|r") or (entry.reward or 0)..(F.tab=="Crates" and " favor" or " reputation"))
       end
