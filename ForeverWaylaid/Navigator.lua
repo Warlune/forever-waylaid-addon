@@ -58,7 +58,16 @@ end
 function F.AdvanceRoadGuidance(guide,player)
   local walk=guide.walkSteps or {}
   local index=guide.walkIndex or 1
-  while index<=#walk and F.Route.Distance(player,walk[index].to)<12 do index=index+1 end
+  local function passed(step)
+    if F.Route.Distance(player,step.to)<4 then return true end
+    if not player or player.instance~=step.from.instance or player.instance~=step.to.instance then return false end
+    local dx,dy=step.to.wx-step.from.wx,step.to.wy-step.from.wy
+    local length2=dx*dx+dy*dy
+    if length2<0.01 then return true end
+    local x,y=player.wx-step.from.wx,player.wy-step.from.wy
+    return x*dx+y*dy>=length2 and (x*dy-y*dx)^2/length2<=64
+  end
+  while index<=#walk and passed(walk[index])do index=index+1 end
   guide.walkIndex=index
   local step=walk[index]
   if step then
@@ -72,8 +81,9 @@ function F.AdvanceRoadGuidance(guide,player)
     guide.target=guide.travelTarget;guide.action=guide.travelAction;guide.roadWarning=nil
   end
 end
-function F.DisplayRoute()
+function F.DisplayRoute(player)
   local segments,stops={},{}
+  player=player or F.Route.Player()
   local function append(step)
     local from=step.from
     for _,via in ipairs(step.detail and step.detail.via or {})do
@@ -83,8 +93,28 @@ function F.DisplayRoute()
     segments[#segments+1]={from=from,to=step.to,mode=step.mode,detail=step.detail,road=step.road}
   end
   for i,leg in ipairs(F.route or {})do
-    local steps=i==1 and F.guidance and F.guidance.stop.questID==leg.stop.questID and F.guidance.steps or leg.steps
-    for _,step in ipairs(steps)do append(step)end
+    local guide=i==1 and F.guidance and F.guidance.stop.questID==leg.stop.questID and F.guidance
+    local steps=guide and guide.steps or leg.steps
+    if guide and guide.walkSteps and player then F.AdvanceRoadGuidance(guide,player)end
+    local walkCount=guide and guide.walkSteps and #guide.walkSteps or 0
+    local first=guide and guide.walkIndex or 1
+    for index,step in ipairs(steps)do
+      if index>walkCount or index>=first then
+        if player and index<=walkCount and index==first and player.instance==step.from.instance then
+          -- Only trim the current walking segment. Keep every future bend,
+          -- transport departure and later delivery anchored to its real point.
+          local road=step.road
+          if road=="mapped" then
+            local dx,dy=step.to.wx-step.from.wx,step.to.wy-step.from.wy
+            local length2=dx*dx+dy*dy
+            local x,y=player.wx-step.from.wx,player.wy-step.from.wy
+            local t=length2>0 and math.max(0,math.min(1,(x*dx+y*dy)/length2)) or 0
+            if (x-t*dx)^2+(y-t*dy)^2>625 then road="unknown" end
+          end
+          append({from=player,to=step.to,mode=step.mode,detail=step.detail,road=road})
+        else append(step)end
+      end
+    end
     stops[#stops+1]={point=leg.stop.point,stop=leg.stop,number=i}
   end
   return segments,stops
@@ -269,5 +299,5 @@ function F.DrawMinimap()
   local function inside(x,y)
     return square and x>=5 and x<=w-5 and y>=5 and y<=h-5 or not square and (x-w/2)^2+(y-h/2)^2<=(math.min(w,h)/2-7)^2
   end
-  F.DrawRouteOverlay(overlay,project,clip,inside,false,true)
+  F.DrawRouteOverlay(overlay,project,clip,inside,false,true,player)
 end

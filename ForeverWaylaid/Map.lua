@@ -9,10 +9,11 @@ function F.ClearRouteOverlay(overlay)
   for _,line in ipairs(overlay.lines)do line:Hide()end
   for _,pin in ipairs(overlay.pins)do pin:Hide()end
 end
-function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small)
+function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small,player)
   F.ClearRouteOverlay(overlay)
   if not F.DisplayRoute then return end
-  local segments,stops=F.DisplayRoute();local lineIndex,pinIndex=0,0
+  player=player or F.Route.Player()
+  local segments,stops=F.DisplayRoute(player);local lineIndex,pinIndex=0,0
   local function pin(point,text,kind,stop)
     local x,y=project(point);if not x or not inside(x,y)then return end
     pinIndex=pinIndex+1;local p=overlay.pins[pinIndex]
@@ -59,7 +60,7 @@ function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small)
     if step.mode~="Fly" and step.mode~="Travel" then pin(step.from,step.mode..": "..(step.to.name or "Destination"),"transport");pin(step.to,step.to.name or "Arrival","transport")end
   end
   for _,stop in ipairs(stops)do pin(stop.point,tostring(stop.number),"stop",stop.stop)end
-  if showPlayer then local player=F.Route.Player();if player then pin(player,"You","player")end end
+  if showPlayer and player then pin(player,"You","player")end
 end
 local function drawMap(overlay,map,showPlayer)
   local w,h=overlay:GetWidth(),overlay:GetHeight()
@@ -73,7 +74,7 @@ function F.InstallMap()
   local overlay=F.CreateRouteOverlay(canvas);F.worldOverlay=overlay
   local elapsed=0
   overlay:SetScript("OnUpdate",function(_,dt)
-    elapsed=elapsed+dt;if elapsed<0.25 or not F.ready then return end;elapsed=0
+    elapsed=elapsed+dt;if elapsed<0.05 or not F.ready then return end;elapsed=0
     if F.db.settings.worldRoute then drawMap(overlay,WorldMapFrame:GetMapID(),false)else F.ClearRouteOverlay(overlay)end
   end)
 end

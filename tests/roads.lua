@@ -23,9 +23,9 @@ assert(math.abs(withUnusedTaxi-300/7)<0.00001,'An unused taxi node must not crea
 local guide={walkSteps=steps,walkIndex=1,travelTarget=b,travelAction='Deliver to customer'}
 F.AdvanceRoadGuidance(guide,a)
 assert(guide.target==steps[1].to and guide.action=='Follow the road')
-F.AdvanceRoadGuidance(guide,point(0,95))
+F.AdvanceRoadGuidance(guide,point(0,99))
 assert(guide.target==steps[2].to,'Arrow advances to the next bend')
-F.AdvanceRoadGuidance(guide,point(100,95))
+F.AdvanceRoadGuidance(guide,point(100,99))
 assert(guide.target==steps[3].to)
 F.AdvanceRoadGuidance(guide,b)
 assert(guide.target==b and guide.action=='Deliver to customer','Arrival restores the delivery action')
@@ -48,6 +48,27 @@ assert(#overlay.lines==3,'Shared world/compass/minimap renderer must draw every 
 F.route={{steps=unknown,stop={point=b}}}
 F.DrawRouteOverlay(overlay,project,clip,function()return true end,false)
 for _,line in ipairs(overlay.lines)do assert(not line.shown,'Clear old lines and never draw the unknown straight shortcut')end
+
+local stop={questID=1,point=b}
+local later={from=b,to=point(200,0),mode='Travel',road='mapped'}
+F.route={{steps=steps,stop=stop},{steps={later},stop={questID=2,point=later.to}}}
+F.guidance={stop=stop,steps=steps,walkSteps=steps,walkIndex=1,travelTarget=b,travelAction='Deliver to customer'}
+local oldPath=roads.Path
+local originalStart=steps[1].from
+roads.Path=function()error('Redrawing must not recalculate paths')end
+local live=point(0,40)
+local displayed=F.DisplayRoute(live)
+assert(displayed[1].from==live and displayed[1].to==steps[1].to,'Line begins at the live player arrow and keeps the next bend')
+assert(displayed[2].from==steps[2].from and displayed[4].from==b,'Keep future bends and later deliveries fixed')
+assert(steps[1].from==originalStart,'Do not mutate the planned route while trimming its display')
+displayed=F.DisplayRoute(point(0,95))
+assert(#displayed==4,'Do not cut across a corner before reaching it')
+live=point(0,99);displayed=F.DisplayRoute(live)
+assert(#displayed==3 and displayed[1].from==live and displayed[1].to==steps[2].to,'Remove the completed road section immediately')
+F.guidance.walkIndex=1
+displayed=F.DisplayRoute(point(50,40))
+assert(displayed[1].road=='unknown','Drifting away from the road must not draw a new straight shortcut')
+roads.Path=oldPath
 
 fixture({{{1454,0,0},{1454,0,10}},{{1454,10,0},{1454,10,10}}})
 assert(roads.Path(a,b)==nil,'Disconnected roads cannot be joined by proximity')
