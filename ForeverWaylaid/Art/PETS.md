@@ -1,0 +1,9 @@
+# Waylaid companion atlas
+
+`WaylaidPets.png` is the original generated source; `WaylaidPets.tga` is the 1024×1024 RGBA game texture, exported using nearest-neighbor sizing. The 2×2 cells are Murloc, Whelp, Wolf pup and Owl in reading order. The addon uses normalized texture coordinates, without per-frame sprite resizing. The pocket view's optional two-pixel bob is disabled by Reduced motion.
+
+Created with the built-in image-generation tool on 2026-10-01. This is original generated fan art for the addon, not an extracted Blizzard texture. Rarity changes the UI wording/color and game stats, not the atlas pixels.
+
+## Final generation prompt
+
+Create ONE game-ready pixel art pet atlas for a Warcraft Classic themed virtual pet addon. Square canvas, exactly a 2 by 2 grid of equal square cells; transparent background everywhere. Four separate full-body cute miniature Warcraft-inspired creatures, exactly centered independently at centers (25%,25%), (75%,25%), (25%,75%), (75%,75%). Top left: green murloc baby with orange dorsal fin and huge round eyes. Top right: purple baby dragon whelp, tiny wings, cream belly. Bottom left: silver-gray wolf pup, amber eyes, fluffy tail. Bottom right: brown-and-cream owl fledgling with spread little wings. Each creature fits completely inside the central 60% of its own cell, with generous empty transparent margins; no overlaps and no shadows extending outside cells. Unified authentic hand-placed chunky 16-bit pixel art, limited saturated palette, black-brown pixel outline, crisp square pixels, charming expressive faces, consistent sprite scale. Single front/three-quarter idle pose each, no animation frames. No text, no lettering, no panels, no gridlines, no background scene, no gradients, no blur. Asset intended for nearest-neighbor sampling on a dark parchment-and-wood Classic WoW UI.

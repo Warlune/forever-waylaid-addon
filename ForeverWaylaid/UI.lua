@@ -93,8 +93,11 @@ function F.BuildUI()
   local close=CreateFrame("Button",nil,w,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-7,-7)
   F.status=S.Text(w,"",660,-37,343,"GameFontHighlightSmall",S.muted);F.status:SetJustifyH("RIGHT")
   F.tab="Crates";F.sortIndex=1;F.tierIndex=1;F.selected={};F.tabButtons={}
-  for i,tab in ipairs({"Crates","Writs","Route","Settings"}) do
-    F.tabButtons[tab]=S.Button(w,tab,24+(i-1)*154,-82,144,function()F.tab=tab;F.offset=0;F.Render()end)
+  for i,tab in ipairs({"Crates","Writs","Route","Pets","Settings"}) do
+    F.tabButtons[tab]=S.Button(w,tab,24+(i-1)*123,-82,113,function()
+      if tab=="Pets" then F.Pets.Toggle();return end
+      F.tab=tab;F.offset=0;F.Render()
+    end)
   end
   S.Button(w,"Travel compass",844,-82,168,function()F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator()end)
   F.craftButton=S.Button(w,"Goods: Buy at AH",640,-82,194,function()

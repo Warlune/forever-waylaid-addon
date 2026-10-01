@@ -1,8 +1,11 @@
-# Forever Waylaid 0.10.4 preview
+# Forever Waylaid 0.11.0 preview
 
-- Walking now uses dotted guides throughout world, city, zone and minimap views. Known road, gate and pass bends are retained; unverified approaches use fainter, wider-spaced dots.
-- Added a coarse city-gate fallback when an endpoint cannot attach to mapped streets. Existing reviewed gate waypoints cover Orgrimmar, Stormwind, Ironforge and Darnassus, in both directions. Same-city trips do not force an exit, and faction restrictions remain enforced.
-- The compass names the city-gate step when an unverified approach leads there. All future transport and arrival-to-customer legs remain visible. No map itinerary panel has been added.
-- Added regression checks for gate entry/exit, same-city trips, distance estimates and faction restrictions.
+- Added **Pets** and `/fwl pets`: a separate Classic-style companion window with a stable, memorial, tower, social panel and small movable pocket view.
+- Adopt four pixel creatures (Murloc, Whelp, Wolf pup and Owl) with Common–Legendary rarity. Feed, play, rest and heal using pet tokens and care supplies; no real gold is spent.
+- **Permanent death** from tower defeat or prolonged starvation. Dead pets stay in the memorial; offline and stabled pets do not lose needs. Lifespan records active online time. A replacement is free when no living pets remain.
+- Added 100 turn-based tower floors, bosses every ten floors, guard, special attacks, healing and retreat. Victories earn XP and tokens; repeated floors award reduced XP.
+- NPC killing blows give 3 pet XP; PvP killing blows give 10. Your character and its combat pet qualify. Only your living active companion gains XP. Combat gains are limited to 60 XP per minute and the same target once per five minutes; the level cap is 100. Hover the pet XP readout for details.
+- Optional guild/group pet sharing is off by default and separate from auction-price sharing. Recent self-reported standings show tower floor, level and active lifespan. Simple save edits and invalid reports are flagged for integrity review and excluded; this is not proof of cheating or a secure global leaderboard.
+- Added regression coverage for rarity, care, persistence, permanent death, tower progression, NPC/PvP XP, duplicate/rate limits, social validation and UI construction.
 
-Use `/reload` after updating. This is simple waypoint guidance, not collision-aware navigation: unknown walls, mountains, interiors, lifts and stairs may still obstruct faint direction-only links. Live route testing remains necessary. This remains a 0.x preview.
+Use `/reload`, then **Pets** or `/fwl pets`. Adopt a companion before earning pet XP. This remains a **0.x preview**, not 1.0. Live Forever combat-event, layout and balance testing is still needed. Existing auction and route systems are unchanged.

@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.10.4"
+F.version = "0.11.0"
 F.defaults = { routeMode="safer", ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
 
 function F.ApplySettings()
@@ -58,6 +58,7 @@ events:SetScript("OnEvent", function(_, event, name, success,spellID)
     F.char.peerPrices = F.char.peerPrices or {}
     F.char.recipients = F.char.recipients or {}
     F.char.realm = GetRealmName()
+    F.Pets.Init()
   elseif event == "PLAYER_LOGIN" then
     F.ReadProfessions(); F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.BuildNavigator(); F.RegisterAuctionator(); F.Style.ApplyTheme(); F.ApplyAccessibility(); F.Refresh()
     F.InitializePeers()
@@ -126,6 +127,7 @@ SlashCmdList.FOREVERWAYLAID = function(msg)
   local clear = tonumber(msg:match("^unpin%s+(%d+)$"))
   if clear then F.char.pins[clear] = nil; F.Refresh(); return end
   if msg == "accessibility" then F.tab="Settings";F.accessibilityView=true;F.window:Show();F.Render();return end
+  if msg == "pets" then F.Pets.Toggle();return end
   if msg == "prices" then F.ImportPersonal(); F.Refresh(); return end
   if msg == "compass" then F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator();return end
   if msg == "reset" then F.ResetNavigator();return end

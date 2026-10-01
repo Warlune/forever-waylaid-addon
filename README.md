@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.10.4 preview
+# Forever Waylaid — v0.11.0 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.10.4.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.11.0.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -25,6 +25,22 @@ The addon has no bundled auction prices or external price service. Until you sca
 - A movable **Courier's Compass** that stays available when the ledger and main map close: direction arrow, distance, current writ, recipient information, and destination coordinates. Its down-arrow button unfolds a small map using the game's actual map artwork.
 - Route lines on the native minimap, clipped to its circular edge and adjusted for zoom and rotating-map settings. The compass automatically guides to the next flight master, boat/zeppelin dock, personal teleport or customer. It keeps the arrival target during a booked flight and recalculates from your current position every five seconds.
 - Flight points and directed routes learned by opening flight masters. Unlearned routes are not invented. Visit order is optimized for up to nine located stops, with a nearest-next estimate for larger sets. The warning icon beside Known flight points lists Eastern Kingdoms and/or Kalimdor when no recorded flight-master departure exists for that continent. Hover it for details; open a flight master's map there without buying a flight. A recorded visit does not mean every route on the continent is known.
+
+## Waylaid companions (new preview)
+
+Open **Pets** on the ledger or use `/fwl pets`. Adopt a pixel Murloc, Whelp, Wolf pup or Owl with a random Common–Legendary rarity. Care for its health, food, happiness and energy; buy treats, toys and healing herbs with **pet tokens**, never real gold. Your first pet, and a replacement when no living pets remain, are free. Further adoptions cost 25 tokens. Earn a token every five active pet minutes and more from tower wins. Use **Pocket view** for a small movable companion window while travelling.
+
+**Death is permanent.** Defeat in the tower or prolonged starvation kills the active pet and preserves its level, best floor and active lifespan in the memorial. Stabled pets and offline time do not lose needs or age. Time alive counts active online time, not calendar time. The stable holds 24 living pets; the collection and memorial hold 128 records total.
+
+The turn-based tower has 100 increasingly difficult floors, a boss every ten floors, strikes, guard, a special attack, healing herbs and retreat. Clear floors in order; repeat floors award reduced XP. Closing the game during battle counts as a retreat and keeps damage and spent supplies. Retreat before losing all health.
+
+Pet XP comes from tower victories and your character's **killing blows**: NPCs give 3 XP and players give 10 XP. Your combat pet's killing blows also count. Other group members' kills, unrelated deaths and enemy-pet kills do not. Combat XP is limited to 60 per minute, with the same target GUID eligible once every five minutes; these session-local checks are abuse deterrents, not secure enforcement. Only the living active companion gains XP, up to level 100. Hover its XP readout for these rules. Combat event handling still needs confirmation in the live Forever client.
+
+**Social** has a separate, default-off sharing toggle. When enabled it exchanges one compact active-pet report with your guild and party/raid roughly every two minutes. It displays the top three recently seen peers by tower floor, with level and active lifespan; reports expire after ten minutes. These are **self-reported guild/group standings**, not a global or verified leaderboard. Pet sharing is independent of auction-price sharing.
+
+A local save checksum and value checks flag simple edits or inconsistent saves for **integrity review**; invalid saves are preserved in quarantine. Flagged reports are excluded from the standings. A flag is not proof of cheating: corruption and bugs are possible. Anyone controlling the addon and saved variables can bypass these checks or restore old saves. There are no secret keys, file locks or claims of cheat-proof protection. A trusted competitive leaderboard would need authoritative validation outside the player-controlled addon. Code stays readable, consistent with [Blizzard's addon policy](https://us.forums.blizzard.com/en/wow/t/ui-add-on-development-policy/24534).
+
+The artwork is original generated pixel fan art; source, export details and the prompt are in `ForeverWaylaid/Art/PETS.md`. The pet panels use the addon's text and contrast preferences; Reduced motion stops the pocket sprite's gentle bob. Pet gameplay, balance and layout are an early preview and still need live testing.
 
 ## Buy or craft your cargo
 
