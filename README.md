@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.8.4 preview
+# Forever Waylaid — v0.8.5 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.8.4.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.8.5.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -44,7 +44,7 @@ An animated orc (Horde) or human (Alliance) scribe copies prices into a ledger. 
 
 **Comparing scan counts:** every auction row in Blizzard's returned snapshot is read, and prices are retained across the entire market. All item types counts distinct item IDs; Relevant items counts the Waylaid subset; Prices saved counts valid price observations committed by this scan. Bid-only listings do not supply buyout values. Prices are grouped by base item ID, so differently enchanted or random-suffix versions share a lowest-price estimate. This scanner does not reproduce Auctionator/Auctioneer's broader shopping, selling, or historical valuation tools. We have not measured accuracy or counts against both addons on a matching market snapshot, so no parity claim is made.
 
-Hover an item in your bags, equipment, chat links, or other normal item tooltips to see **AH buyout (each)**, its source, and scan age when a price is available. The value is per item, not a stack total. With auto-hide enabled, another supported auction addon suppresses our tooltip additions for unrelated items; writs, crates, required goods, and crafting ingredients retain Waylaid information. Installed but disabled scanners do not suppress it. Missing prices are not invented. Scan again after upgrading from 0.5.x to populate unrelated item prices; old Waylaid quotes remain available.
+Hover an item in your bags, equipment, chat links, or other normal item tooltips to see **AH buyout (each)** when a price is available. Unrelated items show only that single line. Waylaid-related items retain their source, scan age and delivery details. Tooltip costs use white numbers with native gold, silver and copper icons. The value is per item, not a stack total. With auto-hide enabled, another supported auction addon suppresses our tooltip additions for unrelated items; writs, crates, required goods, and crafting ingredients retain Waylaid information. Installed but disabled scanners do not suppress it. Missing prices are not invented. Scan again after upgrading from 0.5.x to populate unrelated item prices; old Waylaid quotes remain available.
 
 ### Other auction addons and settings
 

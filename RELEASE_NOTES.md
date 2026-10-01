@@ -1,7 +1,7 @@
-## 0.8.4 — Classic XP-style scan progress
+## 0.8.5 — Cleaner auction tooltips
 
-- Styled scan progress with the native Classic experience-bar trim and twenty cells.
-- Kept the yellow fill and continuous progress based on auctions processed.
-- Retained the original four-frame scribes and existing scanning behavior.
+- Unrelated items show only the AH buyout line, without the addon heading, source, age or estimate footer.
+- Tooltip prices use white numbers and native gold, silver and copper coin icons.
+- Waylaid crates, writs, goods and crafting ingredients retain their relevant details and scanner coexistence rules.
 
-Reload after installing; the addon should report v0.8.4.
+Reload after installing; the addon should report v0.8.5.

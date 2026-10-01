@@ -18,19 +18,24 @@ TooltipDataProcessor={AddTooltipPostCall=function(_,fn)callback=fn end}
 F.InstallTooltips()
 local function tip()
   return {lines={},AddLine=function(self,text)self.lines[#self.lines+1]=text end,
-    AddDoubleLine=function(self,left,right)self.lines[#self.lines+1]=left..'='..right end,
+    AddDoubleLine=function(self,left,right,lr,lg,lb,rr,rg,rb)
+      self.lines[#self.lines+1]=left..'='..right
+      self.amountColor={rr,rg,rb}
+    end,
     Show=function()end}
 end
 local function text(t)return table.concat(t.lines,'\n')end
 local t=tip();callback(t,{id=unrelated})
-assert(text(t):find('AH buyout %(each%)=1g 23s 45c') and text(t):find('Forever Waylaid · 1m ago'))
+assert(#t.lines==1 and t.lines[1]=='AH buyout (each)='..F.Style.Money(12345),'Unrelated items show only the buyout line with coin icons')
+assert(t.amountColor[1]==1 and t.amountColor[2]==1 and t.amountColor[3]==1,'Tooltip amounts use white numbers')
+assert(text(t):find('UI%-GoldIcon') and text(t):find('UI%-SilverIcon') and text(t):find('UI%-CopperIcon'),'Amounts use all three native coin textures')
 local count=#t.lines;callback(t,{id=unrelated});assert(#t.lines==count,'Repeated processing must not duplicate the price')
 GameTooltip.scripts.OnTooltipCleared(t);t.lines={};callback(t,{id=unrelated});assert(#t.lines==count,'Clearing allows the same item to render again')
 for _,addon in ipairs(F.auctionAddons)do
   local scanner=addon[1]
   enabled[scanner]=2
   t=tip();callback(t,{id=unrelated});assert(#t.lines==0,'Another enabled scanner owns unrelated tooltips')
-  t=tip();callback(t,{id=ingredient});assert(text(t):find('AH buyout'),'Waylaid ingredients retain our prices')
+  t=tip();callback(t,{id=ingredient});assert(text(t):find('AH buyout') and text(t):find('Forever Waylaid · 1m ago'),'Waylaid ingredients retain price source and age')
   t=tip();callback(t,{id=crate.id});assert(text(t):find('Cheapest'),'Crate fill information remains visible')
   t=tip();callback(t,{id=writ.id});assert(text(t):find('reputation'),'Writ delivery information remains visible')
   enabled[scanner]=0

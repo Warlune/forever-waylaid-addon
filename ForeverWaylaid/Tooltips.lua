@@ -7,21 +7,25 @@ local function append(tooltip, id)
   if not crate and not writ and not market then return end
   if tooltip.fwlItem == id then return end
   tooltip.fwlItem = id
-  tooltip:AddLine(" ")
-  tooltip:AddLine("Forever Waylaid", 0.87, 0.74, 0.39)
-  if market then
-    tooltip:AddDoubleLine("AH buyout (each)",F.Money(market.price),1,1,1,1,0.82,0)
-    tooltip:AddLine(market.source.." · "..F.Style.Age(market.time),0.65,0.65,0.65)
+  local related=F.catalogIDs[id]
+  if related then
+    tooltip:AddLine(" ")
+    tooltip:AddLine("Forever Waylaid", 0.87, 0.74, 0.39)
   end
+  if market then
+    tooltip:AddDoubleLine("AH buyout (each)",F.Style.Money(market.price),1,1,1,1,1,1)
+    if related then tooltip:AddLine(market.source.." · "..F.Style.Age(market.time),0.65,0.65,0.65)end
+  end
+  if not related then tooltip:Show();return end
   if crate then
     local rows, best = F.CrateCosts(crate)
     if F.db.settings.cheapest then
-      tooltip:AddDoubleLine("Cheapest " .. (F.db.settings.includeCrate and "total" or "fill"), best and F.Money(best.cost) or "Unpriced / low stock", 1,1,1, 1,0.82,0)
+      tooltip:AddDoubleLine("Cheapest " .. (F.db.settings.includeCrate and "total" or "fill"), best and F.Style.Money(best.cost) or "Unpriced / low stock", 1,1,1, 1,1,1)
       if best then tooltip:AddLine(best.option.qty .. " × " .. best.option.name, 0.8,0.8,0.8) end
     end
     if F.db.settings.allCosts then
       for _, row in ipairs(rows) do
-        tooltip:AddDoubleLine(row.option.qty .. " × " .. row.option.name, F.Money(row.cost), 0.9,0.9,0.9, 1,0.82,0)
+        tooltip:AddDoubleLine(row.option.qty .. " × " .. row.option.name, F.Style.Money(row.cost), 0.9,0.9,0.9, 1,1,1)
         if row.quote then
           local note = row.quote.source .. (row.quote.quantity and (" · " .. row.quote.quantity .. " listed") or " · stock unknown")
           tooltip:AddLine(note, 0.65,0.65,0.65)
@@ -31,7 +35,7 @@ local function append(tooltip, id)
     if best and best.quote then tooltip:AddLine("Source: " .. best.quote.source, 0.65,0.65,0.65) end
   elseif writ then
     local quote = F.Price(writ.targetId)
-    tooltip:AddDoubleLine(writ.qty .. " × " .. writ.targetName, F.Money(quote and quote.price * writ.qty), 1,1,1, 1,0.82,0)
+    tooltip:AddDoubleLine(writ.qty .. " × " .. writ.targetName, F.Style.Money(quote and quote.price * writ.qty), 1,1,1, 1,1,1)
     tooltip:AddLine(writ.rep .. " reputation · keep the writ for delivery", 0.8,0.8,0.8)
     if quote then tooltip:AddLine("Source: " .. quote.source, 0.65,0.65,0.65) end
   end
