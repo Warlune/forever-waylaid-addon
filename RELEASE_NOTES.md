@@ -1,4 +1,11 @@
-# Forever Waylaid 0.10.0 preview
+# Forever Waylaid 0.10.1 preview
+
+- Fixed routes and departure markers being covered by zone-map exploration artwork and fog. The overlay now follows the map's layer ordering, above terrain and below normal POI/player icons.
+- Added regression coverage for zone/city/world view changes, changing provider layers, transport markers and the route visibility setting.
+
+Use `/reload` after updating, then check the Durotar zone map. This fix has automated coverage; live in-game visual confirmation is still needed.
+
+## Included from 0.10.0
 
 - Expanded selected roads and open-ground corridors from three maps to all 50 main zone/city maps in the revealed Forever atlas, including Riverglades, Zephras Isle, Mount Hyjal and Shen'dralas. Added explicit regional crossings and port approaches.
 - Added **Safer: prefer roads** and **Fastest: allow shortcuts** in Route and Settings. Changes recalculate immediately and persist. The compass distinguishes open ground from roads; ETA reflects actual selected path length.

@@ -68,14 +68,29 @@ local function drawMap(overlay,map,showPlayer)
   F.DrawRouteOverlay(overlay,project,function(a,b,c,d)return G.Rect(a,b,c,d,2,2,w-2,h-2)end,
     function(x,y)return x>=8 and x<=w-8 and y>=8 and y<=h-8 end,showPlayer)
 end
+function F.UpdateWorldRouteLayer(overlay,map)
+  local manager=map.GetPinFrameLevelsManager and map:GetPinFrameLevelsManager()
+  if not manager or not manager.GetValidFrameLevel then return end
+  -- Zone exploration and fog are full-map pins, far above the canvas.
+  -- Use the map's overlay band above both, below its POI/player icons.
+  -- Query again when drawing: map providers can change the level ordering.
+  local level=math.max(manager:GetValidFrameLevel("PIN_FRAME_LEVEL_QUEST_BLOB"),
+    manager:GetValidFrameLevel("PIN_FRAME_LEVEL_MAP_EXPLORATION")+1,
+    manager:GetValidFrameLevel("PIN_FRAME_LEVEL_FOG_OF_WAR")+1)
+  if overlay:GetFrameLevel()~=level then overlay:SetFrameLevel(level)end
+end
 function F.InstallMap()
   if F.worldOverlay or not WorldMapFrame or not WorldMapFrame.ScrollContainer then return end
   local canvas=WorldMapFrame.ScrollContainer.Child;if not canvas then return end
   local overlay=F.CreateRouteOverlay(canvas);F.worldOverlay=overlay
+  F.UpdateWorldRouteLayer(overlay,WorldMapFrame)
   local elapsed=0
   overlay:SetScript("OnUpdate",function(_,dt)
     elapsed=elapsed+dt;if elapsed<0.05 or not F.ready then return end;elapsed=0
-    if F.db.settings.worldRoute then drawMap(overlay,WorldMapFrame:GetMapID(),false)else F.ClearRouteOverlay(overlay)end
+    if F.db.settings.worldRoute then
+      F.UpdateWorldRouteLayer(overlay,WorldMapFrame)
+      drawMap(overlay,WorldMapFrame:GetMapID(),false)
+    else F.ClearRouteOverlay(overlay)end
   end)
 end
 function F.CreateTravelMap(parent,x,y,w,h)
