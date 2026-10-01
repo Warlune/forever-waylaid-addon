@@ -77,9 +77,49 @@ function F.CreateTravelMap(parent,x,y,w,h)
   local map=S.Panel(parent,x,y,w,h);map:SetClipsChildren(true)
   map.canvas=CreateFrame("Frame",nil,map);map.canvas:SetPoint("TOPLEFT",5,-5);map.canvas:SetPoint("BOTTOMRIGHT",-5,5)
   map.tiles={};map.overlay=F.CreateRouteOverlay(map.canvas)
-  map.label=S.Text(map,"",10,-10,w-20,"GameFontNormalSmall",S.gold)
+  map.label=S.Text(map,"",10,-10,w-76,"GameFontNormalSmall",S.gold)
+  map.label:SetMaxLines(1)
   map.unavailable=S.Text(map,"Map artwork unavailable",15,-h/2,w-30,"GameFontHighlightSmall",S.muted)
+  map.zoomPath={};map.zoomIndex=1
+  local function zoomButton(text,offset,delta)
+    local button=S.Button(map,text,0,0,24,function()F.ZoomTravelMap(map,delta)end)
+    button:ClearAllPoints();button:SetPoint("TOPRIGHT",map,"TOPRIGHT",offset,-8);button:SetSize(24,24)
+    button:SetFrameLevel(map.overlay:GetFrameLevel()+3)
+    button:SetScript("OnEnter",function(self)
+      GameTooltip:SetOwner(self,"ANCHOR_RIGHT")
+      GameTooltip:SetText(delta>0 and "Zoom in" or "Zoom out")
+      local id=map.zoomPath[map.zoomIndex+delta]
+      local info=id and C_Map.GetMapInfo(id)
+      if info then GameTooltip:AddLine(info.name,1,0.85,0.5)end
+      GameTooltip:Show()
+    end)
+    button:SetScript("OnLeave",function()GameTooltip:Hide()end)
+    return button
+  end
+  map.zoomOut=zoomButton("−",-34,-1)
+  map.zoomIn=zoomButton("+",-8,1)
   return map
+end
+-- Use the client's map hierarchy, including Forever zones. The world is
+-- the outer limit; never zoom into unrelated cosmic or instance maps.
+local function zoomPath(id)
+  local path,seen={},{}
+  local worldType=Enum.UIMapType and Enum.UIMapType.World or 1
+  for _=1,15 do
+    if not id or id==0 or seen[id] then break end
+    local info=C_Map.GetMapInfo(id);if not info then break end
+    table.insert(path,1,id);seen[id]=true
+    if info.mapType==worldType then break end
+    id=info.parentMapID
+  end
+  return path
+end
+function F.ZoomTravelMap(map,delta)
+  local index=map.zoomIndex+delta
+  if index<1 or index>#map.zoomPath then return end
+  map.zoomDepth=index
+  GameTooltip:Hide()
+  F.UpdateTravelMap(map)
 end
 local function commonMap(a,b)
   if not b then return a end
@@ -98,7 +138,15 @@ local function commonMap(a,b)
 end
 function F.UpdateTravelMap(map)
   local player=F.Route.Player();local target=F.guidance and F.guidance.target
+  map.zoomPath=zoomPath(player and player.mapID)
   local id=player and commonMap(player.mapID,target and target.mapID)
+  if type(map.zoomDepth)=="number" then
+    id=map.zoomPath[math.min(map.zoomDepth,#map.zoomPath)]
+  end
+  map.zoomIndex=1
+  for index,pathID in ipairs(map.zoomPath)do if pathID==id then map.zoomIndex=index;break end end
+  map.zoomIn:SetEnabled(id~=nil and map.zoomIndex<#map.zoomPath)
+  map.zoomOut:SetEnabled(id~=nil and map.zoomIndex>1)
   if not id then F.ClearRouteOverlay(map.overlay);return end
   local info=C_Map.GetMapInfo(id);map.label:SetText(info and info.name or "")
   if id==map.mapID then F.DrawTravelRoute(map);return end

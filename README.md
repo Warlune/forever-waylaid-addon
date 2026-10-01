@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.9.9 preview
+# Forever Waylaid — v0.9.10 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.9.9.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.9.10.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -135,6 +135,8 @@ Personal travel is considered only when available to your character:
 - **Mage teleport/portal:** mage characters only, a learned Classic capital spell, its required rune in your bags and a readable cooldown. Portal routes allow extra time to enter the portal. No other player's portal is assumed.
 
 Waiting for a cooldown is included in the estimate; the planner uses ordinary travel when that is faster. For multiple writs it reserves runes and limits each Hearthstone/engineering device to one use in the itinerary. Personal travel makes visit ordering an estimate rather than an exact optimization. The route recalculates as you travel, use items, learn flights or finish deliveries. It does not model warlock summons or Forever-specific teleports.
+
+The compact compass map has **+ / −** buttons to step between world, continent and your current zone. Hover a button to see the next map. Your chosen zoom level stays in place while the route updates and follows your location when you change zones.
 
 **Route limits:** lines connect travel points; they are not terrain-aware roads or guaranteed turn-by-turn instructions. Follow roads and avoid hazards. Walking uses a base running-speed estimate, flights use distance, and public transport uses approximate leg/dock times plus an average boarding wait. These are not live departure schedules. Transport endpoints were checked against published Forever build 1.60.1.70124 data and revealed maps; complete journeys still need in-game testing. The retained tram approaches and mage landing points also need verification against expanded city maps. Missing flight data can make the suggested route slower. Navigation requires your clicks; the addon never moves your character, buys a flight, casts a spell or consumes an item for you.
 

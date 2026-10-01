@@ -180,4 +180,38 @@ assert(loadfile('tests/accessibility.lua'))(F)
 assert(loadfile('tests/travel.lua'))(F)
 assert(loadfile('tests/transport.lua'))(F)
 
+-- Manual compass zoom must survive route refreshes and follow the player's
+-- current zone instead of pinning the map to a previously visited city.
+do
+  local oldInfo,oldPlayer,oldDraw,oldGuide=C_Map.GetMapInfo,F.Route.Player,F.DrawTravelRoute,F.guidance
+  local maps={
+    [947]={name='Azeroth',mapType=1,parentMapID=946},
+    [1414]={name='Kalimdor',mapType=2,parentMapID=947},
+    [1454]={name='Orgrimmar',mapType=3,parentMapID=1414},
+    [1411]={name='Durotar',mapType=3,parentMapID=1414},
+    [1415]={name='Eastern Kingdoms',mapType=2,parentMapID=947},
+  }
+  local zone=1454
+  C_Map.GetMapInfo=function(id)return maps[id]end
+  F.Route.Player=function()return {mapID=zone}end
+  F.DrawTravelRoute=function()end
+  F.guidance={target={mapID=1415}}
+  local map=F.CreateTravelMap(UIParent,0,0,284,189)
+  map.zoomIn.SetEnabled=function(self,on)self.enabled=on end
+  map.zoomOut.SetEnabled=function(self,on)self.enabled=on end
+  F.UpdateTravelMap(map)
+  assert(map.mapID==947 and not map.zoomOut.enabled and map.zoomIn.enabled)
+  map.zoomIn.scripts.OnClick();assert(map.mapID==1414)
+  map.zoomIn.scripts.OnClick();assert(map.mapID==1454 and not map.zoomIn.enabled)
+  F.UpdateTravelMap(map);assert(map.mapID==1454,'Refresh must preserve the selected zoom')
+  zone=1411;F.UpdateTravelMap(map);assert(map.mapID==1411,'Zone zoom should follow the player')
+  map.zoomOut.scripts.OnClick();assert(map.mapID==1414)
+  map.zoomOut.scripts.OnClick();assert(map.mapID==947 and not map.zoomOut.enabled)
+  F.ZoomTravelMap(map,-1);assert(map.mapID==947,'Do not zoom past the world into cosmic maps')
+  F.Route.Player=function()return nil end;F.UpdateTravelMap(map)
+  assert(not map.zoomIn.enabled and not map.zoomOut.enabled,'Disable zoom when player position is unavailable')
+  C_Map.GetMapInfo,F.Route.Player,F.DrawTravelRoute,F.guidance=oldInfo,oldPlayer,oldDraw,oldGuide
+  print('PASS: compass world/continent/zone zoom, limits, refresh persistence and zone transitions')
+end
+
 assert(loadfile('tests/requirements.lua'))(F)
