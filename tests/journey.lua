@@ -1,66 +1,69 @@
 local F=...
-local oldRoute,oldGuide,oldPlayer,oldInfo=F.route,F.guidance,F.Route.Player,C_Map.GetMapInfo
-local maps={[947]={parentMapID=0},[1414]={parentMapID=947},[1415]={parentMapID=947},
-  [1411]={parentMapID=1414,name='Durotar'},[1420]={parentMapID=1415,name='Tirisfal'},[1421]={parentMapID=1415,name='Silverpine'}}
-C_Map.GetMapInfo=function(id)return maps[id]end
-local function p(map,x,name)return{mapID=map,x=x/1000,y=0.5,wx=x,wy=500,instance=map==1411 and 1 or 0,name=name}end
-local a,bend,b=p(1411,100,'You'),p(1411,150,'Bend'),p(1411,200,'Dock')
-local via,c,d=p(1420,250,'Intermediate dock'),p(1420,300,'Arrival / flight master'),p(1421,400,'Arrival flight master')
-local customer,final=p(1421,500,'First customer'),p(1411,600,'Second customer')
-local stop1={questID=1,point=customer,npc='First customer',writ={name='First writ'}}
-local stop2={questID=2,point=final,npc='Second customer',writ={name='Second writ'}}
-local boat={via={via}}
-local steps={{from=a,to=bend,mode='Travel',road='mapped'},
-  {from=bend,to=b,mode='Travel',road='mapped'},
-  {from=b,to=c,mode='Boat',detail=boat},
-  {from=c,to=c,mode='Travel',road='unknown'}, -- no phantom walking stage between transports
-  {from=c,to=d,mode='Fly'},
-  {from=d,to=customer,mode='Travel',road='unknown'}}
-F.route={{steps=steps,stop=stop1},{steps={{from=customer,to=final,mode='Travel',road='unknown'}},stop=stop2}}
-F.guidance=nil;F.Route.Player=function()return nil end
-local segments,stops=F.DisplayRoute();local stages=F.BuildJourney(segments)
-assert(#stages==5 and #stages[1].points==3,'Group walking bends, not whole delivery legs')
-assert(stages[1].mode=='Travel' and stages[2].mode=='Boat' and stages[3].mode=='Fly' and stages[4].mode=='Travel')
-assert(#stages[2].points==3 and stages[2].points[2]==via,'Retain intermediate ports within the boat stage')
-assert(stages[4].delivery==1 and stages[5].delivery==2,'Keep consecutive walks for different writs distinct')
-assert(stages[4].unmapped and not stages[1].unmapped)
-assert(F.JourneyTitle(stages[4]):find('Turn%-in: First customer'))
-assert(F.JourneyMap(stages,stops)==947,'Overview must include later deliveries on other continents')
-assert(F.JourneyMap({stages[3]})==1415,'A flight stage focuses its common continent')
-assert(F.JourneyMap({stages[1]})==1411,'Local walking stage focuses its zone')
+local old={route=F.route,guidance=F.guidance,flightGuidance=F.flightGuidance,travel=F.travel}
+local oldPlayer,oldTaxi,oldPath=F.Route.Player,UnitOnTaxi,F.Roads.Path
+local oldFlights,oldEnabled,oldNav=F.char.flights,F.db.settings.flights,F.UpdateNavigator
+local function p(map,x,name)
+  return {mapID=map,x=x/10000,y=0.5,wx=x,wy=500,instance=map==1411 and 1 or 0,name=name}
+end
+local org,dock=p(1411,0,'Orgrimmar'),p(1411,100,'Zeppelin tower')
+local land,fp=p(1420,0,'Tirisfal zeppelin'),p(1420,100,'Undercity flight master')
+local arrival,customer=p(1417,8000,'Hammerfall flight master'),p(1417,8100,'Customer')
+local stop={questID=1,point=customer,npc='Customer',writ={name='Test writ'}}
+local player,flying=org,false
+F.Route.Player=function()return player end
+UnitOnTaxi=function()return flying end
+F.UpdateNavigator=function()end
+F.Roads.Path=function()return nil end -- This regression must cover unmapped walks.
+F.char.flights={nodes={a=fp,b=arrival},edges={a={b=60}}};F.db.settings.flights=true
+F.travel={links={{from=dock,to=land,mode='Zeppelin',seconds=20}},personal={},resources={}}
+local seconds,steps=F.Route.Leg(org,customer,F.char.flights,true,F.travel)
+assert(seconds<math.huge and #steps==5)
+assert(steps[1].mode=='Travel' and steps[2].mode=='Zeppelin' and steps[3].mode=='Travel'
+  and steps[4].mode=='Fly' and steps[5].mode=='Travel','Plan all walks between and after transport')
+F.route={{steps=steps,stop=stop}};F.UpdateGuidance()
+local shown=F.DisplayRoute()
+assert(#shown==5 and shown[3].from==land and shown[3].to==fp)
+assert(shown[5].from==arrival and shown[5].to==customer,'Future walk starts at Hammerfall, not current position in Orgrimmar')
 
-F.guidance={stop=stop1,steps=steps,walkSteps={steps[1],steps[2]},walkIndex=2}
-local live=p(1411,170,'Live position')
-stages=F.BuildJourney(F.DisplayRoute(live))
-assert(stages[1].from==live and stages[1].to==b and stages[2].from==b,'Trim only completed walking; keep future stages anchored')
-assert(steps[1].from==a and not steps[1].stage,'Building the view must not mutate the planned route')
-F.guidance=nil
-
-local viewed
-local map={ScrollContainer=UIParent,SetMapID=function(_,id)viewed=id end}
-local overlay=F.CreateRouteOverlay(UIParent);overlay.journey=stages;overlay.journeyStops=stops
-local panel=F.CreateJourneyPanel(map,overlay)
-F.UpdateJourneyPanel(panel,map,overlay)
-assert(panel.shown and panel.rows[1].stage.number==1 and panel.rows[3].stage.number==3)
-panel.overview.scripts.OnClick();assert(viewed==947)
-panel.rows[3].scripts.OnClick(panel.rows[3]);assert(viewed==1415,'Stage click changes map, not the selected delivery')
-panel.next.scripts.OnClick();assert(panel.page==2 and panel.rows[1].stage.delivery==1 and panel.rows[2].stage.delivery==2)
-panel.header.scripts.OnClick();assert(panel.collapsed and not panel.rows[1].shown and panel.overview.shown)
-panel.header.scripts.OnClick();assert(not panel.collapsed and panel.rows[1].shown)
-F.route={F.route[1]};segments,stops=F.DisplayRoute();overlay.journey=F.BuildJourney(segments);overlay.journeyStops=stops
-F.UpdateJourneyPanel(panel,map,overlay)
-assert(not panel.rows[2].shown,'Removed writ must vanish from the full journey')
-F.route={};overlay.journey=F.BuildJourney(F.DisplayRoute());F.UpdateJourneyPanel(panel,map,overlay)
-assert(not panel.shown,'No stale journey panel after the last delivery is removed')
-
-F.route={{steps={{from=a,to=b,mode='Travel',road='unknown'}},stop=stop1}}
-local function project(point)return point.wx,point.wy end
+-- Even while in Orgrimmar the Arathi zone must show the arrival-to-customer walk.
+local overlay=F.CreateRouteOverlay(UIParent)
+overlay.CreateLine=function()
+  return {SetThickness=function()end,SetColorTexture=function(self,...)self.color={...}end,
+    SetStartPoint=function(self,_,_,x,y)self.x,self.y=x,y end,
+    SetEndPoint=function(self,_,_,x,y)self.toX,self.toY=x,y end,
+    Show=function(self)self.shown=true end,Hide=function(self)self.shown=false end}
+end
+local function project(point)if point.mapID==1417 then return point.wx,point.wy end end
 local function clip(x,y,u,v)return x,y,u,v end
-F.DrawRouteOverlay(overlay,project,clip,function()return true end,false,false,nil,false)
-assert(#overlay.lines==0,'Unmapped ground stays hidden in local navigation')
-F.DrawRouteOverlay(overlay,project,clip,function()return true end,false,false,nil,true)
-assert(#overlay.lines>1 and #overlay.lines<=80,'Overview draws bounded, dashed direction-only connections')
-F.DrawRouteOverlay(overlay,project,clip,function()return true end,false,false,nil,false)
-for _,line in ipairs(overlay.lines)do assert(not line.shown,'Overview dashes disappear on return to local navigation')end
-F.route,F.guidance,F.Route.Player,C_Map.GetMapInfo=oldRoute,oldGuide,oldPlayer,oldInfo
-print('PASS: full mixed-transport journey, later writs, live trim, intermediate ports, overview/focus controls, removal and direction-only dashes')
+F.DrawRouteOverlay(overlay,project,clip,function()return true end,false)
+assert(#overlay.lines>1 and overlay.lines[1].x==arrival.wx,'Future unmapped walk renders on local zone map')
+for _,line in ipairs(overlay.lines)do
+  assert(line.x>=8000 and line.toX<=8100 and line.color[4]==0.65,'Unknown walk is dashed, never a solid claimed road')
+end
+
+player=land;F.UpdateGuidance();shown=F.DisplayRoute()
+assert(#shown==3 and shown[1].mode=='Travel' and shown[1].from==land and shown[1].to==fp,
+  'After disembarking keep the walk to the flight master')
+assert(shown[3].from==arrival,'Updating current walking position cannot move a future walk origin')
+player=fp;F.UpdateGuidance()
+flying=true;F.RefreshMovingGuidance();shown=F.DisplayRoute()
+assert(F.guidance.action=='In flight' and #shown==2 and shown[1].mode=='Fly',
+  'Boarding immediately removes completed approach, retaining flight and final walk')
+assert(shown[2].from==arrival and shown[2].to==customer)
+flying=false;player=arrival;F.RefreshMovingGuidance();shown=F.DisplayRoute()
+assert(#shown==1 and shown[1].mode=='Travel' and shown[1].from==arrival,'Landing immediately restores walking guidance')
+player=p(1417,8040,'Walking');F.RefreshMovingGuidance();shown=F.DisplayRoute()
+assert(shown[1].from==player and shown[1].to==customer,'Only the active walk follows the player arrow')
+
+local later=p(1417,8300,'Second customer')
+F.route[2]={stop={questID=2,point=later},steps={{from=customer,to=later,mode='Travel',road='unknown'}}}
+shown=F.DisplayRoute();assert(#shown==2 and shown[2].from==customer,'Later writ keeps the previous customer as its origin')
+F.route[2]=nil;assert(#F.DisplayRoute()==1,'Removing later writ removes its path')
+F.route={};F.guidance=nil
+F.DrawRouteOverlay(overlay,project,clip,function()return true end,false)
+for _,line in ipairs(overlay.lines)do assert(not line.shown,'Last writ removal clears all paths')end
+assert(F.CreateJourneyPanel==nil and F.UpdateJourneyPanel==nil,'No itinerary panel remains on the map')
+F.route,F.guidance,F.flightGuidance,F.travel=old.route,old.guidance,old.flightGuidance,old.travel
+F.Route.Player,UnitOnTaxi,F.Roads.Path=oldPlayer,oldTaxi,oldPath
+F.char.flights,F.db.settings.flights,F.UpdateNavigator=oldFlights,oldEnabled,oldNav
+print('PASS: Org walk/zeppelin/walk/flight/walk, future arrival anchoring, local-map dashes, boarding/landing, later writs and panel removal')

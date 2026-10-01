@@ -47,7 +47,7 @@ F.DrawRouteOverlay(overlay,project,clip,function()return true end,false)
 assert(#overlay.lines==3,'Shared world/compass/minimap renderer must draw every road bend')
 F.route={{steps=unknown,stop={point=b}}}
 F.DrawRouteOverlay(overlay,project,clip,function()return true end,false)
-for _,line in ipairs(overlay.lines)do assert(not line.shown,'Clear old lines and never draw the unknown straight shortcut')end
+assert(#overlay.lines>3 and overlay.lines[1].shown,'Keep unknown walking visible as separate direction-only dashes')
 
 local stop={questID=1,point=b}
 local later={from=b,to=point(200,0),mode='Travel',road='mapped'}
@@ -105,6 +105,7 @@ movingPlayer=point(0,2);F.RefreshMovingGuidance();assert(replans==0,'Ignore tiny
 movingPlayer=point(0,4);F.RefreshMovingGuidance();assert(replans==1 and redraws==1,'Movement replans the active leg and refreshes its display')
 F.RefreshMovingGuidance();assert(replans==1,'Do not repeatedly replan the same position')
 movingPlayer=point(0,20);UnitOnTaxi=function()return true end
+F.guidance.action='In flight'
 F.RefreshMovingGuidance();assert(replans==1,'Keep booked flight guidance intact')
 F.UpdateGuidance,F.UpdateNavigator,UnitOnTaxi=oldUpdate,oldNavigator,oldTaxi
 for _,line in ipairs(reviewedData.lines)do

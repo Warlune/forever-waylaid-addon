@@ -20,10 +20,10 @@ function F.UpdateGuidance()
   F.flightGuidance=nil
   local seconds,steps=F.Route.Leg(player,chosen.point,F.char.flights,F.db.settings.flights,F.travel)
   if seconds==math.huge then F.guidance=nil;return end
-  local target,action,flight=chosen.point,"Deliver to customer",nil
-  for _,step in ipairs(steps)do
+  local target,action,flight,flightIndex=chosen.point,"Deliver to customer",nil,nil
+  for index,step in ipairs(steps)do
     if step.mode=="Fly" then
-      flight=step
+      flight,flightIndex=step,index
       if F.Route.Distance(player,step.from)>25 then target,action=step.from,"Go to flight master"
       else target,action=step.from,"Take flight to "..(step.to.name or "next stop") end
       break
@@ -52,12 +52,19 @@ function F.UpdateGuidance()
     if step.mode~="Travel" then F.guidance.nextStep=step;break end
   end
   if flight then
-    F.flightGuidance={stop=chosen,target=flight.to,action="In flight",steps=steps,seconds=seconds,flight=flight,nextStep=flight}
+    local remaining={}
+    for index=flightIndex,#steps do remaining[#remaining+1]=steps[index]end
+    F.flightGuidance={stop=chosen,target=flight.to,action="In flight",steps=remaining,seconds=seconds,flight=flight,nextStep=flight}
   end
 end
 function F.RefreshMovingGuidance()
   local guide=F.guidance
-  if not guide or not guide.origin or (UnitOnTaxi and UnitOnTaxi("player")) then return end
+  if not guide then return end
+  local flying=UnitOnTaxi and UnitOnTaxi("player") or false
+  if flying~=(guide.action=="In flight") then
+    F.UpdateGuidance();F.UpdateNavigator();return
+  end
+  if not guide.origin or flying then return end
   local player=F.Route.Player()
   if not player or F.Route.Distance(player,guide.origin)<3 then return end
   -- Replan only the active leg. Full delivery ordering remains on the
@@ -86,10 +93,10 @@ function F.AdvanceRoadGuidance(guide,player)
       guide.roadWarning=step.terrain=="corridor" and "Approximate open-ground route. Enemies and small obstacles are not tracked." or nil
     elseif step.road=="transition" then
       guide.target=step.to;guide.action="Continue through the pass"
-      guide.roadWarning="Zone handoff: the passage itself is not traced. Follow its entrance and terrain; no ground line is shown."
+      guide.roadWarning="Zone handoff: the passage itself is not traced. The dashed line shows direction only; follow the entrance and terrain."
     else
       guide.target=step.to;guide.action=step.road=="approach" and walk[index+1] and walk[index+1].road=="mapped" and "Join the mapped road" or "Direction only"
-      guide.roadWarning="This approach has no mapped walking path. Follow the terrain; no ground line is shown."
+      guide.roadWarning="This approach has no mapped walking path. The dashed line shows direction only; follow the terrain."
     end
   elseif guide.travelTarget then
     guide.target=guide.travelTarget;guide.action=guide.travelAction;guide.roadWarning=nil
