@@ -43,6 +43,24 @@ end
 function G.Project(point,map)
   if not point then return end
   local id,pos=C_Map.GetMapPosFromWorldPos(point.instance,CreateVector2D(point.wx,point.wy),map)
-  if id~=map or not pos then return end
-  return pos:GetXY()
+  if id==map and pos then return pos:GetXY() end
+  -- The API can reject positions outside a city/zone. Project using the
+  -- map's world basis anyway so crossing segments can be clipped at its edge.
+  -- This never projects a different continent onto the current map.
+  G.mapBases=G.mapBases or {}
+  local basis=G.mapBases[map]
+  if not basis and C_Map.GetWorldPosFromMapPos then
+    local instance,o=C_Map.GetWorldPosFromMapPos(map,CreateVector2D(0,0))
+    local ix,x=C_Map.GetWorldPosFromMapPos(map,CreateVector2D(1,0))
+    local iy,y=C_Map.GetWorldPosFromMapPos(map,CreateVector2D(0,1))
+    if o and x and y and instance==ix and instance==iy then
+      local ox,oy=o:GetXY();local xx,xy=x:GetXY();local yx,yy=y:GetXY()
+      basis={instance=instance,ox=ox,oy=oy,xx=xx-ox,xy=xy-oy,yx=yx-ox,yy=yy-oy}
+      basis.det=basis.xx*basis.yy-basis.xy*basis.yx
+      if math.abs(basis.det)>0.0001 then G.mapBases[map]=basis else basis=nil end
+    end
+  end
+  if not basis or basis.instance~=point.instance then return end
+  local x,y=point.wx-basis.ox,point.wy-basis.oy
+  return (x*basis.yy-y*basis.yx)/basis.det,(y*basis.xx-x*basis.xy)/basis.det
 end

@@ -333,6 +333,9 @@ function F.RenderDetail(entry)
         for _,step in ipairs(entry.leg.steps)do
           if step.mode~="Travel" then
             local detail=(step.from.name or "Current position").." → "..(step.to.name or F.DestinationText(step.to))
+            local via=F.Travel.ViaText(step.detail)
+            if via then detail=detail.."\n"..via end
+            if step.detail and step.detail.boardingWait then detail=detail.."\nEstimated wait: ~"..math.ceil(step.detail.boardingWait/60).." min" end
             if step.detail and (step.detail.wait or 0)>1 then detail=detail.."\nCooldown: ~"..math.ceil(step.detail.wait/60).." min" end
             if step.mode=="Engineering teleport" then detail=detail.."\nEquip your transporter; malfunctions are possible." end
             add(step.mode,detail)

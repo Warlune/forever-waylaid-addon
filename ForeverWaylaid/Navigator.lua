@@ -52,13 +52,21 @@ function F.UpdateGuidance()
 end
 function F.DisplayRoute()
   local segments,stops={},{}
+  local function append(step)
+    local from=step.from
+    for _,via in ipairs(step.detail and step.detail.via or {})do
+      segments[#segments+1]={from=from,to=via,mode=step.mode,detail=step.detail}
+      from=via
+    end
+    segments[#segments+1]={from=from,to=step.to,mode=step.mode,detail=step.detail}
+  end
   if F.guidance and F.char.navQuest then
-    for _,step in ipairs(F.guidance.steps)do segments[#segments+1]=step end
+    for _,step in ipairs(F.guidance.steps)do append(step)end
     stops[1]={point=F.guidance.stop.point,stop=F.guidance.stop,number=1}
   else
     for i,leg in ipairs(F.route or {})do
       local steps=i==1 and F.guidance and F.guidance.stop.questID==leg.stop.questID and F.guidance.steps or leg.steps
-      for _,step in ipairs(steps)do segments[#segments+1]=step end
+      for _,step in ipairs(steps)do append(step)end
       stops[#stops+1]={point=leg.stop.point,stop=leg.stop,number=i}
     end
   end
@@ -96,6 +104,8 @@ function F.BuildNavigator()
       GameTooltip:AddLine(guide.stop.writ.name,1,1,1,true)
       for _,step in ipairs(guide.steps)do
         if step.mode~="Travel" then GameTooltip:AddLine(step.mode..": "..(step.to.name or F.DestinationText(step.to)),1,0.85,0.5,true)end
+        local via=F.Travel.ViaText(step.detail)
+        if via then GameTooltip:AddLine(via,1,0.85,0.5,true)end
       end
     end
     local warning=F.FlightCoverageText()

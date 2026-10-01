@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.9.8 preview
+# Forever Waylaid — v0.9.9 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.9.8.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.9.9.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -124,7 +124,9 @@ Coordinates use 0–100. The Route tab shows the quest ID for unresolved writs. 
 
 ### Travel options
 
-The planner compares walking, your recorded flights on **both continents**, and Classic boat/zeppelin connections. Horde routes include Durotar–Tirisfal, Durotar–Grom'gol and Tirisfal–Grom'gol; both factions can use Ratchet–Booty Bay. Alliance routes include Menethil–Auberdine, Menethil–Theramore, Auberdine–Rut'theran, the Feralas ferry and the Deeprun Tram. Faction-only transport is excluded for the other faction.
+The planner compares walking, your recorded flights on **both continents**, and Forever's public transport. The new routes include **Stormwind Harbor–Auberdine**, the one-way **Menethil → Southshore → Auberdine → Menethil** boat, and neutral **Steamwheedle Port–Powderfuse Port (Riverglades)**. Multi-stop journeys include intermediate dock time without charging another boarding wait. The compass tooltip and delivery details name ports where you should stay aboard.
+
+Horde characters can use the **Skywatcher Plateau–Valanaar** skycutter. The **Dalaran–Valanaar** skycutter is currently offered only to Alliance Skyborne: the zone guide reports that Dalaran's guards are hostile to other characters. This is a conservative access filter, not a restriction on physically boarding the vessel. Existing faction-appropriate zeppelins, ferries and the Deeprun Tram remain available.
 
 Personal travel is considered only when available to your character:
 
@@ -134,7 +136,9 @@ Personal travel is considered only when available to your character:
 
 Waiting for a cooldown is included in the estimate; the planner uses ordinary travel when that is faster. For multiple writs it reserves runes and limits each Hearthstone/engineering device to one use in the itinerary. Personal travel makes visit ordering an estimate rather than an exact optimization. The route recalculates as you travel, use items, learn flights or finish deliveries. It does not model warlock summons or Forever-specific teleports.
 
-**Route limits:** lines connect travel points; they are not terrain-aware roads or guaranteed turn-by-turn instructions. Follow roads and avoid hazards. Walking uses a base running-speed estimate; flight times use distance, and boat/zeppelin/tram times include estimated waiting rather than live schedules. Cross-continent transport coordinates and routes are based on Classic geography and still need full journey testing in Forever. Missing flight data can make the suggested route slower. Navigation requires your clicks; the addon never moves your character, buys a flight, casts a spell or consumes an item for you.
+**Route limits:** lines connect travel points; they are not terrain-aware roads or guaranteed turn-by-turn instructions. Follow roads and avoid hazards. Walking uses a base running-speed estimate, flights use distance, and public transport uses approximate leg/dock times plus an average boarding wait. These are not live departure schedules. Transport endpoints were checked against published Forever build 1.60.1.70124 data and revealed maps; complete journeys still need in-game testing. The retained tram approaches and mage landing points also need verification against expanded city maps. Missing flight data can make the suggested route slower. Navigation requires your clicks; the addon never moves your character, buys a flight, casts a spell or consumes an item for you.
+
+Transport evidence, coordinate methods and remaining verification work are recorded in [data/route-research.json](data/route-research.json). Sources include [Blizzard's Forever recap](https://worldofwarcraft.blizzard.com/en-us/news/24304071/world-of-warcraft-forever-found-photos-panel-recap), [the revealed map atlas](https://warcraftforever.games/maps), [published transport data](https://forever-codex.com/zones/?zone=riverglades), and [the Zephras Isle guide](https://www.wowhead.com/forever/guide/zephras-isle-zone-overview).
 
 Travel reference data was checked against [Nauticus route pairs](https://github.com/Road-block/Nauticus/blob/master/data.lua), [Leatrix map locations](https://github.com/WowInterfaces/leatrix-maps-wrath/blob/main/Leatrix_Maps_Icons.lua) (Classic-era routes only), and the local Forever client data for item/spell requirements. No third-party routing implementation is included.
 

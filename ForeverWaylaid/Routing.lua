@@ -22,6 +22,7 @@ end
 
 -- Islands cannot be connected by a straight walking edge across the sea.
 local function land(point)
+  if point.mapID==2521 then return "Zephras Isle" end
   if point.mapID==1438 or point.mapID==1457 then return "Teldrassil" end
   if point.mapID==1444 and point.x and point.x<0.38 and point.y>0.30 and point.y<0.60 then return "Sardor" end
   return point.instance

@@ -1,0 +1,94 @@
+{
+  "reviewedOn": "2026-10-01",
+  "scope": "Forever-specific routing from manually reviewed, fully revealed online maps. Use our own route engine. Do not require player exploration, recorded walking trails, a companion addon, or local client extraction.",
+  "status": "Forever public-transport connections implemented in 0.9.9. Offline source review complete for the listed new routes; full in-game journeys and road tracing remain unverified.",
+  "mapAtlas": "https://warcraftforever.games/maps",
+  "newZoneCoverage": [
+    "Riverglades",
+    "Zephras Isle",
+    "Shen'dralas",
+    "Mount Hyjal"
+  ],
+  "sources": {
+    "blizzard": "https://worldofwarcraft.blizzard.com/en-us/news/24304071/world-of-warcraft-forever-found-photos-panel-recap",
+    "betaTransportInventory": "https://classicwowforever.com/boats-and-zeppelins/",
+    "comparison": "https://forever-codex.com/zones/?zone=riverglades",
+    "publishedTransportData": "https://forever-codex.com/data/map/world.json?v=618c4dcc7b",
+    "newBoatRoutes": "https://www.wowhead.com/forever/news/three-new-ship-routes-debuting-in-forever-382891",
+    "skycutterBoardingAndAccess": "https://www.wowhead.com/forever/guide/zephras-isle-zone-overview",
+    "skyborneRaceIDs": "https://www.curseforge.com/wow/addons/fast-guild-invite-revived/files/8912762/dependencies"
+  },
+  "implementationRequirements": [
+    "Audit existing Classic transport entries against Forever; old coordinates, routes and restrictions are not presumed valid.",
+    "Trace paths from revealed Forever map art even when the player's map is unexplored.",
+    "Use only the character's known usable flight paths; warn about missing Eastern Kingdoms or Kalimdor coverage.",
+    "Include walk-to-dock, waiting, intermediate stops, travel and disembarkation in route estimates; full round-trip duration is not a one-way segment time.",
+    "Keep uncertain or unverified connections out of trusted turn-by-turn guidance.",
+    "Map artwork does not establish collision, vertical transitions or precise walkability; record uncertainty instead of claiming guaranteed obstacle avoidance.",
+    "Remain on a 0.x version until the user explicitly authorizes 1.0."
+  ],
+  "clientBuild": "1.60.1.70124",
+  "transportImplemented": [
+    {
+      "id": "auberdine-stormwind",
+      "stops": [
+        "Auberdine",
+        "Stormwind Harbor"
+      ],
+      "mode": "Boat",
+      "access": "Alliance",
+      "evidence": "Blizzard announcement and published build 70124 transport endpoints."
+    },
+    {
+      "id": "menethil-southshore-auberdine",
+      "stops": [
+        "Menethil Harbor",
+        "Southshore",
+        "Auberdine"
+      ],
+      "mode": "Boat",
+      "access": "Alliance",
+      "direction": "One-way cycle, then back to Menethil. Replaces the original two-stop connection.",
+      "evidence": "Announced by Blizzard; stop order corroborated by new-boat report and transport inventory."
+    },
+    {
+      "id": "steamwheedle-powderfuse",
+      "stops": [
+        "Steamwheedle Port, Tanaris",
+        "Powderfuse Port, Riverglades"
+      ],
+      "mode": "Boat",
+      "access": "Neutral",
+      "evidence": "Blizzard announcement; endpoint names and coordinates from published 70124 data, checked against revealed Riverglades map."
+    },
+    {
+      "id": "dalaran-valanaar",
+      "stops": [
+        "Dalaran north dock",
+        "Valanaar east dock, Zephras Isle"
+      ],
+      "mode": "Skycutter",
+      "access": "Auto-planning only for Alliance Skyborne (race ID 95).",
+      "evidence": "First-hand zone guide gives boarding coordinates and reports hostile Dalaran guards for other characters. Both factions can physically board; this conservative filter avoids recommending corpse runs."
+    },
+    {
+      "id": "skywatcher-valanaar",
+      "stops": [
+        "Skywatcher Plateau, Mulgore",
+        "Valanaar west dock, Zephras Isle"
+      ],
+      "mode": "Skycutter",
+      "access": "Horde automatic planning",
+      "evidence": "First-hand zone guide supplies exact approach coordinates. Both factions can physically board; Alliance is excluded from automatic planning through Horde territory."
+    }
+  ],
+  "coordinateMethod": "Public map/world transport endpoints are normalized against their named zone rectangle: (point-left)/(right-left), (point-top)/(bottom-top). Skycutter coordinates use the first-hand zone guide instead. These are approximate boarding approaches, not guaranteed gangplank positions. No third-party addon implementation is included.",
+  "timingMethod": "Each leg uses published build 70124 estimates, not empirical timings. Expected boarding wait is half the complete cycle (legs plus dock dwell). Intermediate stops add their dwell with no second boarding wait; arrival adds 10 seconds. Costs are direction-specific. The published diagram curves are not treated as physical vessel paths.",
+  "pendingVerification": [
+    "Measure all complete journeys in-game, especially the unusually long published Grom'gol/Tirisfal leg estimates; tune timing without changing verified connectivity.",
+    "Confirm precise gangplank and skycutter boarding approaches in-game.",
+    "The retained Deeprun Tram approach coordinates and capital mage landing points still need verification against expanded city maps; do not claim those have been re-surveyed.",
+    "Trace walkable road networks across fully revealed online maps, including Riverglades, Zephras Isle, Mount Hyjal and Shen'dralas. No new land corridor or special Forever portal is inferred merely from zone existence.",
+    "Map line geometry remains schematic between travel points. Full wall, mountain, elevation and boat-onboard navigation are not validated by this transport update."
+  ]
+}

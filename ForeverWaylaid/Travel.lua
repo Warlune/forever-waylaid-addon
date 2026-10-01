@@ -4,20 +4,47 @@ local T={};F.Travel=T
 local function point(map,x,y,name)
   return {mapID=map,x=x/100,y=y/100,name=name}
 end
--- Classic boarding points. Costs include estimated waiting/loading time;
--- these are not live departure schedules. No summons or Forever-only ports.
--- Route pairs: Nauticus data.lua; dock coordinates: Leatrix Maps map data.
-T.connections={
-  {"Horde","Zeppelin",point(1411,50.9,13.9,"Durotar: Tirisfal zeppelin"),point(1420,60.7,58.8,"Tirisfal: Durotar zeppelin"),240},
-  {"Horde","Zeppelin",point(1411,50.6,12.6,"Durotar: Grom'gol zeppelin"),point(1434,31.4,30.2,"Grom'gol: Durotar zeppelin"),240},
-  {"Horde","Zeppelin",point(1420,61.9,59.1,"Tirisfal: Grom'gol zeppelin"),point(1434,31.6,29.1,"Grom'gol: Tirisfal zeppelin"),240},
-  {"Neutral","Boat",point(1413,63.7,38.6,"Ratchet dock"),point(1434,25.9,73.1,"Booty Bay dock"),240},
-  {"Alliance","Boat",point(1437,4.6,57.1,"Menethil: Auberdine dock"),point(1439,32.4,43.8,"Auberdine: Menethil dock"),240},
-  {"Alliance","Boat",point(1437,5,63.5,"Menethil: Theramore dock"),point(1445,71.6,56.4,"Theramore dock"),240},
-  {"Alliance","Boat",point(1439,33.2,40.1,"Auberdine: Rut'theran dock"),point(1438,54.9,96.8,"Rut'theran dock"),180},
-  {"Alliance","Boat",point(1444,43.3,42.8,"Forgotten Coast dock"),point(1444,31,39.8,"Feathermoon dock"),180},
-  {"Alliance","Tram",point(1453,66.4,34.1,"Stormwind tram entrance"),point(1455,73,50.2,"Ironforge tram entrance"),180},
-}
+-- Build complete journeys around each directed transport loop. Staying on
+-- board through an intermediate port pays its dwell, not another wait for
+-- a new boat. Paths keep intermediate ports for directions and map display.
+function T.PublicLinks(faction)
+  local links={}
+  local raceID
+  if UnitRace then local _,_,id=UnitRace("player");raceID=id end
+  for _,route in ipairs(F.TransportRoutes)do
+    if (route.faction=="Neutral" or route.faction==faction) and (not route.raceID or route.raceID==raceID) then
+      local points,cycle,valid={},0,true
+      for i,stop in ipairs(route.stops)do
+        points[i]=F.Route.World(stop)
+        if not points[i] then valid=false end
+        cycle=cycle+route.legs[i]+stop.dwell
+      end
+      -- A missing map conversion must not silently remove a stop from a loop.
+      if valid then
+        local n=#route.stops
+        for start=1,n do
+          local at,ride,via=start,0,{}
+          for _=1,n-1 do
+            ride=ride+route.legs[at]
+            at=at%n+1
+            local copy={};for i,p in ipairs(via)do copy[i]=p end
+            links[#links+1]={from=points[start],to=points[at],mode=route.mode,
+              routeID=route.id,via=copy,boardingWait=cycle/2,rideSeconds=ride,
+              seconds=cycle/2+ride+10,estimated=true}
+            via[#via+1]=points[at]
+            ride=ride+route.stops[at].dwell
+          end
+        end
+      end
+    end
+  end
+  return links
+end
+function T.ViaText(detail)
+  local names={}
+  for _,p in ipairs(detail and detail.via or {})do names[#names+1]=p.name end
+  return #names>0 and ("Stay aboard via "..table.concat(names,", ")) or nil
+end
 local cities={
   {"Alliance",3561,10059,point(1453,49.6,86.2,"Stormwind mage tower")},
   {"Alliance",3562,11416,point(1455,25.5,8.4,"Ironforge Mystic Ward")},
@@ -63,15 +90,7 @@ end
 function T.Options()
   local result={links={},personal={},resources={}}
   local faction=UnitFactionGroup("player")
-  for _,entry in ipairs(T.connections)do
-    if entry[1]=="Neutral" or entry[1]==faction then
-      local a,b=F.Route.World(entry[3]),F.Route.World(entry[4])
-      if a and b then
-        result.links[#result.links+1]={from=a,to=b,mode=entry[2],seconds=entry[5]}
-        result.links[#result.links+1]={from=b,to=a,mode=entry[2],seconds=entry[5]}
-      end
-    end
-  end
+  result.links=T.PublicLinks(faction)
   local function personal(p,mode,id,wait,seconds,resource,uses)
     p=p and (p.wx and p or F.Route.World(p))
     if p and wait then

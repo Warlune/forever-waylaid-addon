@@ -31,7 +31,7 @@ C_QuestLog={IsOnQuest=function()return false end,IsComplete=function()return fal
 C_Item={GetItemCount=function()return 0 end}
 Enum={}
 local function load(name) assert(loadfile('ForeverWaylaid/'..name..'.lua'))('ForeverWaylaid',F) end
-for _,name in ipairs({'Catalog','Recipes','Core','Pricing','Scanner','Peers','Crafting','Style','Accessibility','AuctionScanUI','Geometry','Routing','Travel','Tracking','Tooltips','UI','Map','Navigator'}) do load(name) end
+for _,name in ipairs({'Catalog','Recipes','Core','Pricing','Scanner','Peers','Crafting','Style','Accessibility','AuctionScanUI','Geometry','Routing','TransportData','Travel','Tracking','Tooltips','UI','Map','Navigator'}) do load(name) end
 F.events.scripts.OnEvent(nil,'ADDON_LOADED','ForeverWaylaid')
 F.events.scripts.OnEvent(nil,'PLAYER_LOGIN')
 for _,tab in ipairs({'Crates','Writs','Route','Settings'}) do F.tab=tab;F.Render() end
@@ -178,5 +178,6 @@ assert(loadfile('tests/tooltips.lua'))(F)
 assert(loadfile('tests/settings.lua'))(F)
 assert(loadfile('tests/accessibility.lua'))(F)
 assert(loadfile('tests/travel.lua'))(F)
+assert(loadfile('tests/transport.lua'))(F)
 
 assert(loadfile('tests/requirements.lua'))(F)
