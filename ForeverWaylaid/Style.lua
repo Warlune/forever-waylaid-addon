@@ -40,24 +40,15 @@ end
 function F.SearchAuctionItem(id)
   local modern=AuctionHouseFrame and AuctionHouseFrame:IsShown()
   local legacy=AuctionFrame and AuctionFrame:IsShown()
-  if not modern and not legacy then F.Print("Open the auction house, then Shift-click an item picture to fill its search.");return false end
+  if not modern and not legacy then return false end
+  -- Use the box the player has clicked into; never choose a tab or search mode.
+  local box=GetCurrentKeyBoardFocus and GetCurrentKeyBoardFocus()
+  if not box or not box.SetText or not box:IsObjectType("EditBox") or not box:IsShown() then return false end
   local name=itemName(id)
-  if not name then F.Print("Item name is still loading. Try Shift-click again in a moment.");return false end
-  local shopping=AuctionatorShoppingFrame
-  -- Fill the same exact-name field used by Auctionator's item-link handler.
-  -- Leave submitting the search to the player.
-  if shopping and shopping.SearchOptions and shopping.SearchOptions.SetSearchTerm and AuctionatorTabs_Shopping then
-    AuctionatorTabs_Shopping:Click()
-    shopping.SearchOptions:SetSearchTerm('"'..name..'"')
-  elseif legacy and BrowseName then
-    if AuctionFrameTab1 then AuctionFrameTab1:Click()end
-    if BrowseResetButton then BrowseResetButton:Click()end
-    BrowseName:SetText(name)
-  elseif modern and AuctionHouseFrame.SetSearchText then
-    AuctionHouseFrame:SetSearchText(name)
-  else
-    F.Print("No supported auction search box is available.");return false
-  end
+  if not name then return false end
+  box:SetText(name)
+  box:SetFocus()
+  box:SetCursorPosition(#name)
   GameTooltip:Hide()
   return true
 end

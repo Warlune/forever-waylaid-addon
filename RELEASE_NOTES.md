@@ -1,6 +1,7 @@
-## 0.3.3 — Keep the ledger open
+## 0.3.4 — Fill the focused search box
 
-- Shift-clicking an item now fills the auction search without closing the ledger or changing the selected entry.
-- Works with Auctionator and both native auction search interfaces. Press Search when ready.
+- Click into the desired search text box, then Shift-click an item picture to fill it with the item name and leave the cursor at the end.
+- No automatic Shopping selection, tab changes, filter resets, or search submission. The ledger stays open.
+- With the auction house closed or no text box focused, the shortcut quietly does nothing. No chat warning.
 
 Install the ForeverWaylaid folder in Interface/AddOns, then /reload. Live accepted-writ delivery testing remains pending.

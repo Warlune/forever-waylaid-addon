@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.3.3 preview
+# Forever Waylaid — v0.3.4 preview
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.3.3.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.3.4.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, choose PvP, Normal, or RP to match your realm. The faction comes from your character. No market is guessed automatically.
@@ -38,7 +38,7 @@ Craft costs value the full batch, including materials you already own; bag count
 
 ## Auction searches and flight setup
 
-With the auction house open, **Shift-click an item picture** in the ledger to fill its auction search. This works for writs, crates, required goods, raw materials, and crafted intermediates. The addon uses Auctionator's Shopping tab when available, otherwise the native search (including the legacy Browse search used alongside Auctioneer). The ledger stays open while the search field is filled; press Search when ready. Ordinary clicks still select entries, and hovering text does not show item tooltips.
+With the auction house open, click the search text box so its cursor is blinking, then **Shift-click an item picture** in the ledger. The item name fills that focused box, with the cursor at the end. The addon does not choose Shopping, change tabs, reset filters, or submit the search. The ledger stays open. With no focused text box or with the AH closed, Shift-click quietly does nothing. Ordinary clicks still select entries, and hovering text does not show item tooltips.
 
 Until a flight-master map has been recorded, the ledger, compass, and login message warn that flight paths are unscanned. **Talk to a flight master and open their map; no flight purchase is needed.** The warning clears after a successful scan, even if that character has no reachable destinations yet. Visit more flight masters to build route coverage. Turning off flight routing also hides the warning.
 
