@@ -1,0 +1,33 @@
+name: Bug report
+description: Something went wrong with Waylaid Forever
+title: "[Bug] "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Addon version
+      placeholder: "For example: 0.14.8"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened, and what did you expect?
+      description: Include the steps needed to reproduce it. A screenshot helps.
+    validations:
+      required: true
+  - type: textarea
+    id: route
+    attributes:
+      label: For route problems
+      description: Faction, starting zone, writ destinations, known flight paths, and whether your Hearthstone was available. Leave out character/account names.
+  - type: textarea
+    id: error
+    attributes:
+      label: Error message or screenshot
+      description: Optional. Remove personal information. Do not upload your entire WTF folder or SavedVariables file.
+  - type: textarea
+    id: addons
+    attributes:
+      label: Other relevant addons
+      description: Especially auction-house, map, navigation, or error-reporting addons.

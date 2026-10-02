@@ -12,6 +12,13 @@ function F.LearnRecipient()
   if name and point then F.char.recipients[questID]={npc=name,point=point} end
 end
 
+function F.GetRoutingFlights()
+  if not F.routingFlights or F.routingFlights.source~=F.char.flights then
+    F.routingFlights=F.Route.PrepareFlights(F.char.flights)
+  end
+  return F.routingFlights
+end
+
 function F.UpdateTracking()
   F.active = {}
   for questID, writ in pairs(F.writsByQuest) do
@@ -46,7 +53,7 @@ function F.UpdateTracking()
   end
   table.sort(F.active, function(a,b) return a.questID < b.questID end)
   F.travel=F.Travel.Options()
-  F.route, F.unresolved, F.routeSeconds, F.routeMode = F.Route.Plan(F.Route.Player(), F.active, F.char.flights, F.db.settings.flights,F.travel)
+  F.route, F.unresolved, F.routeSeconds, F.routeMode = F.Route.Plan(F.Route.Player(), F.active, F.GetRoutingFlights(), F.db.settings.flights,F.travel)
 end
 
 function F.NeedsFlightScan()
@@ -74,6 +81,7 @@ function F.LearnFlights()
   if not C_TaxiMap or not C_TaxiMap.GetTaxiNodesForMap then return end
   local mapID = C_Map.GetBestMapForUnit("player")
   if not mapID then return end
+  F.routingFlights=nil
   local root = mapID
   for _ = 1, 8 do
     local info = C_Map.GetMapInfo(root)
@@ -89,17 +97,18 @@ function F.LearnFlights()
     for _, node in ipairs(nodes) do
       if not node.isUndiscovered and (node.faction == 0 or node.faction == faction) then
         local x, y = node.position:GetXY()
-        local point = F.Route.World({ mapID = map.mapID, x = x, y = y, name = node.name })
+        local point = x and y and x>=0 and x<=1 and y>=0 and y<=1 and F.Route.World({ mapID = map.mapID, x = x, y = y, name = node.name })
         if point then point.nodeID = node.nodeID; byName[node.name] = point end
       end
     end
   end
-  local current, reachable = nil, {}
+  local current, reachable, slots = nil, {}, {}
   for slot = 1, NumTaxiNodes() do
     local kind, name = TaxiNodeGetType(slot), TaxiNodeName(slot)
     local point = byName[name]
     if point and (kind == "CURRENT" or kind == "REACHABLE") then
       F.char.flights.nodes[point.nodeID] = point
+      slots[slot]=point
       if kind == "CURRENT" then current = point else reachable[#reachable + 1] = point end
     end
   end
@@ -110,6 +119,36 @@ function F.LearnFlights()
       edges[point.nodeID] = F.Route.Distance(current, point) / 32 * 1.3
     end
     F.char.flights.edges[current.nodeID] = edges
+    F.char.flights.paths=F.char.flights.paths or {}
+    -- Replace this departure's previews, so vanished routes cannot survive a scan.
+    F.char.flights.paths[current.nodeID]={}
+    if GetNumRoutes and TaxiGetNodeSlot then
+      F.char.flights.connections=F.char.flights.connections or {}
+      for slot,point in pairs(slots) do
+        if point~=current then
+          local count=GetNumRoutes(slot)
+          local path,last,seconds,valid={current.nodeID},current,0,type(count)=="number" and count>0
+          local seen={[current.nodeID]=true}
+          for hop=1,(valid and count or 0) do
+            local a,b=slots[TaxiGetNodeSlot(slot,hop,true)],slots[TaxiGetNodeSlot(slot,hop,false)]
+            if not a or not b or a~=last or a.instance~=b.instance or seen[b.nodeID] then valid=false;break end
+            local duration=F.Route.Distance(a,b)/32*1.3
+            if not F.Positive(duration) then valid=false;break end
+            path[#path+1]=b.nodeID;seen[b.nodeID]=true;last=b;seconds=seconds+duration
+          end
+          if valid and last==point then
+            F.char.flights.paths[current.nodeID][point.nodeID]=path
+            edges[point.nodeID]=seconds
+            for i=2,#path do
+              local a,b=path[i-1],path[i]
+              local connections=F.char.flights.connections
+              connections[a]=connections[a] or {}
+              connections[a][b]=F.Route.Distance(F.char.flights.nodes[a],F.char.flights.nodes[b])/32*1.3
+            end
+          end
+        end
+      end
+    end
   end
 end
 

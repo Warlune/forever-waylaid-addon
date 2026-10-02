@@ -1,5 +1,6 @@
 local _,F=...
 local T={};F.Travel=T
+F.routingBetaNotice="Routes are in beta. Paths, travel times and delivery order may not be optimal."
 
 local function point(map,x,y,name)
   return {mapID=map,x=x/100,y=y/100,name=name}

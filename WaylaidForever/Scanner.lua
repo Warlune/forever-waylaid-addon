@@ -101,6 +101,7 @@ end
 local function finish(message,saved)
   if state then
     lastReport={index=state.index,total=state.total,unique=state.unique,matched=state.matched,elapsed=state.elapsed,saved=saved or 0,phase=saved and "complete" or "stopped"}
+    if F.Telemetry then pcall(F.Telemetry.Record,"S",saved and "complete" or "stopped")end
   end
   state=nil;F.nativeScanActive=false;status=message;F.UpdateScanUI()
 end

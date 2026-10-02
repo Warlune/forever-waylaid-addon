@@ -1,6 +1,8 @@
 local _, F = ...
-F.version = "0.14.2"
-F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
+F.version = "0.14.8"
+-- Diagnostic sharing is separate from price sharing and always opt-in.
+F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, generalAuctionTooltips = true, autoHideAuction = true }
+F.defaults.telemetry=false
 
 function F.ApplySettings()
   F.Style.ApplyTheme()
@@ -24,6 +26,7 @@ function F.Refresh()
   if F.UpdateGuidance then F.UpdateGuidance() end
   if F.Render then F.Render() end
   if F.UpdateNavigator then F.UpdateNavigator() end
+  if F.Telemetry then pcall(F.Telemetry.CaptureRoute) end
 end
 
 local events = CreateFrame("Frame")
@@ -65,6 +68,7 @@ events:SetScript("OnEvent", function(_, event, name, success,spellID)
     if F.db.settings.textSize==nil then F.db.settings.textSize=F.db.settings.largeText and 13 or 0 end
     F.db.settings.largeText=nil
     F.db.settings.routeMode=nil -- Retired: writ walking is always direct guidance.
+    F.db.settings.debugAlliance=nil -- Retired appearance preview; use actual faction.
     F.db.settings.valuePalette=nil -- Retired: use the game's color filters.
     for key, value in pairs(F.defaults) do if F.db.settings[key] == nil then F.db.settings[key] = value end end
     F.char.flights = F.char.flights or { nodes = {}, edges = {} }
@@ -81,6 +85,8 @@ events:SetScript("OnEvent", function(_, event, name, success,spellID)
   elseif event == "PLAYER_LOGIN" then
     F.ReadProfessions(); F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.BuildNavigator(); F.RegisterAuctionator(); F.Style.ApplyTheme(); F.ApplyAccessibility(); F.Refresh()
     F.InitializePeers()
+    F.Telemetry.Initialize()
+    F.VersionCheck.Initialize()
     F.Print("v" .. F.version .. " — /wf to open. Scan AH prices or opt into peer sharing in Settings.")
     if F.NeedsFlightScan()then F.Print("Flight paths not scanned: open a flight master's map to learn your routes. No flight purchase needed; until then, routing uses walking estimates.")end
   elseif F.char then
@@ -149,6 +155,7 @@ SlashCmdList.WAYLAIDFOREVER = function(msg)
   if clear then F.char.pins[clear] = nil; F.Refresh(); return end
   if msg == "accessibility" then F.tab="Settings";F.accessibilityView=true;F.window:Show();F.Render();return end
   if msg == "memory" then F.ReportMemory();return end
+  if msg == "diagnostics" then F.ShowTelemetry();return end
   if msg == "prices" then F.ImportPersonal(); F.Refresh(); return end
   if msg == "compass" then F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator();return end
   if msg == "reset" then F.ResetNavigator();return end

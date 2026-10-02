@@ -18,7 +18,23 @@ function F.UpdateGuidance()
     F.guidance=F.flightGuidance;F.guidance.action="In flight";return
   end
   F.flightGuidance=nil
-  local seconds,steps=F.Route.Leg(player,chosen.point,F.char.flights,F.db.settings.flights,F.travel)
+  -- Keep the itinerary's resource decision when updating the live arrow.
+  -- Otherwise a locally faster hearth here could spend the one saved for
+  -- the next delivery by the complete-round planner.
+  local travel=F.travel
+  local planned=F.route[1].steps
+  if travel and planned then
+    local allowed={}
+    for _,step in ipairs(planned) do
+      local detail=step.detail
+      if detail and detail.resource then allowed[detail.id or detail.resource]=true end
+    end
+    travel={links=travel.links,resources=travel.resources,personal={}}
+    for _,entry in ipairs(F.travel.personal or {}) do
+      if allowed[entry.id or entry.resource] then travel.personal[#travel.personal+1]=entry end
+    end
+  end
+  local seconds,steps=F.Route.Leg(player,chosen.point,F.GetRoutingFlights(),F.db.settings.flights,travel)
   if seconds==math.huge then F.guidance=nil;return end
   local target,action,flight,flightIndex=chosen.point,"Deliver to customer",nil,nil
   for index,step in ipairs(steps)do
@@ -102,17 +118,29 @@ function F.AdvanceRoadGuidance(guide,player)
     guide.target=guide.travelTarget;guide.action=guide.travelAction;guide.roadWarning=nil
   end
 end
-function F.DisplayRoute(player)
-  local segments,stops={},{}
+function F.DisplayRoute(player,segments,stops)
+  -- Renderers provide their own scratch arrays. Ordinary callers still get
+  -- independent snapshots; no map can overwrite another map's route data.
+  segments,stops=segments or {},stops or {}
+  local segmentCount,stopCount=0,0
   local delivery,recipient
   player=player or F.Route.Player()
+  local function segment(from,to,step,road,connectionFrom,connectionTo)
+    segmentCount=segmentCount+1
+    local row=segments[segmentCount] or {};segments[segmentCount]=row
+    row.from,row.to,row.mode,row.detail=from,to,step.mode,step.detail
+    row.road,row.delivery,row.recipient=road,delivery,recipient
+    row.connectionFrom,row.connectionTo=connectionFrom,connectionTo
+  end
   local function append(step)
     local from=step.from
+    local connectionFrom=false
     for _,via in ipairs(step.detail and step.detail.via or {})do
-      segments[#segments+1]={from=from,to=via,mode=step.mode,detail=step.detail,delivery=delivery,recipient=recipient}
+      segment(from,via,step,nil,connectionFrom,step.mode=="Fly")
       from=via
+      connectionFrom=step.mode=="Fly"
     end
-    segments[#segments+1]={from=from,to=step.to,mode=step.mode,detail=step.detail,road=step.road,delivery=delivery,recipient=recipient}
+    segment(from,step.to,step,step.road,connectionFrom,nil)
   end
   for i,leg in ipairs(F.route or {})do
     delivery,recipient=i,leg.stop
@@ -138,8 +166,12 @@ function F.DisplayRoute(player)
         else append(step)end
       end
     end
-    stops[#stops+1]={point=leg.stop.point,stop=leg.stop,number=i}
+    stopCount=stopCount+1
+    local row=stops[stopCount] or {};stops[stopCount]=row
+    row.point,row.stop,row.number=leg.stop.point,leg.stop,i
   end
+  for i=#segments,segmentCount+1,-1 do segments[i]=nil end
+  for i=#stops,stopCount+1,-1 do stops[i]=nil end
   return segments,stops
 end
 function F.ResetNavigator()
@@ -158,7 +190,7 @@ function F.BuildNavigator()
   end)
   local stripe=c:CreateTexture(nil,"ARTWORK");stripe:SetPoint("TOPLEFT",5,-5);stripe:SetSize(290,19);S.Accent(stripe,0.55)
   F.compassStripe=stripe
-  S.Text(c,"COURIER'S COMPASS",11,-9,210,"GameFontNormalSmall",S.gold)
+  S.Text(c,"COMPASS • ROUTES BETA",11,-9,210,"GameFontNormalSmall",S.gold)
   c.arrow=c:CreateTexture(nil,"ARTWORK");c.arrow:SetTexture("Interface\\Minimap\\MinimapArrow");c.arrow:SetPoint("TOPLEFT",10,-31);c.arrow:SetSize(40,40)
   c.distance=S.Text(c,"",5,-76,52,"GameFontNormalSmall",S.gold);c.distance:SetJustifyH("CENTER")
   c.action=S.Text(c,"",60,-29,230,"GameFontNormalSmall",S.gold);c.action:SetMaxLines(1)
@@ -169,6 +201,8 @@ function F.BuildNavigator()
   c.flightNotice=S.Text(c,"Flight paths not scanned\nVisit a flight master to learn routes.",11,-76,278,"GameFontHighlightSmall",S.gold)
   c:SetScript("OnEnter",function(self)
     GameTooltip:SetOwner(self,"ANCHOR_LEFT");GameTooltip:SetText("Delivery route")
+    GameTooltip:AddLine(F.routingBetaNotice,1,0.82,0,true)
+    GameTooltip:AddLine("Larger delivery rounds can miss a shorter order. Dotted lines show direction, not a verified walking path.",1,0.82,0,true)
     local guide=F.guidance
     if guide then
       GameTooltip:AddLine(guide.stop.writ.name,1,1,1,true)
@@ -177,6 +211,8 @@ function F.BuildNavigator()
         if step.mode~="Travel" then GameTooltip:AddLine(step.mode..": "..(step.to.name or F.DestinationText(step.to)),1,0.85,0.5,true)end
         local via=F.Travel.ViaText(step.detail)
         if via then GameTooltip:AddLine(via,1,0.85,0.5,true)end
+        local note=F.Route.FlightNote(step)
+        if note then GameTooltip:AddLine(note,1,0.82,0,true)end
       end
     end
     local warning=F.FlightCoverageText()

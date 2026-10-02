@@ -3,17 +3,21 @@ local G,S=F.Geometry,F.Style
 function F.CreateRouteOverlay(parent)
   local overlay=CreateFrame("Frame",nil,parent);overlay:SetAllPoints(parent)
   overlay:SetFrameLevel(parent:GetFrameLevel()+5);overlay:EnableMouse(false);overlay:SetClipsChildren(true)
-  overlay.lines={};overlay.pins={};return overlay
+  overlay.lines={};overlay.pins={};overlay.routeSegments={};overlay.routeStops={};return overlay
 end
-function F.ClearRouteOverlay(overlay)
+function F.ClearRouteOverlay(overlay,keepRoute)
   for _,line in ipairs(overlay.lines)do line:Hide()end
   for _,pin in ipairs(overlay.pins)do pin:Hide();pin.routeStop=nil;pin.pinText=nil end
+  if not keepRoute then
+    for i=#(overlay.routeSegments or {}),1,-1 do overlay.routeSegments[i]=nil end
+    for i=#(overlay.routeStops or {}),1,-1 do overlay.routeStops[i]=nil end
+  end
 end
 function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small,player)
-  F.ClearRouteOverlay(overlay)
+  F.ClearRouteOverlay(overlay,true)
   if not F.DisplayRoute then return end
   player=player or F.Route.Player()
-  local segments,stops=F.DisplayRoute(player);local lineIndex,pinIndex=0,0
+  local segments,stops=F.DisplayRoute(player,overlay.routeSegments,overlay.routeStops);local lineIndex,pinIndex=0,0
   local function pin(point,text,kind,stop)
     local x,y=project(point);if not x or not inside(x,y)then return end
     pinIndex=pinIndex+1;local p=overlay.pins[pinIndex]
@@ -71,7 +75,13 @@ function F.DrawRouteOverlay(overlay,project,clip,inside,showPlayer,small,player)
         else line(x,y,u,v,step.mode)end
       end
     end
-    if step.mode=="Fly" then pin(step.from,"Flight master: "..(step.from.name or "Departure"),"flight");pin(step.to,"Land: "..(step.to.name or "Arrival flight master"),"flight")end
+    if step.mode=="Fly" then
+      local function flightLabel(point,connection,label)
+        return (connection and "Flight connection: " or label)..(point.name or "Flight master")..(connection and " (stay aboard)" or "")
+      end
+      pin(step.from,flightLabel(step.from,step.connectionFrom,"Flight master: "),"flight")
+      pin(step.to,flightLabel(step.to,step.connectionTo,"Land: "),"flight")
+    end
     if step.mode~="Fly" and step.mode~="Travel" then pin(step.from,step.mode..": "..(step.to.name or "Destination"),"transport");pin(step.to,"Arrive: "..(step.to.name or "Destination"),"transport")end
   end
   for _,stop in ipairs(stops)do pin(stop.point,"D"..stop.number,"stop",stop.stop)end

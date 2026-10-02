@@ -37,169 +37,376 @@ function R.WalkDistance(a,b)
   return R.Distance(a,b)
 end
 
--- Dijkstra over observed flights, public transports and eligible personal
--- teleports. Cooldown waiting is charged at the point of use, not ignored.
-function R.Leg(start, finish, flights, useFlights, travel, elapsed, used)
-  if not start or not finish then return math.huge,{} end
-  elapsed,used=elapsed or 0,used or {}
-  local points, index = {start, finish}, {}
-  if useFlights then
-    for id, node in pairs(flights.nodes) do
-      points[#points + 1] = node; index[id] = #points
+-- Build a temporary graph; guesses must never become saved observations or
+-- count as a flight-master scan. A scanned departure (even an empty one) wins.
+function R.PrepareFlights(flights)
+  local graph={nodes=flights.nodes,edges={},estimated={},details={},source=flights}
+  local function pathData(ids)
+    if type(ids)~="table" or #ids<2 then return end
+    local via,seen,seconds={}, {},0
+    for i,id in ipairs(ids) do
+      local point=flights.nodes[id]
+      if not point or seen[id] then return end
+      seen[id]=true
+      if i>1 then
+        local prior=flights.nodes[ids[i-1]]
+        if prior.instance~=point.instance then return end
+        local hop=flights.connections and flights.connections[ids[i-1]] and flights.connections[ids[i-1]][id]
+        hop=hop or R.Distance(prior,point)/32*1.3
+        if not F.Positive(hop) then return end
+        seconds=seconds+hop
+      end
+      if i>1 and i<#ids then via[#via+1]=point end
+    end
+    return seconds,{via=via,flightPath=true}
+  end
+  local function put(from,to,seconds,detail,estimated)
+    graph.edges[from]=graph.edges[from] or {}
+    graph.details[from]=graph.details[from] or {}
+    graph.estimated[from]=graph.estimated[from] or {}
+    graph.edges[from][to]=seconds;graph.details[from][to]=detail;graph.estimated[from][to]=estimated
+  end
+  -- A scanned destination is a bookable journey, not necessarily one hop.
+  -- Prefer its exact ordered preview over the old endpoint-only estimate.
+  for from,row in pairs(flights.edges) do
+    graph.edges[from]={}
+    for to,seconds in pairs(row) do
+      local ids=flights.paths and flights.paths[from] and flights.paths[from][to]
+      local cost,detail
+      if ids and ids[1]==from and ids[#ids]==to then cost,detail=pathData(ids) end
+      put(from,to,cost or seconds,detail or {flightPathUnknown=true})
     end
   end
-  local costs, visited, previous, modes,details = {[1] = 0}, {}, {}, {},{}
-  local flightEdges = {}
-  if useFlights then
-    for from, edges in pairs(flights.edges) do
-      if index[from] then
-        flightEdges[index[from]] = {}
-        for to, seconds in pairs(edges) do
-          if index[to] and F.Positive(seconds) then flightEdges[index[from]][index[to]] = seconds + 15 end
+  -- Recover usable paths from older recorded directed hops. Do not reverse
+  -- them, invent missing stops, or override an authoritative departure scan.
+  local ids={};for id in pairs(flights.nodes) do ids[#ids+1]=id end
+  table.sort(ids,function(a,b)return tostring(a)<tostring(b) end)
+  for _,from in ipairs(ids) do
+    local costs,previous,visited={[from]=0},{},{}
+    for _=1,#ids do
+      local at,cost
+      for _,id in ipairs(ids) do
+        if not visited[id] and costs[id] and (not cost or costs[id]<cost) then at,cost=id,costs[id] end
+      end
+      if not at then break end
+      visited[at]=true
+      for to,seconds in pairs(flights.connections and flights.connections[at] or {}) do
+        if flights.nodes[to] and flights.nodes[at].instance==flights.nodes[to].instance and F.Positive(seconds) and not visited[to] then
+          if not costs[to] or cost+seconds<costs[to] then costs[to],previous[to]=cost+seconds,at end
+        end
+      end
+    end
+    for to,cost in pairs(costs) do
+      local observed=flights.edges[from]
+      local existing=graph.details[from] and graph.details[from][to]
+      if to~=from and (not observed or observed[to]) and not (existing and existing.flightPath) then
+        local path,at={},to
+        while at do table.insert(path,1,at);at=previous[at] end
+        local _,detail=pathData(path)
+        if detail then
+          detail.estimatedPath=#path>2
+          put(from,to,cost,detail)
         end
       end
     end
   end
-  local links,personal={},{}
-  local function addPoint(p)
-    for i,other in ipairs(points)do if R.Distance(p,other)<1 then return i end end
-    points[#points+1]=p;return #points
-  end
-  for _,link in ipairs(travel and travel.links or {})do
-    local from,to=addPoint(link.from),addPoint(link.to)
-    links[from]=links[from] or {};links[from][to]=link
-  end
-  for _,link in ipairs(travel and travel.personal or {})do
-    if (used[link.resource] or 0)<(travel.resources[link.resource] or 1) then
-      personal[#personal+1]={to=addPoint(link.to),link=link}
+  -- Legacy network estimates are only a fallback when no connecting path
+  -- has been recorded. Never let a guessed straight edge beat known hops.
+  for hub,row in pairs(flights.edges) do
+    local members={[hub]=true}
+    for to,seconds in pairs(row) do if F.Positive(seconds) and flights.nodes[to] then members[to]=true end end
+    for from in pairs(members) do
+      for to in pairs(members) do
+        local a,b=flights.nodes[from],flights.nodes[to]
+        if from~=to and a and b and a.instance==b.instance and not flights.edges[from] and not (graph.edges[from] and graph.edges[from][to]) then
+          put(from,to,math.max(30,R.Distance(a,b)/32*1.6),{flightPathUnknown=true},true)
+        end
+      end
     end
   end
-  for _ = 1, #points do
-    local at, cost
-    for i = 1, #points do
-      if not visited[i] and costs[i] and (not cost or costs[i] < cost) then at, cost = i, costs[i] end
+  return graph
+end
+
+function R.FlightNote(step)
+  local detail=step.detail
+  if detail and detail.estimatedConnection then
+    return "Estimated connection — open this flight master to confirm available flights."
+  elseif detail and detail.estimatedPath then
+    return "Known connecting flights — open the departure flight master to confirm this itinerary."
+  elseif detail and detail.flightPathUnknown then
+    return "Connecting stops not recorded — open the departure flight master to update the route and time estimate."
+  end
+end
+
+-- Ordinary travel is a static directed graph. Build it once per plan and
+-- reuse each source's shortest-path tree for every delivery-order candidate.
+-- Arrival by walking must not prevent taking another transport or a shorter
+-- walking connection. Positive distances make walking detours unnecessary.
+local plainFlight={mode="Fly"}
+local function network(anchors,flights,useFlights,travel)
+  local points,index,byPoint={},{},{}
+  local function add(p)
+    if byPoint[p] then return byPoint[p] end
+    points[#points+1]=p;byPoint[p]=#points;return #points
+  end
+  for _,p in ipairs(anchors) do add(p) end
+  if useFlights then
+    local ids={};for id in pairs(flights.nodes) do ids[#ids+1]=id end
+    table.sort(ids,function(a,b)return tostring(a)<tostring(b) end)
+    for _,id in ipairs(ids) do index[id]=add(flights.nodes[id]) end
+  end
+  for _,link in ipairs(travel and travel.links or {}) do add(link.from);add(link.to) end
+  -- Most possible connections are ordinary walks. Store their costs as
+  -- numbers, with sparse metadata only for transport, instead of allocating
+  -- a table per walking edge on every moving-compass update.
+  local edges,edgeInfo={},{}
+  local function edge(a,b,seconds,mode,detail)
+    if a==b or seconds<0 or seconds>=math.huge then return end
+    local old=edges[a][b]
+    if not old or seconds<old then
+      edges[a][b]=seconds
+      if mode~="Travel" then
+        edgeInfo[a]=edgeInfo[a] or {}
+        edgeInfo[a][b]=mode=="Fly" and not detail and plainFlight or {mode=mode,detail=detail}
+      elseif edgeInfo[a] then edgeInfo[a][b]=nil end
     end
-    if not at or at == 2 then break end
-    visited[at] = true
-    for to = 1, #points do
-      if not visited[to] then
-        local yards,road=R.WalkDistance(points[at],points[to])
-        local weight, mode,detail = yards/7, "Travel",road and {roadSegments=road} or nil
-        -- A walking edge already contains the whole road path. Chaining
-        -- walks through unused taxi/dock nodes could replace a traced bend
-        -- with two artificially shorter, unmapped straight-line estimates.
-        if modes[at]=="Travel" then weight=math.huge end
-        local taxi = flightEdges[at] and flightEdges[at][to]
-        if taxi and taxi < weight then weight, mode,detail = taxi, "Fly",nil end
-        local link=links[at] and links[at][to]
-        if link and link.seconds<weight then weight,mode,detail=link.seconds,link.mode,link end
-        for _,entry in ipairs(personal)do
-          if entry.to==to then
-            local p=entry.link;local wait=math.max(0,p.wait-elapsed-cost)
-            if wait+p.seconds<weight then
-              weight,mode=wait+p.seconds,p.mode
-              detail={id=p.id,resource=p.resource,wait=wait}
+  end
+  for i,a in ipairs(points) do
+    edges[i]={}
+    for j,b in ipairs(points) do edge(i,j,R.WalkDistance(a,b)/7,"Travel") end
+  end
+  if useFlights then
+    for from,row in pairs(flights.edges) do
+      for to,seconds in pairs(row) do
+        if index[from] and index[to] and F.Positive(seconds) then
+          local estimated=flights.estimated and flights.estimated[from] and flights.estimated[from][to]
+          local detail=flights.details and flights.details[from] and flights.details[from][to]
+          if estimated then
+            local copy={estimatedConnection=true}
+            for key,value in pairs(detail or {}) do copy[key]=value end
+            detail=copy
+          end
+          edge(index[from],index[to],seconds+15,"Fly",detail)
+        end
+      end
+    end
+  end
+  for _,link in ipairs(travel and travel.links or {}) do
+    edge(byPoint[link.from],byPoint[link.to],link.seconds,link.mode,link)
+  end
+  local trees={}
+  return function(from,to)
+    if from==to then return 0,{} end
+    local source,target=byPoint[from],byPoint[to]
+    local tree=trees[source]
+    if not tree then
+      local costs,previous,visited={[source]=0},{},{}
+      for _=1,#points do
+        local at,cost
+        for i=1,#points do
+          if not visited[i] and costs[i] and (not cost or costs[i]<cost) then at,cost=i,costs[i] end
+        end
+        if not at then break end
+        visited[at]=true
+        for nextPoint=1,#points do
+          local e=edges[at][nextPoint]
+          if e and not visited[nextPoint] and (not costs[nextPoint] or cost+e<costs[nextPoint]) then
+            costs[nextPoint],previous[nextPoint]=cost+e,at
+          end
+        end
+      end
+      tree={costs=costs,previous=previous,paths={}};trees[source]=tree
+    end
+    local seconds=tree.costs[target] or math.huge
+    if seconds==math.huge then return seconds,{} end
+    if not tree.paths[target] then
+      local steps,at={},target
+      while tree.previous[at] do
+        local prior=tree.previous[at];local info=edgeInfo[prior] and edgeInfo[prior][at]
+        table.insert(steps,1,{from=points[prior],to=points[at],mode=info and info.mode or "Travel",detail=info and info.detail,road=not info and "unknown" or nil})
+        at=prior
+      end
+      tree.paths[target]=steps
+    end
+    return seconds,tree.paths[target]
+  end
+end
+
+local function planner(start,stops,flights,useFlights,travel)
+  local anchors={start}
+  for _,stop in ipairs(stops) do if stop.point then anchors[#anchors+1]=stop.point end end
+  for _,p in ipairs(travel and travel.personal or {}) do anchors[#anchors+1]=p.to end
+  local base=network(anchors,flights,useFlights,travel)
+  local resources,resourceIndex={},{}
+  for _,p in ipairs(travel and travel.personal or {}) do resourceIndex[p.resource]=true end
+  for name in pairs(resourceIndex) do resources[#resources+1]=name end
+  table.sort(resources)
+  for i,name in ipairs(resources) do resourceIndex[name]=i end
+  -- Between deliveries, origin-independent teleports need only be considered
+  -- as the first move: walking or teleporting before the last teleport cannot
+  -- improve arrival time. Waiting is charged against the trip's elapsed time.
+  -- Keep the best arrival for EACH resource choice, including using none.
+  local function choices(from,to,elapsed,used)
+    local options,byResource={},{}
+    local seconds,steps=base(from,to)
+    if seconds<math.huge then options[#options+1]={seconds=seconds,steps=steps} end
+    for _,p in ipairs(travel and travel.personal or {}) do
+      local r=resourceIndex[p.resource]
+      if (used[r] or 0)<((travel.resources or {})[p.resource] or 1) then
+        local after,path=base(p.to,to)
+        local wait=math.max(0,(p.wait or 0)-elapsed)
+        local cost=wait+p.seconds+after
+        if cost<math.huge and (not byResource[r] or cost<byResource[r].seconds) then
+          byResource[r]={seconds=cost,resource=r,teleport=p,wait=wait,after=path}
+        end
+      end
+    end
+    for r=1,#resources do
+      local option=byResource[r]
+      if option then
+        option.from=from
+        options[#options+1]=option
+      end
+    end
+    return options
+  end
+  return choices,resources
+end
+
+local function optionSteps(option)
+  if option.steps then return option.steps end
+  local p=option.teleport
+  local steps={{from=option.from,to=p.to,mode=p.mode,detail={id=p.id,resource=p.resource,wait=option.wait}}}
+  for _,step in ipairs(option.after) do steps[#steps+1]=step end
+  return steps
+end
+
+function R.Leg(start,finish,flights,useFlights,travel,elapsed,used)
+  if not start or not finish then return math.huge,{} end
+  local choices,resources=planner(start,{{point=finish}},flights,useFlights,travel)
+  local counts={};for i,name in ipairs(resources) do counts[i]=(used or {})[name] or 0 end
+  local best,steps=math.huge,{}
+  for _,option in ipairs(choices(start,finish,elapsed or 0,counts)) do
+    if option.seconds<best then best,steps=option.seconds,optionSteps(option) end
+  end
+  return best,steps
+end
+
+-- Search delivery order AND remaining travel resources. Earlier arrival
+-- dominates later arrival only for the same visited set, location and usage.
+-- Large frontiers are ranked with an optimistic remaining-travel bound and
+-- trimmed, keeping work bounded in the game client. Never call a trimmed
+-- result exact. No zone names or particular delivery combinations are used.
+function R.Plan(start,stops,flights,useFlights,travel)
+  if not start then return {},stops,0,"exact" end
+  local choices,resources=planner(start,stops,flights,useFlights,travel)
+  local usable,unresolved={},{}
+  for _,stop in ipairs(stops) do
+    if stop.point and #choices(start,stop.point,0,{})>0 then usable[#usable+1]=stop
+    else unresolved[#unresolved+1]=stop end
+  end
+  local n=#usable
+  if n==0 then return {},unresolved,0,"exact" end
+  local limit=n>12 and 12 or (n>9 and 48 or ((n<=6 or #resources==0) and 2048 or 128))
+  local mode="exact"
+  local optimistic={}
+  for i=0,n do
+    optimistic[i]={}
+    for j=1,n do
+      local best=math.huge
+      if i~=j then
+        -- Ignoring cooldowns and remaining charges is an optimistic bound,
+        -- not a candidate journey. Actual choices below enforce both.
+        for _,option in ipairs(choices(i==0 and start or usable[i].point,usable[j].point,math.huge,{})) do
+          best=math.min(best,option.seconds)
+        end
+      end
+      optimistic[i][j]=best
+    end
+  end
+  local incoming={}
+  for j=1,n do
+    incoming[j]=math.huge
+    for i=0,n do incoming[j]=math.min(incoming[j],optimistic[i][j]) end
+  end
+  local function rank(state)
+    local bound,first=state.total,math.huge
+    for j=1,n do
+      if state.seen:byte(j)==48 then
+        bound=bound+incoming[j]
+        first=math.min(first,optimistic[state.at][j]-incoming[j])
+      end
+    end
+    return bound+(first<math.huge and first or 0)
+  end
+  local empty={};for i=1,#resources do empty[i]=0 end
+  local frontier={{at=0,seen=string.rep("0",n),used=empty,total=0,key=""}}
+  local best=frontier[1]
+  for _=1,n do
+    local byKey={}
+    for _,state in ipairs(frontier) do
+      for j,stop in ipairs(usable) do
+        if state.seen:byte(j)==48 then
+          for _,option in ipairs(choices(state.at==0 and start or usable[state.at].point,stop.point,state.total,state.used)) do
+            local counts={};for r=1,#resources do counts[r]=state.used[r]+(option.resource==r and 1 or 0) end
+            local seen=state.seen:sub(1,j-1).."1"..state.seen:sub(j+1)
+            local key=seen..":"..j..":"..table.concat(counts,",")
+            local total=state.total+option.seconds
+            if not byKey[key] or total<byKey[key].total then
+              byKey[key]={at=j,seen=seen,used=counts,total=total,parent=state,option=option,key=key}
             end
           end
         end
-        if weight < math.huge and (not costs[to] or cost + weight < costs[to]) then
-          costs[to], previous[to], modes[to],details[to] = cost + weight, at, mode,detail
-        end
       end
     end
-  end
-  local steps, at = {}, 2
-  while previous[at] do
-    local road=details[at] and details[at].roadSegments
-    if road then
-      for i=#road,1,-1 do table.insert(steps,1,road[i])end
+    local nextFrontier={}
+    for _,state in pairs(byKey) do nextFrontier[#nextFrontier+1]=state end
+    if #nextFrontier==0 then break end
+    if #nextFrontier>limit then
+      mode="estimated"
+      for _,state in ipairs(nextFrontier) do state.rank=rank(state) end
+      table.sort(nextFrontier,function(a,b)
+        if a.rank~=b.rank then return a.rank<b.rank end
+        if a.total~=b.total then return a.total<b.total end
+        return a.key<b.key
+      end)
+      for i=#nextFrontier,limit+1,-1 do nextFrontier[i]=nil end
     else
-      table.insert(steps, 1, { from = points[previous[at]], to = points[at], mode = modes[at],detail=details[at],road=modes[at]=="Travel" and "unknown" or nil })
+      table.sort(nextFrontier,function(a,b)
+        if a.total~=b.total then return a.total<b.total end
+        return a.key<b.key
+      end)
     end
-    at = previous[at]
+    frontier=nextFrontier;best=frontier[1]
+    for _,state in ipairs(frontier) do if state.total<best.total then best=state end end
   end
-  return costs[2] or math.huge, steps
-end
-
--- Exact open-path visit order for up to 9 stops; nearest-next beyond that.
--- Missing/cross-continent routes are left unresolved, never treated as free.
-function R.Plan(start, stops, flights, useFlights, travel)
-  local usable, unresolved = {}, {}
-  for _, stop in ipairs(stops) do
-    if start and stop.point and R.Leg(start,stop.point,flights,useFlights,travel)<math.huge then usable[#usable + 1] = stop
-    else unresolved[#unresolved + 1] = stop end
-  end
-  local n, matrix, paths = #usable, {}, {}
-  if n == 0 then return {}, unresolved, 0, "exact" end
-  -- Personal resources change after a delivery. Re-evaluate each next leg
-  -- with consumed runes/items and elapsed cooldown time. Never promise a
-  -- second Hearthstone/engineering use in the same itinerary.
-  if travel and #travel.personal>0 then
-    local result,total,at,seen,used={},0,start,{},{}
+  -- A bounded search must never discard a cheaper complete greedy route.
+  -- Keep that inexpensive baseline as a candidate, not as the only strategy.
+  if mode=="estimated" then
+    local greedy={at=0,seen=string.rep("0",n),used=empty,total=0}
     for _=1,n do
-      local best,j,path=math.huge,nil,nil
-      for i,stop in ipairs(usable)do
-        if not seen[i] then
-          local seconds,steps=R.Leg(at,stop.point,flights,useFlights,travel,total,used)
-          if seconds<best then best,j,path=seconds,i,steps end
+      local choice,nextStop
+      for j,stop in ipairs(usable) do
+        if greedy.seen:byte(j)==48 then
+          for _,option in ipairs(choices(greedy.at==0 and start or usable[greedy.at].point,stop.point,greedy.total,greedy.used)) do
+            if not choice or option.seconds<choice.seconds then choice,nextStop=option,j end
+          end
         end
       end
-      if not j then break end
-      result[#result+1]={stop=usable[j],seconds=best,steps=path}
-      for _,step in ipairs(path)do
-        local resource=step.detail and step.detail.resource
-        if resource then used[resource]=(used[resource] or 0)+1 end
-      end
-      total,at,seen[j]=total+best,usable[j].point,true
+      if not choice then break end
+      local counts={};for r=1,#resources do counts[r]=greedy.used[r]+(choice.resource==r and 1 or 0) end
+      greedy={at=nextStop,seen=greedy.seen:sub(1,nextStop-1).."1"..greedy.seen:sub(nextStop+1),
+        used=counts,total=greedy.total+choice.seconds,parent=greedy,option=choice}
     end
-    for i,stop in ipairs(usable)do if not seen[i] then unresolved[#unresolved+1]=stop end end
-    return result,unresolved,total,"estimated"
+    local _,greedyCount=greedy.seen:gsub("1","")
+    local _,bestCount=best.seen:gsub("1","")
+    if greedyCount>bestCount or (greedyCount==bestCount and greedy.total<best.total) then best=greedy end
   end
-  for i = 0, n do
-    matrix[i], paths[i] = {}, {}
-    for j = 1, n do
-      if i ~= j then matrix[i][j], paths[i][j] = R.Leg(i == 0 and start or usable[i].point, usable[j].point, flights, useFlights,travel) end
-    end
+  local result,at={},best
+  while at.parent do
+    table.insert(result,1,{stop=usable[at.at],seconds=at.option.seconds,steps=optionSteps(at.option)})
+    at=at.parent
   end
-  local order, mode = {}, n <= 9 and "exact" or "estimated"
-  if n <= 9 then
-    local memo = {}
-    local function solve(at, mask)
-      if mask == 2^n - 1 then return 0 end
-      local key = at .. ":" .. mask
-      if memo[key] then return memo[key].cost end
-      local best, nextStop = math.huge, nil
-      for j = 1, n do
-        local bit = 2^(j - 1)
-        if math.floor(mask / bit) % 2 == 0 then
-          local cost = matrix[at][j] + solve(j, mask + bit)
-          if cost < best then best, nextStop = cost, j end
-        end
-      end
-      memo[key] = {cost = best, nextStop = nextStop}
-      return best
-    end
-    solve(0, 0)
-    local at, mask = 0, 0
-    for _ = 1, n do
-      local j = memo[at .. ":" .. mask].nextStop
-      if not j then break end
-      order[#order + 1] = j; at, mask = j, mask + 2^(j - 1)
-    end
-  else
-    local seen, at = {}, 0
-    for _ = 1, n do
-      local best, nextStop = math.huge, nil
-      for j = 1, n do if not seen[j] and matrix[at][j] < best then best, nextStop = matrix[at][j], j end end
-      if not nextStop then break end
-      order[#order + 1] = nextStop; seen[nextStop], at = true, nextStop
-    end
-  end
-  local result, total, at, seen = {}, 0, 0, {}
-  for _, j in ipairs(order) do
-    result[#result + 1] = { stop = usable[j], seconds = matrix[at][j], steps = paths[at][j] }
-    total, at, seen[j] = total + matrix[at][j], j, true
-  end
-  for j, stop in ipairs(usable) do if not seen[j] then unresolved[#unresolved + 1] = stop end end
-  return result, unresolved, total, mode
+  for j,stop in ipairs(usable) do if best.seen:byte(j)==48 then unresolved[#unresolved+1]=stop end end
+  return result,unresolved,best.total,mode
 end

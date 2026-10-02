@@ -2,7 +2,7 @@
 ## Title: Waylaid Forever
 ## Notes: Crate costs, writ deliveries, personal scans and optional peer prices.
 ## Author: Warlune
-## Version: 0.14.2
+## Version: 0.14.8
 ## SavedVariables: WaylaidForeverDB
 ## SavedVariablesPerCharacter: WaylaidForeverCharDB
 ## OptionalDeps: ForeverWaylaid, Auctionator, Auc-Advanced, TomTom
@@ -14,6 +14,8 @@ Diagnostics.lua
 Pricing.lua
 Scanner.lua
 Peers.lua
+Telemetry.lua
+UpdateCheck.lua
 Crafting.lua
 Style.lua
 Accessibility.lua

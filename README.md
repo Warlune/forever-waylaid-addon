@@ -1,10 +1,10 @@
-# Waylaid Forever — v0.14.2 beta
+# Waylaid Forever — v0.14.8 beta
 
 A Classic-style crate and writ planner for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `WaylaidForever-0.14.2.zip` asset from Releases.
+1. Download the `WaylaidForever-0.14.8.zip` asset from Releases.
 2. Extract **both** folders from the ZIP into your Forever client's `Interface/AddOns` directory. `WaylaidForever` is the addon; `ForeverWaylaid` is a tiny saved-data compatibility loader that replaces the old addon entry point. Allow it to replace the old TOC. The main path is `Interface/AddOns/WaylaidForever/WaylaidForever.toc`.
 3. Restart WoW, enable **Waylaid Forever** and its **saved-data compatibility** entry for the first login on each character, and click the crate bubble beside the minimap or enter `/wf`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -12,6 +12,16 @@ A Classic-style crate and writ planner for **WoW Forever beta**, targeting inter
 Existing settings, prices, flight paths and delivery pins are copied from the old save the first time the renamed addon loads. The original save stays intact. Keep the compatibility entry enabled until you have logged into every character you want to migrate; after that it can be disabled. `/wf` is the new short command; `/fwl` and `/waylaid` still work.
 
 The addon has no bundled auction prices or external price service. Until you scan or receive opted-in peer prices, items remain unpriced. Existing personal scans survive upgrades. Auctionator, Auctioneer and TomTom are optional and are not bundled.
+
+**Optional diagnostics:** Settings > Diagnostics (or `/wf diagnostics`) offers
+automatic, off-by-default bug telemetry. The current receiving character is
+War Lune on Horde, Classic Beta PvP 2. Reports are bounded, expire, and use addon
+messages; they contain no raw chat or raw Lua error text. See
+the included `DIAGNOSTICS.md` for the fields and limits.
+
+**Update notices:** a separate version-only exchange with guild/group members
+shows one chat alert per newer version detected, saved across reloads. This is
+not a direct CurseForge check and does not enable diagnostic sharing.
 
 ## What is in this version
 
@@ -26,7 +36,7 @@ The addon has no bundled auction prices or external price service. Until you sca
 - The map shows every remaining walking and transport leg, with departure/arrival icons and **D1, D2…** delivery markers. Dotted gold guides show walking, blue lines show flights and purple lines show other transport. Fainter, wider-spaced walking dots indicate unverified direction-only links. Optional TomTom waypoint support.
 - A movable **Courier's Compass** that stays available when the ledger and main map close: direction arrow, distance, current writ, recipient information, and destination coordinates. Its down-arrow button unfolds a small map using the game's actual map artwork.
 - Route lines on the native minimap, clipped to its circular edge and adjusted for zoom and rotating-map settings. The compass automatically guides to the next flight master, boat/zeppelin dock, personal teleport or customer. It keeps the arrival target during a booked flight and recalculates from your current position every five seconds.
-- Flight points and directed routes learned by opening flight masters. Unlearned routes are not invented. Visit order is optimized for up to nine located stops, with a nearest-next estimate for larger sets. The warning icon beside Known flight points lists Eastern Kingdoms and/or Kalimdor when no recorded flight-master departure exists for that continent. Hover it for details; open a flight master's map there without buying a flight. A recorded visit does not mean every route on the continent is known.
+- Flight points, directed routes and ordered connecting stops are learned by opening flight masters. A connecting journey is priced from the sum of its flight-leg estimates with one boarding allowance. Its map line passes through the recorded connections, labeled stay aboard, while the compass targets the final landing. Older recorded hops can reconstruct an estimated itinerary; when the connecting stops are unknown, open the departure flight master to record its full preview. For known destinations with no departure scan, connections within an observed flight network are estimated and marked for confirmation at the flight master. A departure scan replaces these estimates. The planner compares delivery order together with remaining travel resources, including saving a hearth or teleport for a later stop. Walking at both ends, transfers, public transport, flight estimates, initial cooldowns and shared reagent counts are included. Larger rounds use a bounded search and retain a nearest-next baseline if it is better; these results are estimates rather than guaranteed optimal routes. Cooldown-based items are conservatively budgeted for one use per planned round and reevaluated on refresh. The warning icon beside Known flight points lists Eastern Kingdoms and/or Kalimdor when no recorded flight-master departure exists for that continent. Hover it for details; open a flight master's map there without buying a flight. A recorded visit does not mean every route on the continent is known.
 
 ## Buy or craft your cargo
 
@@ -34,7 +44,7 @@ The top **Goods: Buy at AH / Goods: Craft** button is independent of tooltip set
 
 Craft mode uses the website's 208 verified recipes and 143 raw materials. The selected bundle's required professions and highest skill ranks appear at the top, including specialization notes. The header shows the writ/crate's required item level from the catalogue; this is separate from a recipe's profession skill rank. Profession requirements compare your trained skill with the required rank: green when met, red with the missing points otherwise. Required character levels use the same colors and shortfall. These refresh on skill and level changes; unlearned professions are labeled, and unavailable readings stay unknown. High contrast keeps these comparisons in white with written status. Meeting a rank does not mean the recipe is learned. Unknown recipe ranks are explicitly labeled unverified. Each option includes a raw-material shopping list, bag counts and quantities still needed, vendor or auction sources, and an ordered crafting list with profession and skill requirements. Shared intermediate ingredients are combined before rounding to whole crafts. Variable yields use the guaranteed minimum; faction-only recipes are excluded for the other faction. Alternate root recipes are compared by stock availability and cost.
 
-Hover only the **picture** of a required good, reagent, crafted step, writ, or crate to see the normal in-game item tooltip. The faction theme follows your character: warm Horde tones or Alliance blue with a native crest. **Settings → Debug: preview Alliance appearance** switches the colors, crest, heading, compass accent and scribe immediately. This preview changes appearance only; prices, recipes, routes and peer sharing still use your real faction. Turn it off to restore your character's theme.
+Hover only the **picture** of a required good, reagent, crafted step, writ, or crate to see the normal in-game item tooltip. The faction theme follows your character: warm Horde tones or Alliance blue with a native crest.
 
 Craft costs value the full batch, including materials you already own; bag counts are shown separately. Vendor values are undiscounted base prices, and recipes are not assumed to be learned. These are planning lists: the addon does not craft, buy, or consume items for you. Gathered goods keep their purchase cost instead of inventing a recipe.
 

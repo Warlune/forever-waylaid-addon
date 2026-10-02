@@ -17,7 +17,7 @@ export function runtimeFiles(addon = 'WaylaidForever') {
   }
   const art = addon === 'WaylaidForever' ? ['AuctionScribes'] :
     ['WaylaidPets', 'PetScenesAlliance', 'PetScenesHorde', ...Array.from({length: 6}, (_, i) => `PetRoster${i+1}`)];
-  return [`${addon}.toc`, ...code, ...(addon === 'CompanionsForever' ? ['PET_GUIDE.md'] : []), ...art.map(name => `Art/${name}.tga`)];
+  return [`${addon}.toc`, ...code, ...(addon === 'CompanionsForever' ? ['PET_GUIDE.md'] : ['DIAGNOSTICS.md']), ...art.map(name => `Art/${name}.tga`)];
 }
 export function buildPackage(stage) {
   stage = resolve(stage);

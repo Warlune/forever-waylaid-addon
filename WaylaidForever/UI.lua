@@ -75,16 +75,35 @@ function F.LedgerEntries()
   return entries
 end
 
+local anchors={TOPLEFT=true,TOP=true,TOPRIGHT=true,LEFT=true,CENTER=true,RIGHT=true,BOTTOMLEFT=true,BOTTOM=true,BOTTOMRIGHT=true}
+local function validPosition(p)
+  return type(p)=="table" and anchors[p.point] and anchors[p.relativePoint or p.point]
+    and type(p.x)=="number" and p.x==p.x and math.abs(p.x)<1000000
+    and type(p.y)=="number" and p.y==p.y and math.abs(p.y)<1000000
+end
+function F.RestoreLedgerPosition(window)
+  local p=F.char.ledgerPosition
+  window:ClearAllPoints()
+  if validPosition(p)then window:SetPoint(p.point,UIParent,p.relativePoint or p.point,p.x,p.y)
+  else window:SetPoint("CENTER")end
+end
+function F.SaveLedgerPosition(window)
+  local point,_,relativePoint,x,y=window:GetPoint()
+  local p={point=point,relativePoint=relativePoint,x=x,y=y}
+  if validPosition(p)then F.char.ledgerPosition=p end
+end
 function F.BuildUI()
   local w=CreateFrame("Frame","WaylaidForeverFrame",UIParent,"BackdropTemplate");F.window=w
-  w:SetSize(1040,704);w:SetPoint("CENTER");w:SetFrameStrata("HIGH")
+  w:SetSize(1040,704);F.RestoreLedgerPosition(w);w:SetFrameStrata("HIGH")
   w:SetScale(math.min(1,(UIParent:GetWidth()-40)/1040,(UIParent:GetHeight()-40)/704))
   w:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8",edgeFile="Interface\\DialogFrame\\UI-DialogBox-Border",tile=true,tileSize=32,edgeSize=32,insets={left=10,right=10,top=10,bottom=10}})
   w:SetBackdropColor(unpack(S.Theme().bg))
   w:SetBackdropBorderColor(0.86,0.72,0.46,1)
   local backing=w:CreateTexture(nil,"BACKGROUND",nil,-8);backing:SetPoint("TOPLEFT",10,-10);backing:SetPoint("BOTTOMRIGHT",-10,10);backing:SetColorTexture(0.055,0.039,0.025,0.98)
   w:EnableMouse(true);w:SetMovable(true);w:SetClampedToScreen(true);w:RegisterForDrag("LeftButton")
-  w:SetScript("OnDragStart",w.StartMoving);w:SetScript("OnDragStop",w.StopMovingOrSizing)
+  w:SetScript("OnDragStart",w.StartMoving);w:SetScript("OnDragStop",function(self)
+    self:StopMovingOrSizing();F.SaveLedgerPosition(self)
+  end)
   local banner=w:CreateTexture(nil,"ARTWORK");banner:SetPoint("TOPLEFT",14,-14);banner:SetSize(1012,60);S.Accent(banner,0.32)
   local crest=w:CreateTexture(nil,"OVERLAY");crest:SetPoint("TOPLEFT",25,-18);crest:SetSize(58,58);crest:SetTexture(S.Theme().crest)
   F.banner,F.crest=banner,crest
@@ -112,7 +131,7 @@ function F.BuildUI()
   edit:HookScript("OnTextChanged",function(self)placeholder:SetShown(self:GetText()=="")end)
   F.search=edit
   F.routeModeBar=CreateFrame("Frame",nil,w);F.routeModeBar:SetPoint("TOPLEFT",24,-120);F.routeModeBar:SetSize(988,28)
-  F.routeModeHint=S.Text(F.routeModeBar,"Dotted walking directions • transport planning active",0,-7,980,"GameFontHighlightSmall",S.muted)
+  F.routeModeHint=S.Text(F.routeModeBar,F.routingBetaNotice,0,-7,980,"GameFontHighlightSmall",S.gold)
   F.tierButton=S.Button(F.filters,"Tier: All",308,0,160,function()F.tierIndex=F.tierIndex%#tiers+1;F.offset=0;F.Render()end)
   F.sortButton=S.Button(F.filters,"Sort: Best value",480,0,176,function()F.sortIndex=F.sortIndex%3+1;F.offset=0;F.Render()end)
   F.ownedButton=S.Button(F.filters,"Show: All",668,0,166,function()F.onlyOwned=not F.onlyOwned;F.offset=0;F.Render()end)
@@ -185,7 +204,8 @@ function F.BuildUI()
   F.versionLabel:ClearAllPoints();F.versionLabel:SetPoint("BOTTOMRIGHT",-27,18)
   F.versionLabel:SetJustifyH("RIGHT");F.versionLabel:SetMaxLines(1)
   F.settings=S.Panel(w,24,-221,990,415)
-  S.Text(F.settings,"Make the ledger your own",25,-18,620,"GameFontNormalLarge",S.gold)
+  S.Text(F.settings,"Make the ledger your own",25,-18,460,"GameFontNormalLarge",S.gold)
+  S.Button(F.settings,"Diagnostics",515,-14,200,F.ShowTelemetry)
   S.Button(F.settings,"Accessibility",740,-14,220,function()F.accessibilityView=true;F.Render()end)
   F.BuildAccessibility(w)
   S.Text(F.settings,"TOOLTIPS & PRICES",25,-57,400,"GameFontNormalSmall",S.muted)
@@ -200,7 +220,6 @@ function F.BuildUI()
   S.Check(F.settings,"Consider my learned flight routes",513,-170,"flights")
   S.Check(F.settings,"AH tooltips on unrelated items",23,-200,"generalAuctionTooltips")
   S.Check(F.settings,"Auto-hide extras with another AH addon",23,-230,"autoHideAuction")
-  S.Check(F.settings,"Debug: preview Alliance appearance",513,-200,"debugAlliance")
   F.auctionCompatibility=S.Text(F.settings,"",515,-239,440,"GameFontHighlightSmall",S.muted)
   S.Rule(F.settings,25,-268,934)
   local peerToggle=S.Check(F.settings,"Opt in: share scan prices with guild / party / raid",23,-279,"peerSharing")
@@ -219,7 +238,7 @@ function F.BuildUI()
   footer.scribe.art:ClearAllPoints();footer.scribe.art:SetPoint("BOTTOMRIGHT",0,0)
   footer:SetScript("OnUpdate",footer.scribe.animate)
   F.UpdateScanUI()
-  S.Text(F.settings,"Debug changes appearance only. Auto-hide affects our Scan tab and unrelated AH tooltips; Waylaid details remain.\nPeer prices are unverified and expire after 24 hours. Sharing sends observed prices, stock and scan times.",25,-354,920,"GameFontHighlightSmall",S.muted)
+  S.Text(F.settings,"Auto-hide affects our Scan tab and unrelated AH tooltips; Waylaid details remain.\nPeer prices are unverified and expire after 24 hours. Sharing sends observed prices, stock and scan times.",25,-354,920,"GameFontHighlightSmall",S.muted)
   w:EnableMouseWheel(true);w:SetScript("OnMouseWheel",function(_,delta)
     if F.detailPanel:IsMouseOver() and F.tab~="Settings" then F.ScrollDetails(delta);return end
     if F.tab~="Settings" then F.offset=math.max(0,math.min(F.lastPage or 0,(F.offset or 0)-delta*pageSize));F.Render()end
@@ -338,12 +357,14 @@ function F.RenderDetail(entry)
       local stop=entry.stop
       add(stop.ready and "Ready for delivery" or "Accepted • gather goods",(stop.npc or stop.deliveryText or "Recipient unknown").."\n"..F.DestinationText(stop.point))
       if entry.leg then
-        add("Travel plan","~"..math.ceil(entry.leg.seconds/60).." min • estimate")
+        add("Travel plan • beta","~"..math.ceil(entry.leg.seconds/60).." min • estimate\n"..F.routingBetaNotice)
         for _,step in ipairs(entry.leg.steps)do
           if step.mode~="Travel" then
             local detail=(step.from.name or "Current position").." → "..(step.to.name or F.DestinationText(step.to))
             local via=F.Travel.ViaText(step.detail)
             if via then detail=detail.."\n"..via end
+            local note=F.Route.FlightNote(step)
+            if note then detail=detail.."\n"..note end
             if step.detail and step.detail.boardingWait then detail=detail.."\nEstimated wait: ~"..math.ceil(step.detail.boardingWait/60).." min" end
             if step.detail and (step.detail.wait or 0)>1 then detail=detail.."\nCooldown: ~"..math.ceil(step.detail.wait/60).." min" end
             if step.mode=="Engineering teleport" then detail=detail.."\nEquip your transporter; malfunctions are possible." end

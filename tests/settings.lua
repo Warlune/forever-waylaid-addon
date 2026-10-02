@@ -25,11 +25,11 @@ assert(not F.HasAuctionScanner(),'Known disabled state wins over globals or load
 F.char.localPrices={['Test Realm:Horde']={[2840]={price=7}},['Test Realm:Alliance']={[2840]={price=99}}}
 local beforeScope=F.PersonalScanScope()
 F.db.settings.debugAlliance=true;F.ApplySettings()
-assert(F.Style.Faction()=='Alliance' and F.Style.Theme().crest:find('Alliance'))
-assert(F.Price(2840).price==7 and F.PersonalScanScope()==beforeScope,'Visual preview cannot select Alliance prices or scan scope')
+assert(F.Style.Faction()=='Horde' and F.Style.Theme().crest:find('Horde'),'Retired preview must not override actual faction')
+assert(F.Price(2840).price==7 and F.PersonalScanScope()==beforeScope,'Retired preview cannot select Alliance prices or scan scope')
 F.db.settings.debugAlliance=false;F.ApplySettings()
 assert(F.Style.Faction()=='Horde' and F.Style.Theme().crest:find('Horde'))
 C_AddOns,Auctionator,AucAdvanced=oldAddons,oldScanner,oldAuc
 UnitGUID,F.char.localPrices=oldGUID,oldPrices
 F.db.settings.debugAlliance,F.db.settings.autoHideAuction=oldDebug,oldHide
-print('PASS: auction addon registry, disabled installs, helper exclusions, auto-hide and cosmetic-only Alliance preview')
+print('PASS: auction addon registry, disabled installs, helper exclusions, auto-hide and retired Alliance preview')

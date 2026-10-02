@@ -31,7 +31,7 @@ function S.MinimumTextSize()
   return 0
 end
 function S.Faction()
-  return F.db and F.db.settings.debugAlliance and "Alliance" or UnitFactionGroup("player")
+  return UnitFactionGroup("player")
 end
 function S.ApplyTheme()
   local theme=S.Theme()

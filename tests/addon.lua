@@ -43,7 +43,7 @@ C_QuestLog={IsOnQuest=function()return false end,IsComplete=function()return fal
 C_Item={GetItemCount=function()return 0 end}
 Enum={}
 local function load(name) assert(loadfile('WaylaidForever/'..name..'.lua'))('WaylaidForever',F) end
-for _,name in ipairs({'Catalog','Recipes','Core','Diagnostics','Pricing','Scanner','Peers','Crafting','Style','Accessibility','AuctionScanUI','Geometry','Routing','TransportData','Travel','Tracking','Tooltips','UI','Journey','Map','Navigator'}) do load(name) end
+for _,name in ipairs({'Catalog','Recipes','Core','Diagnostics','Pricing','Scanner','Peers','Telemetry','UpdateCheck','Crafting','Style','Accessibility','AuctionScanUI','Geometry','Routing','TransportData','Travel','Tracking','Tooltips','UI','Journey','Map','Navigator'}) do load(name) end
 assert(F.Roads==nil and F.roadData==nil, "Advanced road engine must not be loaded")
 F.events.scripts.OnEvent(nil,'ADDON_LOADED','WaylaidForever')
 F.events.scripts.OnEvent(nil,'PLAYER_LOGIN')
@@ -240,4 +240,13 @@ assert(loadfile('tests/security-memory.lua'))(F,companions)
 
 assert(loadfile('tests/crate-details.lua'))(F)
 assert(loadfile('tests/rename.lua'))(F,companions)
+assert(loadfile('tests/flight-network.lua'))(F)
+assert(loadfile('tests/route-engine.lua'))(F)
+assert(loadfile('tests/connecting-flights.lua'))(F)
+assert(loadfile('tests/memory-performance.lua'))(F)
+assert(loadfile('tests/mock-routes.lua'))(F)
+assert(loadfile('tests/route-coverage.lua'))(F)
+assert(loadfile('tests/telemetry.lua'))(F)
+assert(loadfile('tests/update-check.lua'))(F)
+assert(loadfile('tests/upgrade-preservation.lua'))(F)
 print("ALL ADDON TESTS PASSED")

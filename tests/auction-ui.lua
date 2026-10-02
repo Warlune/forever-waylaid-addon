@@ -1,14 +1,14 @@
 local F=...
 do
-  local oldColor=CreateColor
+  local oldColor,oldFaction=CreateColor,UnitFactionGroup
   CreateColor=function(r,g,b,a)return {r,g,b,a}end
   local ends
   local texture={SetAlpha=function()end,SetColorTexture=function()end,
     SetGradient=function(_,_,left,right)ends={left,right}end}
   F.Style.Accent(texture,0.32)
-  F.db.settings.debugAlliance=true;F.Style.Accent(texture)
+  UnitFactionGroup=function()return 'Alliance'end;F.Style.Accent(texture)
   assert(ends[1][4]==0.32 and ends[2][4]==0.32,'Both gradient endpoints retain opacity after a faction change')
-  F.db.settings.debugAlliance=false;F.Style.Accent(texture)
+  UnitFactionGroup=oldFaction;F.Style.Accent(texture)
   assert(ends[1][4]==0.32 and ends[2][4]==0.32,'Returning to Horde retains opacity')
   CreateColor=oldColor
 end
@@ -81,10 +81,11 @@ F.db.settings.reduceMotion=true
 ui.page.scripts.OnUpdate(nil,10)
 assert(coords[1]==0.25,'Reduced motion holds the scribe pose')
 F.db.settings.reduceMotion=false
-F.db.settings.debugAlliance=true;F.Style.ApplyTheme()
-assert(coords[1]==0.25 and coords[3]==0.5 and UnitFactionGroup('player')=='Horde','Preview selects the original human row without changing faction or pose')
-F.db.settings.debugAlliance=false;F.Style.ApplyTheme()
-assert(coords[3]==0,'Turning the preview off restores the original orc')
+local oldFaction=UnitFactionGroup
+UnitFactionGroup=function()return 'Alliance'end;F.Style.ApplyTheme()
+assert(coords[1]==0.25 and coords[3]==0.5,'Alliance selects the original human row without changing pose')
+UnitFactionGroup=oldFaction;F.Style.ApplyTheme()
+assert(coords[3]==0,'Horde uses the original orc')
 ui.start.scripts.OnClick();assert(calls==1 and F.GetScanProgress().phase=='waiting')
 F.scanFrame.scripts.OnEvent(nil,'REPLICATE_ITEM_LIST_UPDATE')
 F.scanFrame.scripts.OnUpdate(nil,0.25)
