@@ -1,6 +1,6 @@
-# Waylaid companions — 0.13.11 preview
+# Forever Companions — 0.1.0 beta
 
-Open **Pets → Adopt**, choose a adoption crate, then select the new companion in the stable and click **Equip**. Browsing a pet does not change the equipped companion. The first living companion is equipped automatically. The compass and large window share the same pet and battle.
+Open **/fcp → Adopt**, choose an adoption crate, then select the new companion in the stable and click **Equip**. Browsing a pet does not change the equipped companion. The first living companion is equipped automatically. The compact and large windows share the same pet and battle.
 
 ## Adoption crates and collection
 

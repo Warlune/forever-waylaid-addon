@@ -1,4 +1,4 @@
-local F=...
+local F,C=...
 assert(F.Roads==nil and F.roadData==nil,'No advanced road tables or caches at login')
 local from={instance=1,wx=0,wy=0,mapID=1454}
 local to={instance=1,wx=700,wy=0,mapID=1411}
@@ -31,7 +31,7 @@ quest=202;draw();assert(pin.scripts.OnClick==click,'Redrawing must reuse pin han
 click(pin);assert(selected==202,'Reused handler must follow the current pin, not a captured old writ')
 F.ClearRouteOverlay(overlay);assert(rawget(pin,'routeStop')==nil and rawget(pin,'pinText')==nil)
 F.DisplayRoute,F.TrackDelivery=oldDisplay,oldTrack
-local P=F.Pets;local sharing=P.state.share
+local P=C.Pets;local sharing=P.state.share
 P.state.share=true
 local invalid={'','|cffff0000','\n','3,1,1,1,0,0','3,1,1,1,0,0,0,999','3,101,1,1,0,0,0','3,1,6,1,0,0,0',string.rep('9',181)}
 for _,message in ipairs(invalid)do

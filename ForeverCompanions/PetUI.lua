@@ -1,6 +1,6 @@
 local _,F=...
 local P,S=F.Pets,F.Style
-local atlas="Interface\\AddOns\\ForeverWaylaid\\Art\\WaylaidPets"
+local atlas="Interface\\AddOns\\ForeverCompanions\\Art\\WaylaidPets"
 local icons={food="INV_Misc_Food_14",toy="INV_Misc_Bone_01",rest="Spell_Nature_Sleep",medicine="INV_Potion_51",adopt="INV_Egg_02",next="Ability_Hunter_BeastCall",fight="Ability_DualWield",pause="Spell_Frost_Stun",open="INV_Misc_Book_09",inspect="Ability_Hunter_EagleEye"}
 local function text(parent,value,x,y,width,height,color)
   local t=S.Text(parent,value,x,y,width,"GameFontHighlightSmall",color or S.gold);t:SetHeight(height);return t
@@ -11,7 +11,7 @@ end
 local function showPet(art,pet,flip)
   art:SetShown(not not pet);if not pet then return end
   local entry=F.PetData.species[pet.species];local grid=entry.atlas==0 and 2 or 4
-  art:SetTexture(entry.atlas==0 and atlas or "Interface\\AddOns\\ForeverWaylaid\\Art\\PetRoster"..entry.atlas,"CLAMP","CLAMP","NEAREST")
+  art:SetTexture(entry.atlas==0 and atlas or "Interface\\AddOns\\ForeverCompanions\\Art\\PetRoster"..entry.atlas,"CLAMP","CLAMP","NEAREST")
   local col=entry.cell%grid;local row=math.floor(entry.cell/grid)
   art:SetTexCoord((col+(flip and 1 or 0))/grid,(col+(flip and 0 or 1))/grid,row/grid,(row+1)/grid)
   art:SetDesaturated(pet.deadAt~=nil)
@@ -216,7 +216,7 @@ end
 local function renderStage(f,pet,tower)
   f.tower=tower;f.needsPet=pet or false
   f.victory:ClearAllPoints();f.victory:SetPoint("CENTER",f,"CENTER")
-  f.bg:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\PetScenes"..S.Faction()..".tga","CLAMP","CLAMP","NEAREST")
+  f.bg:SetTexture("Interface\\AddOns\\ForeverCompanions\\Art\\PetScenes"..S.Faction()..".tga","CLAMP","CLAMP","NEAREST")
   f.bg:SetTexCoord(tower and 0.5 or 0,tower and 1 or 0.5,0.2,0.8);f.bg:SetAlpha(S.HighContrast() and 0.25 or 1)
   local b=P.state.battle;local result=tower and P.CurrentVictory()
   local r=result and result.round or P.lastRound
@@ -294,7 +294,6 @@ function P.BattleVisible()
 end
 function P.ToggleCompass(show)
   F.char.navPets=show==nil and not F.char.navPets or show
-  if F.char.navPets then F.char.navExpanded=false;F.db.settings.navigator=true end
   F.UpdateNavigator();P.Render()
 end
 function P.BuildCompass(parent)
@@ -355,12 +354,13 @@ function P.BuildUI()
   w:ClearAllPoints();w:SetPoint("CENTER");w:SetFrameStrata("DIALOG");w:SetFrameLevel(100);w:SetToplevel(true);w:SetClampedToScreen(true);w:SetMovable(true);w:EnableMouse(true);w:RegisterForDrag("LeftButton")
   w:SetScript("OnDragStart",w.StartMoving);w:SetScript("OnDragStop",w.StopMovingOrSizing)
   local close=CreateFrame("Button",nil,w,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-3,-3);close:SetScript("OnClick",function()w:Hide()end)
-  text(w,"WAYLAID COMPANIONS",22,-16,680,26)
+  text(w,"FOREVER COMPANIONS",22,-16,560,26)
+  S.Button(w,"Settings",620,-13,115,F.OpenSettings):SetHeight(24)
   for i,mode in ipairs({"collection","tower","peers"})do local value=mode
     S.Button(w,({"Camp & stable","Tower","Inspect pets"})[i],20+(i-1)*158,-52,148,function()P.mode=value;P.page=1;P.Render()end)
   end
   S.Button(w,"Store",526,-52,80,function()P.OpenStore()end)
-  S.Button(w,"Compass view",616,-52,140,function()w:Hide();P.ToggleCompass(true)end)
+  S.Button(w,"Small view",616,-52,140,function()w:Hide();P.ToggleCompass(true)end)
   w.scene=stage(w,20,-94,456,272)
   w.health=meter(w,20,-381,220,"",{0.25,0.65,0.4});w.food=meter(w,256,-381,220,"",{0.7,0.53,0.2})
   frameHealth(w.health)

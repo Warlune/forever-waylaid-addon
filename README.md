@@ -1,10 +1,10 @@
-# Forever Waylaid — v0.13.11 preview
+# Forever Waylaid — v0.14.0 beta
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.13.11.zip` asset from Releases.
+1. Download the `ForeverWaylaid-0.14.0.zip` asset from Releases.
 2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
 3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -26,21 +26,13 @@ The addon has no bundled auction prices or external price service. Until you sca
 - Route lines on the native minimap, clipped to its circular edge and adjusted for zoom and rotating-map settings. The compass automatically guides to the next flight master, boat/zeppelin dock, personal teleport or customer. It keeps the arrival target during a booked flight and recalculates from your current position every five seconds.
 - Flight points and directed routes learned by opening flight masters. Unlearned routes are not invented. Visit order is optimized for up to nine located stops, with a nearest-next estimate for larger sets. The warning icon beside Known flight points lists Eastern Kingdoms and/or Kalimdor when no recorded flight-master departure exists for that continent. Hover it for details; open a flight master's map there without buying a flight. A recorded visit does not mean every route on the continent is known.
 
-## Waylaid companions (new preview)
+## Optional companion game
 
-Click **Pet** in the compass header for the compact game, or **Pets** in the ledger (`/fwl pets`) for the larger camp, stable and inspection screen. Horde and Alliance each have their own pixel camp and tower scenes; the Alliance debug preview switches these too. **Open** and **Compass view** move between the two sizes. The route arrow remains above the compact game, which shares the expandable area with the route map.
+The pet game is now **Forever Companions**, a separate addon with its own download, settings and saved data. Forever Waylaid works without it and no longer loads pet code or artwork.
 
-Collect **100 Warcraft species**, including 16 raid-boss companions. Open **Adopt** for six adoption crates costing 25–100 tokens with exact rarity odds. Select a pet to preview it; click **Equip** to make it your traveling companion. Four care icons handle feeding, play, rest and healing; hover for descriptions, supply counts and costs. If an item runs out, clicking its care icon buys one with pet tokens and uses it. No real gold is involved. A free common rescue is available when no living pets remain. Earn two tokens per five minutes online with a living equipped pet, and more from tower victories and boss encounters. The Store sells treats, toys and herbs. Eligible personal NPC kills have a 1% treat chance, capped at one per 30 minutes; first tower clears have a 10% chance. Earned dungeon adoption crates open free. See the [companion guide](ForeverWaylaid/PET_GUIDE.md) for all adoption crate odds, abilities, income and drop rules.
+Install both addons to keep **Pets** in the ledger and **Pet** in the compass as shortcuts. The compact pet window is now independently movable, so it can stay open alongside the route map. `/fwl pets` also opens the standalone game when installed.
 
-**Death is permanent.** Tower defeat or prolonged starvation kills the active pet, retaining its level and active lifespan in the memorial. Stabled and offline pets do not age or lose needs. The stable holds 100 living pets; the stable and memorial together hold 512 records.
-
-The tower has 100 floors, unlocked one at a time, with a boss every ten floors. Floors 1–33 have one enemy, 34–66 have two, and 67–100 have three. Pets have HP, attack, armor and speed, with speed determining turn order. Rare and higher pets also have family abilities; Common and Uncommon pets rely on basic actions and stats. Select a floor and press the sword **Fight** icon to watch one automated battle: your companion attacks, guards heavy blows and uses eligible non-healing specials. Healing is manual: click Heal to queue a ready healing ability, otherwise one herb, otherwise a 4-token heal, for its next turn. Sprites lunge, hits show damage and health bars track both fighters. Defeated enemies fade away, then a victory panel shows XP and tokens. Completed floors are marked for the equipped pet and offer Replay; Next floor selects a new challenge without starting it. **Pause** remains available; the old Retreat button is now **Heal**. Neither herbs nor tokens are spent automatically. Combat pauses when neither tower view is visible. It never starts the next floor automatically or fast-forwards after a loading screen. A reload retreats with damage and supply costs retained. Reduced motion removes lunges and hit flashes but keeps health and damage information.
-
-Tower victories earn pet XP; repeated floors give reduced XP. NPC killing blows give 3 pet XP, player killing blows give 10, and your combat pet's kills count. Enemies must be **within five levels of your character and not gray**. The addon observes readable target/focus/mouseover levels and uses the client's gray-difficulty range. Unknown, stale (over 60 seconds), skull and restricted levels or identities give no XP. Only a living active companion gains XP, capped at pet level 100. Combat gains are limited to 60 XP per minute and the same target once per five minutes. The supported standalone `PARTY_KILL` event is used, never the restricted combat log. Live Forever kill-XP testing remains necessary.
-
-**Inspect pets** has a separate, default-off sharing toggle. Browse guild/group pets alphabetically, or target an opted-in addon user and click **Inspect target**. Both players need this version and sharing enabled; normal game messaging restrictions apply. Shared portraits include rarity, level, stats, active lifespan and tower progress. Records expire after about ten minutes. There are no rankings, cheating flags or obfuscated code. Unreadable saves are backed up and malformed messages ignored.
-
-Original generated artwork, export details and prompts are documented in `ForeverWaylaid/Art/PETS.md` and `ForeverWaylaid/Art/PET_SCENES.md`. Text sizing, high contrast and faction previews apply to these panels. Gameplay balance and live layout testing remain ongoing.
+**Upgrading an existing pet collection:** install Forever Waylaid 0.14.0 and Forever Companions 0.1.0, then log into each character with both enabled once. The companion addon copies that character's pets, tokens, supplies and tower progress into its own save. The original Waylaid data is left intact. Afterwards either addon can be disabled independently. See the [Forever Companions installation and migration guide](ForeverCompanions/README.md).
 
 ## Buy or craft your cargo
 
@@ -160,7 +152,7 @@ When a city trip cannot attach to the mapped streets, the fallback aims through 
 
 **Simple writ navigation:** advanced road routing is disabled, including Orgrimmar. The street graph, road data and safer/fastest controls are not loaded. Walking uses direct dotted bearings to the next transport or delivery; boat, zeppelin, flight and eligible personal-teleport planning remain active. Real faction restrictions on capital destinations and transport are retained. Old safer/fastest settings are cleared on login.
 
-**Memory and installation size:** the runtime package excludes source PNGs, retired scribe textures and archived road files; their source remains in this repository. Existing artwork keeps the same resolution. The closed ledger skips item-list rebuilding, and map pins reuse their event handlers. Run `/fwl memory` for the client's current Lua memory report and stored-record counts. This reports Lua memory, not texture/video memory or disk size. It does not force garbage collection or erase saved prices, flight paths or pets.
+**Memory and installation size:** the runtime package excludes source PNGs, retired scribe textures and archived road files; their source remains in this repository. Existing artwork keeps the same resolution. The closed ledger skips item-list rebuilding, and map pins reuse their event handlers. Run `/fwl memory` for the client's current Lua memory report and stored-record counts. This reports Lua memory, not texture/video memory or disk size. It does not force garbage collection or erase saved prices, flight paths or legacy pet saves.
 
 **Route limits:** direct walking bearings can cross walls, mountains or water on the map; they are directions, not collision-safe routes. Walking uses a base running-speed estimate. Flight, boat and zeppelin timings are approximate and missing flight data can make the route slower. Transport endpoints were checked against published Forever build 1.60.1.70124 data; complete journeys still need in-game testing. Navigation requires your clicks; the addon never moves your character, buys a flight, casts a spell or consumes an item for you.
 

@@ -203,7 +203,7 @@ function P.Packet()
 end
 function P.InspectTarget()
   if not P.state.share then return false,"Enable pet sharing before inspecting another player." end
-  if not UnitIsPlayer or not UnitIsPlayer("target") or (UnitIsUnit and UnitIsUnit("target","player")) then return false,"Target another player with Forever Waylaid." end
+  if not UnitIsPlayer or not UnitIsPlayer("target") or (UnitIsUnit and UnitIsUnit("target","player")) then return false,"Target another player with Forever Companions." end
   local name=GetUnitName and GetUnitName("target",true) or UnitName("target")
   if not name or name=="" or not P.RegisterSharing() then return false,"Pet inspection is unavailable." end
   if P.nextInspect and F.Now()<P.nextInspect then return false,"Wait a few seconds before inspecting again." end
@@ -256,6 +256,7 @@ events:RegisterEvent("PLAYER_TARGET_CHANGED")
 events:RegisterEvent("PLAYER_FOCUS_CHANGED")
 events:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 events:SetScript("OnEvent",function(_,event,p,message,channel,sender)
+  if not P.state then return end
   if event=="PARTY_KILL" then
     P.CombatKill(event,p,message)
   elseif event=="PLAYER_TARGET_CHANGED" then P.ObserveEnemy("target")
@@ -276,6 +277,6 @@ events:SetScript("OnUpdate",function(_,dt)
     for sender,entry in pairs(P.peers)do if F.Now()-entry.seen>600 then P.peers[sender]=nil end end
     for sender,when in pairs(P.replyTimes)do if F.Now()-when>60 then P.replyTimes[sender]=nil end end
   end
-  if P.pendingInspect and F.Now()>P.pendingInspect.expires then P.pendingInspect=nil;P.notice="No pet reply. Both players need this version and pet sharing enabled." end
+  if P.pendingInspect and F.Now()>P.pendingInspect.expires then P.pendingInspect=nil;P.notice="No pet reply. Both players need compatible companions and pet sharing enabled." end
   if P.Render then P.Render()end
 end)

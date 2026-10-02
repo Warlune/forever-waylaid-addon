@@ -167,7 +167,7 @@ P.SetSharing(false);P.Share();P.Receive('ASK3','WHISPER','Off');assert(sends==be
 C_ChatInfo,IsInGuild,IsInGroup,IsInRaid=oldChat,oldGuild,oldGroup,oldRaid
 UnitIsPlayer,UnitIsUnit,GetUnitName=oldIsPlayer,oldIsUnit,oldGetName
 P.window=nil;P.BuildUI();P.window:Show()
-assert(F.window.frameStrata=='HIGH' and P.window.frameStrata=='DIALOG','Pet window renders above every ledger child')
+assert(P.window.frameStrata=='DIALOG','Standalone pet window uses dialog strata')
 assert(P.window.mouseEnabled and P.window.scene.bg.drawLayer=='BORDER' and P.window.scene.pet.drawLayer=='ARTWORK','Scene lies above panel fill and below sprites')
 local oldPreview=F.db.settings.debugAlliance
 local background
@@ -182,7 +182,7 @@ assert(P.window.social.text.text:find('Alpha',1,true),'Pet viewer sorts by name,
 P.page=2;P.Render();assert(P.window.social.text.text:find('Zulu',1,true),'Every shared pet can be inspected')
 P.SetSharing(false);P.Render();assert(not P.window.scene.pet.shown,'Opt-out hides cached portraits')
 local oldExpanded,oldPets=F.char.navExpanded,F.char.navPets
-P.ToggleCompass(true);assert(F.char.navPets and not F.char.navExpanded and P.mini.shown and not F.compass.map.shown)
+P.ToggleCompass(true);assert(F.char.navPets and P.mini.shown and F.compass.shown,'Independent compact window opens')
 P.window:Hide();P.Render();assert(P.mini.stats.text:find('Lv',1,true),'Compact game renders while large window is closed')
 P.miniMode='care';P.Render();local oldFood=P.Active().food;P.Active().food=50;P.mini.care[1].scripts.OnClick();assert(P.Active().food==85,'Compass care uses the same active pet')
 P.Active().food=oldFood
@@ -228,7 +228,7 @@ for i=1,16 do P.AdvanceBattle(0.1,true)end;assert(b.turn==1 and P.lastRound,'Vis
 P.BattleAction('retreat')
 
 P.mini.scene.scripts.OnUpdate(P.mini.scene,0.1)
-F.compass.expand.scripts.OnClick();assert(F.char.navExpanded and not F.char.navPets and not P.mini.shown and F.compass.map.shown,'Map and pet switch without covering route')
+P.ToggleCompass(false);assert(not F.char.navPets and not P.mini.shown and not F.compass.shown,'Compact game closes independently')
 F.char.navExpanded,F.char.navPets=oldExpanded,oldPets;F.UpdateNavigator()
 -- Inspect supports all new species and derives the same family stats.
 P.SetSharing(true);P.Receive('3,100,4,50,100,20,30','PARTY','BossOwner')
