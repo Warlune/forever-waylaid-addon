@@ -1,23 +1,25 @@
-# Forever Companions — v0.1.0 beta
+# Companions Forever — v0.1.1 beta
 
 A standalone pixel companion game for WoW Forever. Adopt Warcraft creatures, keep them fed and happy, and climb a 100-floor tower together. No other addon is required.
 
 ## Install and open
 
-1. Extract `ForeverCompanions-0.1.0.zip` into your Forever client's `Interface/AddOns` directory. The file must be at `Interface/AddOns/ForeverCompanions/ForeverCompanions.toc`.
-2. Restart the game client so it discovers the new addon, then enable **Forever Companions**.
-3. Click its paw icon beside the minimap or use `/fcp` (also `/companions`). Right-click the icon or use `/fcp small` for a movable compact window.
-4. Use **Settings** in the large window or `/fcp settings` for separate window sizes, minimum text size, high contrast, reduced motion and Alliance artwork preview. `/fcp reset` restores the compact window's position.
+1. Extract **both** folders in `CompanionsForever-0.1.1.zip` into your Forever client's `Interface/AddOns` directory. `CompanionsForever` is the game. `ForeverCompanions` is its tiny saved-data compatibility loader; allow it to replace the old TOC. The main file is `Interface/AddOns/CompanionsForever/CompanionsForever.toc`.
+2. Restart the game client so it discovers the new addon, then enable **Companions Forever** and its **saved-data compatibility** entry.
+3. Click its paw icon beside the minimap or use `/cf` (also `/companions`). Right-click the icon or use `/cf small` for a movable compact window.
+4. Use **Settings** in the large window or `/cf settings` for separate window sizes, minimum text size, high contrast, reduced motion and Alliance artwork preview. `/cf reset` restores the compact window's position.
 
-## Bring your existing Waylaid pets
+## Bring your existing pets
 
-**Before starting a new stable**, update Forever Waylaid to **0.14.0 or newer** and enable both addons once on each character that has pets. An empty companion save imports the character's collection automatically, including equipped pet, levels, health, needs, age, memorials, tokens, inventory, adoption crates, tower progress and reward cooldowns. An interrupted tower battle ends as a retreat, just as on a normal reload; damage remains.
+If you already played the standalone **Forever Companions 0.1.0**, the included compatibility loader reads that save. **Companions Forever** copies it once into `CompanionsForeverDB` and `CompanionsForeverCharDB`, including your pet collection, equipped pet, health, needs, age, memorials, tokens, supplies, tower progress and settings. This newer standalone save takes priority over older pets bundled with Waylaid. Original saves are never edited or removed by the importer.
 
-The import deep-copies the save and never edits or removes the original `ForeverWaylaidCharDB.pets`. New progress is saved only in `ForeverCompanionsCharDB`; account-wide appearance preferences are copied once into `ForeverCompanionsDB` and then remain separate. Once imported, Forever Waylaid can be disabled or removed. Keep a backup of your WTF folder before changing installations.
+If your pets are still in the combined Waylaid addon, also install **Waylaid Forever 0.14.1** with its included compatibility folder. Enable the two main addons and their saved-data compatibility entries once on each character. The pet game imports the old collection if it does not have a current stable. New saves take priority on every subsequent login, so progress cannot be rolled back by an older copy.
 
-If you already started a new stable before enabling Waylaid, it will **not** be overwritten automatically. In companion Settings, **Import old Waylaid pets** explains the replacement and asks for confirmation. It saves the current stable to `ForeverCompanionsCharDB.beforeLegacyImport` first. Import is one-time per character, so later reloads cannot roll back your progress. An unreadable imported save is preserved in `petQuarantine` for recovery.
+An interrupted tower battle ends as a retreat, as on a normal reload; damage remains. If you already started a new stable before enabling the old save, it will not be replaced automatically. **Import old Waylaid pets** in Settings asks for confirmation and backs up the current stable to `beforeLegacyImport` before copying it. Unreadable pet saves remain available in `petQuarantine`.
 
-WoW cannot expose another disabled addon's saved variables to this addon. If no legacy save is found, enable updated Waylaid on the original character and log in again. Old bundled Waylaid versions (0.13.x) must be updated or disabled; Forever Companions pauses initialization alongside them to avoid two pet engines running together.
+Keep compatibility entries enabled until you have logged into every character you want to migrate. They can then be disabled. They contain no pet or delivery gameplay. Do not keep old versions of their TOCs: the renamed addons refuse to start alongside an old running engine. WoW only loads a disabled addon's data when its compatibility entry is enabled.
+
+`/cf` is the new short command. `/fcp` and `/companions` remain available for existing macros. Appearance settings are now independent from Waylaid.
 
 ## Playing
 
@@ -36,7 +38,7 @@ Original generated artwork, export details and prompts are documented in `Art/PE
 
 ## Optional Waylaid shortcuts
 
-With updated Forever Waylaid also enabled, its Pets button and `/fwl pets` open this addon; its compass Pet button toggles this addon's compact window. The two windows can be moved and used independently. Neither addon is a required dependency of the other. Pet sharing remains opt-in and uses the existing peer protocol.
+With updated Waylaid Forever also enabled, its Pets button and `/wf pets` open this addon; its compass Pet button toggles this addon's compact window. The two windows can be moved and used independently. Neither addon is a required dependency of the other. Pet sharing remains opt-in and uses the existing peer protocol.
 
 ## Beta testing
 

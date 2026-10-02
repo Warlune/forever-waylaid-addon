@@ -1,17 +1,17 @@
 local waylaid=...
-local oldAccount,oldCharacter=ForeverWaylaidDB,ForeverWaylaidCharDB
+local oldAccount,oldCharacter=WaylaidForeverDB,WaylaidForeverCharDB
 local function loadAddon()
   local C={}
   for _,name in ipairs({'Core','Style','PetData','Pets','PetProgression','PetUI','Desktop'})do
-    assert(loadfile('ForeverCompanions/'..name..'.lua'))('ForeverCompanions',C)
+    assert(loadfile('CompanionsForever/'..name..'.lua'))('CompanionsForever',C)
   end
   return C
 end
 -- Standalone login must work with no Waylaid save, UI or namespace.
-ForeverWaylaidDB=nil;ForeverWaylaidCharDB=nil
-ForeverCompanionsDB=nil;ForeverCompanionsCharDB=nil
+WaylaidForeverDB=nil;WaylaidForeverCharDB=nil
+CompanionsForeverDB=nil;CompanionsForeverCharDB=nil
 local C=loadAddon()
-C.events.scripts.OnEvent(nil,'ADDON_LOADED','ForeverCompanions')
+C.events.scripts.OnEvent(nil,'ADDON_LOADED','CompanionsForever')
 C.events.scripts.OnEvent(nil,'PLAYER_LOGIN')
 assert(C.ready and C.char~=waylaid.char and C.db~=waylaid.db)
 assert(C.Pets.state.tokens==25 and #C.Pets.state.pets==0)
@@ -21,9 +21,9 @@ C.Pets.state.tokens=93;C.Pets.state.inventory.food=7;C.Pets.state.packs[2]=1
 C.Pets.state.share=true
 local legacy=C.char.pets
 -- Import uses a deep copy, preserving every field without advancing the old engine.
-ForeverWaylaidDB={settings={textSize=16,highContrast=true,peerSharing=true}}
-ForeverWaylaidCharDB={pets=legacy}
-ForeverCompanionsDB=nil;ForeverCompanionsCharDB=nil
+WaylaidForeverDB={settings={textSize=16,highContrast=true,peerSharing=true}}
+WaylaidForeverCharDB={pets=legacy}
+CompanionsForeverDB=nil;CompanionsForeverCharDB=nil
 C=loadAddon();C.Initialize()
 local imported=C.Pets.Active()
 assert(imported~=pet and imported.level==19 and imported.best==17 and imported.xp==8 and imported.health==62)
@@ -34,22 +34,22 @@ imported.level=20;C.Pets.state.tokens=81;C.Initialize()
 assert(C.Pets.Active().level==20 and C.Pets.state.tokens==81 and pet.level==19 and legacy.tokens==93,'Reload never re-imports or edits the source')
 assert(not C.ImportLegacy(true),'One-time import cannot roll back earned progress')
 -- Installing standalone first does not authorize replacing that new progress later.
-ForeverCompanionsDB=nil;ForeverCompanionsCharDB=nil;ForeverWaylaidCharDB=nil
+CompanionsForeverDB=nil;CompanionsForeverCharDB=nil;WaylaidForeverCharDB=nil
 C=loadAddon();C.Initialize();assert(C.Pets.Rescue());C.Pets.Active().level=5
 local started=C.char.pets
-ForeverWaylaidCharDB={pets=legacy};C.Initialize()
+WaylaidForeverCharDB={pets=legacy};C.Initialize()
 assert(C.char.pets==started and not C.char.legacyImportedAt and not C.ImportLegacy(false))
 assert(C.ImportLegacy(true));assert(C.Pets.Active().level==19)
 assert(C.char.beforeLegacyImport~=started and C.char.beforeLegacyImport.pets[1].level==5)
 -- Old combined releases must not run a second companion engine alongside this one.
-local oldLoaded,oldMarker=IsAddOnLoaded,ForeverWaylaidCompanionsSplit
-IsAddOnLoaded=function(name)return name=='ForeverWaylaid'end;ForeverWaylaidCompanionsSplit=nil
+local oldLoaded,oldMarker=IsAddOnLoaded,WaylaidForeverLegacyLoader
+IsAddOnLoaded=function(name)return name=='ForeverWaylaid'end;WaylaidForeverLegacyLoader=nil
 local blocked=loadAddon();blocked.Initialize()
 assert(blocked.blocked and not blocked.ready and not blocked.Pets.state)
 assert(pcall(blocked.Pets.events.scripts.OnEvent,nil,'PARTY_KILL','me','enemy'))
-IsAddOnLoaded=oldLoaded;ForeverWaylaidCompanionsSplit=oldMarker
-ForeverWaylaidDB=oldAccount;ForeverWaylaidCharDB=oldCharacter
-ForeverCompanions=C
+IsAddOnLoaded=oldLoaded;WaylaidForeverLegacyLoader=oldMarker
+WaylaidForeverDB=oldAccount;WaylaidForeverCharDB=oldCharacter
+CompanionsForever=C
 C.events.scripts.OnEvent(nil,'PLAYER_LOGIN')
 C.db.settings.textSize=0;C.db.settings.highContrast=false
 local wasExpanded=waylaid.char.navExpanded

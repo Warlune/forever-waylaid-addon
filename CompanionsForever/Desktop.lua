@@ -26,13 +26,13 @@ function F.BuildDesktop()
     local y=self:GetTop()*scale-UIParent:GetHeight()
     F.char.petPosition={x=x,y=y}
   end)
-  S.Text(c,"FOREVER COMPANIONS",12,-12,250,"GameFontNormalSmall",S.gold)
+  S.Text(c,"COMPANIONS FOREVER",12,-12,250,"GameFontNormalSmall",S.gold)
   local close=CreateFrame("Button",nil,c,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-1,-1)
   close:SetScript("OnClick",function()P.ToggleCompass(false)end)
   P.BuildCompass(c);P.mini:ClearAllPoints();P.mini:SetPoint("TOPLEFT",8,-34)
   -- Independent minimap launcher; no delivery addon is required.
   if Minimap then
-    local button=CreateFrame("Button","ForeverCompanionsMinimapButton",Minimap)
+    local button=CreateFrame("Button","CompanionsForeverMinimapButton",Minimap)
     F.minimapButton=button;button:SetSize(32,32);button:SetPoint("TOPLEFT",Minimap,"TOPLEFT",-12,-10)
     button:SetFrameStrata("MEDIUM");button:SetFrameLevel(Minimap:GetFrameLevel()+16)
     local icon=button:CreateTexture(nil,"ARTWORK");icon:SetTexture("Interface\\Icons\\Ability_Hunter_BeastTaming");icon:SetSize(21,21);icon:SetPoint("CENTER")
@@ -40,7 +40,7 @@ function F.BuildDesktop()
     button:RegisterForClicks("LeftButtonUp","RightButtonUp")
     button:SetScript("OnClick",function(_,key)if key=="RightButton" then P.ToggleCompass()else P.Toggle()end end)
     button:SetScript("OnEnter",function(self)
-      GameTooltip:SetOwner(self,"ANCHOR_LEFT");GameTooltip:SetText("Forever Companions")
+      GameTooltip:SetOwner(self,"ANCHOR_LEFT");GameTooltip:SetText("Companions Forever")
       GameTooltip:AddLine("Left-click: camp and tower",1,1,1);GameTooltip:AddLine("Right-click: compact window",1,1,1);GameTooltip:Show()
     end)
     button:SetScript("OnLeave",function()GameTooltip:Hide()end)
@@ -69,10 +69,10 @@ function F.OpenSettings()
   w:SetClampedToScreen(true);w:EnableMouse(true)
   w:SetScale(F.AccessibleScale(1,560,470))
   local close=CreateFrame("Button",nil,w,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-3,-3);close:SetScript("OnClick",function()w:Hide()end)
-  S.Text(w,"Forever Companions settings",20,-18,490,"GameFontNormalLarge",S.gold)
-  local popup=CreateFrame("Frame","ForeverCompanionsSizeMenu",w);popup:SetAllPoints(w);popup:SetFrameLevel(220);popup:EnableMouse(true)
+  S.Text(w,"Companions Forever settings",20,-18,490,"GameFontNormalLarge",S.gold)
+  local popup=CreateFrame("Frame","CompanionsForeverSizeMenu",w);popup:SetAllPoints(w);popup:SetFrameLevel(220);popup:EnableMouse(true)
   popup:SetScript("OnMouseDown",function(self)self:Hide()end)
-  UISpecialFrames[#UISpecialFrames+1]="ForeverCompanionsSizeMenu"
+  UISpecialFrames[#UISpecialFrames+1]="CompanionsForeverSizeMenu"
   w:SetScript("OnHide",function()popup:Hide()end)
   local menu=S.Panel(popup,0,0,246,160);menu:EnableMouse(true);local choices={}
   F.dropdowns={}
@@ -98,14 +98,15 @@ function F.OpenSettings()
   S.Check(w,"High contrast",18,-202,"highContrast")
   S.Check(w,"Reduced motion",18,-238,"reduceMotion")
   S.Check(w,"Preview Alliance artwork",18,-274,"debugAlliance")
-  S.Text(w,"These settings affect only Forever Companions.",20,-317,520,"GameFontHighlightSmall",S.muted)
+  S.Text(w,"These settings affect only Companions Forever.",20,-317,520,"GameFontHighlightSmall",S.muted)
   local notice=S.Text(w,"",20,-385,516,"GameFontHighlightSmall",S.gold);notice:SetHeight(65)
   local import=S.Button(w,"Import old Waylaid pets",20,-346,260,function()
     popup:Hide()
     if F.char.legacyImportedAt then notice:SetText("Already imported. Your current progress has been kept.");return end
     if F.Pets.state.battle then notice:SetText("Finish your battle first.");return end
-    if not (type(ForeverWaylaidCharDB)=="table" and type(ForeverWaylaidCharDB.pets)=="table")then
-      notice:SetText("Enable updated Forever Waylaid on this character and log in once, then try again.");return
+    local legacy=WaylaidForeverCharDB or ForeverWaylaidCharDB
+    if not (type(legacy)=="table" and type(legacy.pets)=="table")then
+      notice:SetText("Enable updated Waylaid Forever on this character and log in once, then try again.");return
     end
     F.confirmImport:Show()
   end)

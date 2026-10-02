@@ -59,7 +59,7 @@ GameFontHighlightSmall=originalFont
 local savedSettings=F.db.settings
 for _,case in ipairs({{old=true,expected=13},{old=false,expected=0},{old=true,current=16,expected=16}})do
  F.db.settings={largeText=case.old,textSize=case.current,valuePalette="sunset"}
- F.events.scripts.OnEvent(nil,'ADDON_LOADED','ForeverWaylaid')
+ F.events.scripts.OnEvent(nil,'ADDON_LOADED','WaylaidForever')
  assert(F.db.settings.textSize==case.expected and F.db.settings.largeText==nil)
  assert(F.db.settings.valuePalette==nil and F.defaults.valuePalette==nil, "Retired palette preference is removed")
 end

@@ -1,6 +1,5 @@
 local _, F = ...
-F.version = "0.14.0"
-ForeverWaylaidCompanionsSplit = true
+F.version = "0.14.1"
 F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
 
 function F.ApplySettings()
@@ -11,16 +10,16 @@ function F.ApplySettings()
 end
 
 function F.OpenCompanions(compact)
-  local addon=ForeverCompanions
+  local addon=CompanionsForever
   if addon and addon.ready then
     if compact then addon.Pets.ToggleCompass() else addon.Pets.Toggle() end
-  else F.Print("Install and enable Forever Companions to open the pet game.")end
+  else F.Print("Install and enable Companions Forever to open the pet game.")end
 end
 
 function F.Now() return GetServerTime and GetServerTime() or time() end
 function F.Positive(n) return type(n) == "number" and n == n and n > 0 and n < math.huge end
 function F.Print(text)
-  if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cffdfbc65Forever Waylaid:|r " .. text) end
+  if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cffdfbc65Waylaid Forever:|r " .. text) end
 end
 function F.Money(n)
   if not n then return "Unpriced" end
@@ -38,7 +37,15 @@ local events = CreateFrame("Frame")
 F.events = events
 for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "QUEST_LOG_UPDATE", "QUEST_ACCEPTED", "QUEST_REMOVED", "QUEST_TURNED_IN", "BAG_UPDATE_DELAYED", "TAXIMAP_OPENED", "ZONE_CHANGED_NEW_AREA", "QUEST_COMPLETE", "GET_ITEM_INFO_RECEIVED", "SKILL_LINES_CHANGED", "PLAYER_LEVEL_UP", "HEARTHSTONE_BOUND", "SPELLS_CHANGED", "PLAYER_ENTERING_WORLD", "UNIT_SPELLCAST_SUCCEEDED"}) do events:RegisterEvent(event) end
 local queued = false
+local function copySave(value,seen)
+  if type(value)~="table" then return value end
+  seen=seen or {};if seen[value]then return seen[value]end
+  local result={};seen[value]=result
+  for key,item in pairs(value)do result[copySave(key,seen)]=copySave(item,seen)end
+  return result
+end
 events:SetScript("OnEvent", function(_, event, name, success,spellID)
+  if F.legacyBlocked then return end
   if event=="UNIT_SPELLCAST_SUCCEEDED" then
     if name=="player" and spellID==8690 and F.char then F.hearthPending=F.Now()+30 end
     return
@@ -51,10 +58,16 @@ events:SetScript("OnEvent", function(_, event, name, success,spellID)
     if not success or not F.Style or not F.Style.qualityPending[name] then return end
     F.Style.qualityPending[name]=nil
   end
-  if event == "ADDON_LOADED" and name == "ForeverWaylaid" then
-    ForeverWaylaidDB = ForeverWaylaidDB or {}
-    ForeverWaylaidCharDB = ForeverWaylaidCharDB or {}
-    F.db, F.char = ForeverWaylaidDB, ForeverWaylaidCharDB
+  if event == "ADDON_LOADED" and name == "WaylaidForever" then
+    local loaded=C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
+    if loaded and loaded("ForeverWaylaid") and not WaylaidForeverLegacyLoader then
+      F.legacyBlocked=true
+      F.Print("Install the included saved-data compatibility folder over the old addon, then restart WoW. This prevents two delivery addons running together.")
+      return
+    end
+    WaylaidForeverDB = WaylaidForeverDB or copySave(ForeverWaylaidDB) or {}
+    WaylaidForeverCharDB = WaylaidForeverCharDB or copySave(ForeverWaylaidCharDB) or {}
+    F.db, F.char = WaylaidForeverDB, WaylaidForeverCharDB
     F.db.settings = F.db.settings or {}
     if F.db.settings.textSize==nil then F.db.settings.textSize=F.db.settings.largeText and 13 or 0 end
     F.db.settings.largeText=nil
@@ -65,12 +78,17 @@ events:SetScript("OnEvent", function(_, event, name, success,spellID)
     F.char.pins = F.char.pins or {}
     F.char.localPrices = F.char.localPrices or {}
     F.char.peerPrices = F.char.peerPrices or {}
+    for _,scope in pairs(F.char.localPrices)do
+      for _,quote in pairs(scope)do
+        if quote.source=="Forever Waylaid" then quote.source="Waylaid Forever" end
+      end
+    end
     F.char.recipients = F.char.recipients or {}
     F.char.realm = GetRealmName()
   elseif event == "PLAYER_LOGIN" then
     F.ReadProfessions(); F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.BuildNavigator(); F.RegisterAuctionator(); F.Style.ApplyTheme(); F.ApplyAccessibility(); F.Refresh()
     F.InitializePeers()
-    F.Print("v" .. F.version .. " — /fwl to open. Scan AH prices or opt into peer sharing in Settings.")
+    F.Print("v" .. F.version .. " — /wf to open. Scan AH prices or opt into peer sharing in Settings.")
     if F.NeedsFlightScan()then F.Print("Flight paths not scanned: open a flight master's map to learn your routes. No flight purchase needed; until then, routing uses walking estimates.")end
   elseif F.char then
     if event=="ADDON_LOADED" then F.InstallMap();return end
@@ -120,9 +138,11 @@ events:SetScript("OnUpdate",function(_,dt)
   end
 end)
 
-SLASH_FOREVERWAYLAID1 = "/fwl"
-SLASH_FOREVERWAYLAID2 = "/waylaid"
-SlashCmdList.FOREVERWAYLAID = function(msg)
+SLASH_WAYLAIDFOREVER1 = "/wf"
+SLASH_WAYLAIDFOREVER2 = "/waylaid"
+SLASH_WAYLAIDFOREVER3 = "/fwl" -- Keep existing users' macros working.
+SlashCmdList.WAYLAIDFOREVER = function(msg)
+  if F.legacyBlocked then F.Print("Update the old addon folder using the included compatibility files, then restart WoW.");return end
   local quest, map, x, y, npc = msg:match("^pin%s+(%d+)%s+(%d+)%s+([%d.]+)%s+([%d.]+)%s*(.*)$")
   if quest then
     quest, map, x, y = tonumber(quest), tonumber(map), tonumber(x), tonumber(y)
@@ -140,6 +160,6 @@ SlashCmdList.FOREVERWAYLAID = function(msg)
   if msg == "prices" then F.ImportPersonal(); F.Refresh(); return end
   if msg == "compass" then F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator();return end
   if msg == "reset" then F.ResetNavigator();return end
-  if msg ~= "" then F.Print("/fwl | /fwl prices | /fwl pin QUEST_ID MAP_ID X Y | /fwl unpin QUEST_ID"); return end
+  if msg ~= "" then F.Print("/wf | /wf prices | /wf pin QUEST_ID MAP_ID X Y | /wf unpin QUEST_ID"); return end
   F.window:SetShown(not F.window:IsShown())
 end

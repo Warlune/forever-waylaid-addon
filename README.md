@@ -1,13 +1,15 @@
-# Forever Waylaid — v0.14.0 beta
+# Waylaid Forever — v0.14.1 beta
 
 A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `ForeverWaylaid-0.14.0.zip` asset from Releases.
-2. Extract the `ForeverWaylaid` folder into your Forever client's `Interface/AddOns` folder. The resulting path must be `Interface/AddOns/ForeverWaylaid/ForeverWaylaid.toc`.
-3. Start WoW, enable **Forever Waylaid**, and click the crate bubble beside the minimap or enter `/fwl`.
+1. Download the `WaylaidForever-0.14.1.zip` asset from Releases.
+2. Extract **both** folders from the ZIP into your Forever client's `Interface/AddOns` directory. `WaylaidForever` is the addon; `ForeverWaylaid` is a tiny saved-data compatibility loader that replaces the old addon entry point. Allow it to replace the old TOC. The main path is `Interface/AddOns/WaylaidForever/WaylaidForever.toc`.
+3. Restart WoW, enable **Waylaid Forever** and its **saved-data compatibility** entry for the first login on each character, and click the crate bubble beside the minimap or enter `/wf`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
+
+Existing settings, prices, flight paths and delivery pins are copied from the old save the first time the renamed addon loads. The original save stays intact. Keep the compatibility entry enabled until you have logged into every character you want to migrate; after that it can be disabled. `/wf` is the new short command; `/fwl` and `/waylaid` still work.
 
 The addon has no bundled auction prices or external price service. Until you scan or receive opted-in peer prices, items remain unpriced. Existing personal scans survive upgrades. Auctionator, Auctioneer and TomTom are optional and are not bundled.
 
@@ -15,7 +17,7 @@ The addon has no bundled auction prices or external price service. Until you sca
 
 - A merchant's field ledger with native Classic borders, red buttons, gold headings, item portraits, and parchment detail pages.
 - Search crates and writs by name or material; filter crate tiers or owned cargo; sort by value, total cost, or name. Inspect required materials, bag counts, observed auction stock, price source/age, favor, reputation, and purchase totals.
-- All 30 crates and 150 writs from the existing [Forever Waylaid Ledger](https://warlune.github.io/forever-waylaid-ledger/).
+- All 30 crates and 150 writs from the existing [Waylaid Forever Ledger](https://warlune.github.io/forever-waylaid-ledger/).
 - Tooltips with configurable **cheapest fill**, **include crate purchase price**, and **all material fill costs**. Known low-stock options cannot win cheapest-fill selection. Prices are estimates: quantity is total observed stock, not a guarantee that every unit can be bought at the minimum price.
 - Personal Auctionator full/incremental scans captured while this addon is enabled at recognized faction capitals. Neutral and unidentified auction houses are excluded. Older Auctionator history is not relabeled as a fresh scan.
 - Auctioneer Advanced's home-faction scan image, read when the auction house closes or when you click **Read personal prices**. Versions lacking that API are ignored safely.
@@ -28,11 +30,11 @@ The addon has no bundled auction prices or external price service. Until you sca
 
 ## Optional companion game
 
-The pet game is now **Forever Companions**, a separate addon with its own download, settings and saved data. Forever Waylaid works without it and no longer loads pet code or artwork.
+The pet game is now **Companions Forever**, a separate addon with its own download, settings and saved data. Waylaid Forever works without it and no longer loads pet code or artwork.
 
-Install both addons to keep **Pets** in the ledger and **Pet** in the compass as shortcuts. The compact pet window is now independently movable, so it can stay open alongside the route map. `/fwl pets` also opens the standalone game when installed.
+Install both addons to keep **Pets** in the ledger and **Pet** in the compass as shortcuts. The compact pet window is now independently movable, so it can stay open alongside the route map. `/wf pets` also opens the standalone game when installed.
 
-**Upgrading an existing pet collection:** install Forever Waylaid 0.14.0 and Forever Companions 0.1.0, then log into each character with both enabled once. The companion addon copies that character's pets, tokens, supplies and tower progress into its own save. The original Waylaid data is left intact. Afterwards either addon can be disabled independently. See the [Forever Companions installation and migration guide](ForeverCompanions/README.md).
+**Upgrading an existing pet collection:** install Waylaid Forever 0.14.1 and Companions Forever 0.1.1, then log into each character with both enabled once. The companion addon copies that character's pets, tokens, supplies and tower progress into its own save. The original Waylaid data is left intact. Afterwards either addon can be disabled independently. See the [Companions Forever installation and migration guide](CompanionsForever/README.md).
 
 ## Buy or craft your cargo
 
@@ -46,7 +48,7 @@ Craft costs value the full batch, including materials you already own; bag count
 
 ## Accessibility
 
-Open **Settings → Accessibility**, or type `/fwl accessibility`.
+Open **Settings → Accessibility**, or type `/wf accessibility`.
 
 - **Ledger size** and **Compass size** dropdowns offer 100%, 115%, 130% and 150%, capped to fit the screen.
 - **Minimum text size** offers Default, 12, 13, 14 and 16 points. Larger headings retain their size. The former Larger text preference migrates to 13 points. At 16 points, lists show five taller rows; long item names may still truncate, with full names in the detail panel.
@@ -117,15 +119,15 @@ Updates are requested roughly every five minutes, with staggered timing and limi
 
 Accept writs normally; they appear in the Writs and Route tabs. Open each flight master you want the planner to learn. The planner cannot retrieve a complete historical flight network from a newly installed addon.
 
-Left-click the minimap crate bubble to open the ledger; right-click it to toggle the compass. Drag the bubble around the minimap edge or drag the compass by its frame. `/fwl compass` toggles the compass and `/fwl reset` restores its position. Map overlays and the compass have separate switches in Settings.
+Left-click the minimap crate bubble to open the ledger; right-click it to toggle the compass. Drag the bubble around the minimap edge or drag the compass by its frame. `/wf compass` toggles the compass and `/wf reset` restores its position. Map overlays and the compass have separate switches in Settings.
 
 Recipient information comes from the quest's directions, a named manual pin, or an NPC learned when opening that writ's completion dialog. Learned names are reused only when the current destination matches. Unknown NPC names are shown as unknown rather than guessed.
 
 Before a writ is ready, the game's quest pointer may lead to materials rather than the customer. Such quests remain visible with material progress; their delivery location is not guessed. Once ready, the addon uses the client-provided waypoint or quest POI. If a destination is missing, or you know it early, use:
 
 ```text
-/fwl pin QUEST_ID MAP_ID X Y [NPC name]
-/fwl unpin QUEST_ID
+/wf pin QUEST_ID MAP_ID X Y [NPC name]
+/wf unpin QUEST_ID
 ```
 
 Coordinates use 0–100. The Route tab shows the quest ID for unresolved writs. A manually pinned writ can be included before its materials are ready, and is labeled accordingly.
@@ -152,7 +154,7 @@ When a city trip cannot attach to the mapped streets, the fallback aims through 
 
 **Simple writ navigation:** advanced road routing is disabled, including Orgrimmar. The street graph, road data and safer/fastest controls are not loaded. Walking uses direct dotted bearings to the next transport or delivery; boat, zeppelin, flight and eligible personal-teleport planning remain active. Real faction restrictions on capital destinations and transport are retained. Old safer/fastest settings are cleared on login.
 
-**Memory and installation size:** the runtime package excludes source PNGs, retired scribe textures and archived road files; their source remains in this repository. Existing artwork keeps the same resolution. The closed ledger skips item-list rebuilding, and map pins reuse their event handlers. Run `/fwl memory` for the client's current Lua memory report and stored-record counts. This reports Lua memory, not texture/video memory or disk size. It does not force garbage collection or erase saved prices, flight paths or legacy pet saves.
+**Memory and installation size:** the runtime package excludes source PNGs, retired scribe textures and archived road files; their source remains in this repository. Existing artwork keeps the same resolution. The closed ledger skips item-list rebuilding, and map pins reuse their event handlers. Run `/wf memory` for the client's current Lua memory report and stored-record counts. This reports Lua memory, not texture/video memory or disk size. It does not force garbage collection or erase saved prices, flight paths or legacy pet saves.
 
 **Route limits:** direct walking bearings can cross walls, mountains or water on the map; they are directions, not collision-safe routes. Walking uses a base running-speed estimate. Flight, boat and zeppelin timings are approximate and missing flight data can make the route slower. Transport endpoints were checked against published Forever build 1.60.1.70124 data; complete journeys still need in-game testing. Navigation requires your clicks; the addon never moves your character, buys a flight, casts a spell or consumes an item for you.
 

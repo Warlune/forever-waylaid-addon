@@ -31,12 +31,12 @@ function F.BuildAccessibility(parent)
   S.Text(panel,"Accessibility",25,-18,620,"GameFontNormalLarge",S.gold)
   S.Button(panel,"Back to settings",740,-14,220,function()F.accessibilityView=false;F.Render()end)
   -- One shared popup closes on selection, outside click, Escape or leaving this panel.
-  local popup=CreateFrame("Frame","ForeverWaylaidAccessibilityMenu",panel)
+  local popup=CreateFrame("Frame","WaylaidForeverAccessibilityMenu",panel)
   popup:SetAllPoints(parent);popup:SetFrameStrata("DIALOG");popup:EnableMouse(true)
   popup:SetScript("OnMouseDown",function(self)self:Hide()end)
   local menu=S.Panel(popup,0,0,430,160);menu:EnableMouse(true)
   popup.choices={};F.accessibilityMenu=popup
-  UISpecialFrames[#UISpecialFrames+1]="ForeverWaylaidAccessibilityMenu"
+  UISpecialFrames[#UISpecialFrames+1]="WaylaidForeverAccessibilityMenu"
   panel:SetScript("OnHide",function()popup:Hide()end)
   F.accessibilityDropdowns={}
   local function dropdown(key,title,x,y,options)

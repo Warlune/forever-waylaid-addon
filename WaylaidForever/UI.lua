@@ -76,7 +76,7 @@ function F.LedgerEntries()
 end
 
 function F.BuildUI()
-  local w=CreateFrame("Frame","ForeverWaylaidFrame",UIParent,"BackdropTemplate");F.window=w
+  local w=CreateFrame("Frame","WaylaidForeverFrame",UIParent,"BackdropTemplate");F.window=w
   w:SetSize(1040,704);w:SetPoint("CENTER");w:SetFrameStrata("HIGH")
   w:SetScale(math.min(1,(UIParent:GetWidth()-40)/1040,(UIParent:GetHeight()-40)/704))
   w:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8",edgeFile="Interface\\DialogFrame\\UI-DialogBox-Border",tile=true,tileSize=32,edgeSize=32,insets={left=10,right=10,top=10,bottom=10}})
@@ -88,12 +88,12 @@ function F.BuildUI()
   local banner=w:CreateTexture(nil,"ARTWORK");banner:SetPoint("TOPLEFT",14,-14);banner:SetSize(1012,60);S.Accent(banner,0.32)
   local crest=w:CreateTexture(nil,"OVERLAY");crest:SetPoint("TOPLEFT",25,-18);crest:SetSize(58,58);crest:SetTexture(S.Theme().crest)
   F.banner,F.crest=banner,crest
-  S.Text(w,"FOREVER WAYLAID",94,-22,470,"GameFontNormalHuge",S.gold)
+  S.Text(w,"WAYLAID FOREVER",94,-22,470,"GameFontNormalHuge",S.gold)
   F.factionTitle=S.Text(w,"THE MERCHANT'S FIELD LEDGER",95,-49,500,"GameFontHighlightSmall",S.muted)
   local close=CreateFrame("Button",nil,w,"UIPanelCloseButton");close:SetPoint("TOPRIGHT",-7,-7)
   F.status=S.Text(w,"",660,-37,343,"GameFontHighlightSmall",S.muted);F.status:SetJustifyH("RIGHT")
   F.tab="Crates";F.sortIndex=1;F.tierIndex=1;F.selected={};F.tabButtons={}
-  local companionReady=ForeverCompanions and ForeverCompanions.ready
+  local companionReady=CompanionsForever and CompanionsForever.ready
   local tabs=companionReady and {"Crates","Writs","Route","Pets","Settings"} or {"Crates","Writs","Route","Settings"}
   local spacing=companionReady and 123 or 154
   for i,tab in ipairs(tabs) do
@@ -226,7 +226,7 @@ function F.BuildUI()
     if F.detailPanel:IsMouseOver() and F.tab~="Settings" then F.ScrollDetails(delta);return end
     if F.tab~="Settings" then F.offset=math.max(0,math.min(F.lastPage or 0,(F.offset or 0)-delta*pageSize));F.Render()end
   end)
-  w:SetScript("OnShow",F.Refresh);UISpecialFrames[#UISpecialFrames+1]="ForeverWaylaidFrame";w:Hide()
+  w:SetScript("OnShow",F.Refresh);UISpecialFrames[#UISpecialFrames+1]="WaylaidForeverFrame";w:Hide()
 end
 
 local function detailWriter()
@@ -355,7 +355,7 @@ function F.RenderDetail(entry)
         local warning=F.FlightCoverageText();if warning then add("Flight coverage",warning)end
         if not F.char.home or F.char.home.name~=F.Travel.BindName() then add("Hearthstone destination unknown","Bind at an inn or use your Hearthstone once to record its destination.")end
       end
-      if not stop.point then add("Set the customer pin","/fwl pin "..stop.questID.." MAP_ID X Y")end
+      if not stop.point then add("Set the customer pin","/wf pin "..stop.questID.." MAP_ID X Y")end
     else add("Not accepted","Open the writ in your bags to start its route.")end
   end
   local quote=entry.quote or entry.best and entry.best.quote

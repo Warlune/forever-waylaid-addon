@@ -70,7 +70,7 @@ for faction in ("horde", "alliance"):
         frame = frame.resize(size, Image.Resampling.LANCZOS)
         sheet.paste(frame, (col * CELL + 8, row * CELL + 248 - size[1]))
         boxes.append(bounds)
-    output = ROOT / "ForeverWaylaid" / "Art" / f"AuctionScribe{faction.title()}16.tga"
+    output = ROOT / "WaylaidForever" / "Art" / f"AuctionScribe{faction.title()}16.tga"
     sheet.save(output, compression=None)
     # Exact same atlas in PNG for inspection and future asset tooling.
     sheet.save(ROOT / "art" / f"auction-scribe-{faction}-16-packed.png")

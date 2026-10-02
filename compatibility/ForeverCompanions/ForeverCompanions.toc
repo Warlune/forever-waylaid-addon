@@ -1,0 +1,9 @@
+## Interface: 16001
+## Title: Companions Forever - saved-data compatibility
+## Notes: Loads old saves for Companions Forever. Contains no pet gameplay.
+## Author: Warlune
+## Version: 0.1.1
+## SavedVariables: ForeverCompanionsDB
+## SavedVariablesPerCharacter: ForeverCompanionsCharDB
+
+Compatibility.lua

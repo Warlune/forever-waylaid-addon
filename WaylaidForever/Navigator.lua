@@ -202,7 +202,7 @@ function F.BuildNavigator()
     if button=="LeftButton" and F.guidance then F.Navigate(F.guidance.stop.point,F.guidance.stop.questID)end
   end)
   if Minimap then
-    local b=CreateFrame("Button","ForeverWaylaidMinimapButton",Minimap);F.minimapButton=b
+    local b=CreateFrame("Button","WaylaidForeverMinimapButton",Minimap);F.minimapButton=b
     b:SetSize(33,33);b:SetFrameStrata("MEDIUM");b:SetFrameLevel(Minimap:GetFrameLevel()+15)
     local bg=b:CreateTexture(nil,"BACKGROUND");bg:SetTexture("Interface\\Minimap\\UI-Minimap-Background");bg:SetAllPoints()
     local icon=b:CreateTexture(nil,"ARTWORK");icon:SetTexture(S.icons.crate);icon:SetPoint("CENTER",0,0);icon:SetSize(22,22)
@@ -225,7 +225,7 @@ function F.BuildNavigator()
       else F.window:SetShown(not F.window:IsShown())end
     end)
     b:SetScript("OnEnter",function(self)
-      GameTooltip:SetOwner(self,"ANCHOR_LEFT");GameTooltip:SetText("Forever Waylaid")
+      GameTooltip:SetOwner(self,"ANCHOR_LEFT");GameTooltip:SetText("Waylaid Forever")
       GameTooltip:AddLine("Left-click: open your ledger",1,0.85,0.5)
       GameTooltip:AddLine("Right-click: show / hide compass",1,1,1)
       GameTooltip:AddLine("Drag: move around the minimap",0.7,0.7,0.7);GameTooltip:Show()
@@ -238,7 +238,7 @@ end
 function F.UpdateNavigator()
   local c=F.compass;if not c then return end
   c:SetShown(F.db.settings.navigator)
-  c.petToggle:SetShown(ForeverCompanions and ForeverCompanions.ready or false)
+  c.petToggle:SetShown(CompanionsForever and CompanionsForever.ready or false)
   local expanded=F.char.navExpanded
   local guide=F.guidance
   local large=S.MinimumTextSize()>=14

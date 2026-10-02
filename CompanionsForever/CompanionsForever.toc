@@ -1,0 +1,16 @@
+## Interface: 16001
+## Title: Companions Forever
+## Notes: Collect, care for and battle pixel companions. Standalone beta.
+## Author: Warlune
+## Version: 0.1.1
+## SavedVariables: CompanionsForeverDB
+## SavedVariablesPerCharacter: CompanionsForeverCharDB
+## OptionalDeps: ForeverWaylaid, ForeverCompanions, WaylaidForever
+
+Core.lua
+Style.lua
+PetData.lua
+Pets.lua
+PetProgression.lua
+PetUI.lua
+Desktop.lua

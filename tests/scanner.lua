@@ -41,15 +41,15 @@ assert(not F.StartNativeScan() and calls==1,'Cannot submit twice while running')
 now=now+5;response()
 local scope=GetRealmName()..':Horde'
 local prices=F.char.localPrices[scope]
-assert(prices[2840].price==11 and prices[2840].quantity==15 and prices[2840].time==100000 and prices[2840].source=='Forever Waylaid')
+assert(prices[2840].price==11 and prices[2840].quantity==15 and prices[2840].time==100000 and prices[2840].source=='Waylaid Forever')
 assert(not prices[2589],'Bid-only auctions do not invent buyout values')
 assert(prices[999999].price==40 and prices[999999].quantity==5,'Save buyouts for unrelated items too')
 assert(F.GetScanProgress().saved==2,'Saved prices include every item with a valid buyout')
 assert(F.GetScanProgress().unique==3 and F.GetScanProgress().matched==1,'All distinct item IDs include unrelated and bid-only items; retained prices are separate')
-assert(F.Price(2840).source=='Forever Waylaid')
+assert(F.Price(2840).source=='Waylaid Forever')
 F.char.peerPrices[scope]={[2840]={time=now+1,price=8,quantity=50,source='Peer scan (unverified)'}}
 assert(F.Price(2840).source=='Peer scan (unverified)','Newer eligible peer price wins when sharing is on')
-F.db.settings.peerSharing=false;assert(F.Price(2840).source=='Forever Waylaid','Disabled peers must not affect personal prices')
+F.db.settings.peerSharing=false;assert(F.Price(2840).source=='Waylaid Forever','Disabled peers must not affect personal prices')
 assert(not F.StartNativeScan() and calls==1,'Full snapshot cooldown must persist between attempts')
 local saved=prices[2840]
 now=now+901;rows={}

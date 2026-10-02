@@ -13,7 +13,7 @@ local oldCosts,shown=F.LedgerCrateCosts,F.window:IsShown()
 F.LedgerCrateCosts=function()error('Hidden ledger must not recalculate item lists')end
 F.window:Hide();F.Render();F.LedgerCrateCosts=oldCosts;F.window:SetShown(shown)
 local oldPrint=F.Print;local messages={};F.Print=function(s)messages[#messages+1]=s end
-SlashCmdList.FOREVERWAYLAID('pin '..F.catalog.writs[1].questId..' 1454 .. 50')
+SlashCmdList.WAYLAIDFOREVER('pin '..F.catalog.writs[1].questId..' 1454 .. 50')
 assert(messages[#messages]=='Invalid writ, map or coordinates.','Malformed pin coordinates do not crash')
 F.ReportMemory();assert(#messages>=3);F.Print=oldPrint
 print('PASS: direct writ navigation, unloaded road graph, hidden-ledger work suppression, malformed pin safety and memory diagnostics')

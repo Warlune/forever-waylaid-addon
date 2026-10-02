@@ -9,8 +9,8 @@ F.Now=function()return now end;UnitName=function()return 'Self' end;GetNormalize
 IsInGuild=function()return true end;IsInGroup=function()return false end;IsInRaid=function()return false end
 F.Refresh=function()end
 local scope=GetRealmName()..':Horde'
-F.char.localPrices={[scope]={[2840]={price=15,quantity=30,time=now-10,source='Forever Waylaid'}}};F.char.peerPrices={}
-F.char.localPrices[scope][999999]={price=25,quantity=3,time=now-10,source='Forever Waylaid'}
+F.char.localPrices={[scope]={[2840]={price=15,quantity=30,time=now-10,source='Waylaid Forever'}}};F.char.peerPrices={}
+F.char.localPrices[scope][999999]={price=25,quantity=3,time=now-10,source='Waylaid Forever'}
 local function tick()F.peerFrame.scripts.OnUpdate(nil,1)end
 local function receive(msg,channel,sender)F.peerFrame.scripts.OnEvent(nil,'CHAT_MSG_ADDON','FWLPrice1',msg,channel or 'WHISPER',sender or 'Other-TestRealm')end
 F.SetPeerSharing(false);now=now+60;tick();assert(#sent==0,'Default/disabled sharing sends nothing')

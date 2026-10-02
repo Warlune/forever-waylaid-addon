@@ -97,7 +97,7 @@ function F.SaveNativeSnapshot(snapshot,scope,observed)
   local target=F.char.localPrices[scope] or {};F.char.localPrices[scope]=target
   local count=0
   for id,row in pairs(snapshot)do
-    if save(target,id,row.price,observed,"Forever Waylaid",row.quantity,true) then count=count+1 end
+    if save(target,id,row.price,observed,"Waylaid Forever",row.quantity,true) then count=count+1 end
   end
   return count
 end

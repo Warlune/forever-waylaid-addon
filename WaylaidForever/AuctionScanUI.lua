@@ -11,7 +11,7 @@ end
 function F.CreateScanScribe(parent,size)
   local art=parent:CreateTexture(nil,"ARTWORK")
   art:SetSize(size,size);art:SetPoint("CENTER")
-  art:SetTexture("Interface\\AddOns\\ForeverWaylaid\\Art\\AuctionScribes.tga")
+  art:SetTexture("Interface\\AddOns\\WaylaidForever\\Art\\AuctionScribes.tga")
   local ui={art=art}
   local phase,elapsed=0,0
   local function pose()
@@ -104,7 +104,7 @@ function F.InstallAuctionScanUI()
   page:SetFrameLevel(host:GetFrameLevel()+10);page:EnableMouse(true);page:Hide()
   local tabHost=CreateFrame("Frame",nil,host)
   tabHost:SetAllPoints(host)
-  local tab=CreateFrame("Button","ForeverWaylaidAuctionScanTab",tabHost,"AuctionHouseFrameDisplayModeTabTemplate")
+  local tab=CreateFrame("Button","WaylaidForeverAuctionScanTab",tabHost,"AuctionHouseFrameDisplayModeTabTemplate")
   -- Match PanelTemplates_AnchorTabs, which lays out the native AH tabs.
   tab:ClearAllPoints();tab:SetPoint("TOPLEFT",previous,"TOPRIGHT",3,0);tab:SetText("Scan")
   PanelTemplates_TabResize(tab,20,nil,70);PanelTemplates_DeselectTab(tab)
@@ -137,7 +137,7 @@ function F.InstallAuctionScanUI()
     if F.ShouldHideAuctionExtras() then return end
     host:SetDisplayMode(scanMode)
     for _,nativeTab in ipairs(host.Tabs)do PanelTemplates_DeselectTab(nativeTab)end
-    PanelTemplates_SelectTab(tab);host:SetTitle("Forever Waylaid — Auction Scribe")
+    PanelTemplates_SelectTab(tab);host:SetTitle("Waylaid Forever — Auction Scribe")
     page:Show();F.UpdateScanUI()
   end)
   hooksecurefunc(host,"SetDisplayMode",function(_,mode)

@@ -10,7 +10,7 @@ local function append(tooltip, id)
   local related=F.catalogIDs[id]
   if related then
     tooltip:AddLine(" ")
-    tooltip:AddLine("Forever Waylaid", 0.87, 0.74, 0.39)
+    tooltip:AddLine("Waylaid Forever", 0.87, 0.74, 0.39)
   end
   if market then
     tooltip:AddDoubleLine("AH buyout (each)",F.Style.Money(market.price),1,1,1,1,1,1)

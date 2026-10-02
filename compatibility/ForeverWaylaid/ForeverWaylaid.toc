@@ -1,0 +1,9 @@
+## Interface: 16001
+## Title: Waylaid Forever - saved-data compatibility
+## Notes: Loads old saves for Waylaid Forever. Contains no delivery or pet gameplay.
+## Author: Warlune
+## Version: 0.14.1
+## SavedVariables: ForeverWaylaidDB
+## SavedVariablesPerCharacter: ForeverWaylaidCharDB
+
+Compatibility.lua

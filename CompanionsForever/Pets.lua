@@ -203,7 +203,7 @@ function P.Packet()
 end
 function P.InspectTarget()
   if not P.state.share then return false,"Enable pet sharing before inspecting another player." end
-  if not UnitIsPlayer or not UnitIsPlayer("target") or (UnitIsUnit and UnitIsUnit("target","player")) then return false,"Target another player with Forever Companions." end
+  if not UnitIsPlayer or not UnitIsPlayer("target") or (UnitIsUnit and UnitIsUnit("target","player")) then return false,"Target another player with Companions Forever." end
   local name=GetUnitName and GetUnitName("target",true) or UnitName("target")
   if not name or name=="" or not P.RegisterSharing() then return false,"Pet inspection is unavailable." end
   if P.nextInspect and F.Now()<P.nextInspect then return false,"Wait a few seconds before inspecting again." end

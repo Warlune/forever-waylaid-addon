@@ -21,14 +21,15 @@ jobs:
       - run: pnpm test && pnpm check
       - run: sudo apt-get update && sudo apt-get install -y lua5.1
       - run: lua5.1 tests/addon.lua
-      - run: node tools/build-recipes.mjs && git diff --exit-code -- ForeverWaylaid/Catalog.lua ForeverWaylaid/Recipes.lua
-      - run: node tools/build-roads.mjs && git diff --exit-code -- ForeverWaylaid/WorldRoadData.lua
+      - run: node tools/build-recipes.mjs && git diff --exit-code -- WaylaidForever/Catalog.lua WaylaidForever/Recipes.lua
+      - run: node tools/build-roads.mjs && git diff --exit-code -- WaylaidForever/WorldRoadData.lua
       - name: Package both addons separately
         run: |
           node tools/package-addon.mjs
-          for addon in ForeverWaylaid ForeverCompanions; do
+          for addon in WaylaidForever CompanionsForever; do
             version=$(sed -n 's/^## Version: //p' "$addon/$addon.toc" | tr -d '\r')
-            (cd release/stage && zip -r "../$addon-$version.zip" "$addon")
+            if [ "$addon" = WaylaidForever ]; then legacy=ForeverWaylaid; else legacy=ForeverCompanions; fi
+            (cd release/stage && zip -r "../$addon-$version.zip" "$addon" "$legacy")
             python3 tools/check-package.py "release/$addon-$version.zip" "$addon"
           done
       - uses: actions/upload-artifact@v4

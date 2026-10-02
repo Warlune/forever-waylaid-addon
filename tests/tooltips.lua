@@ -10,7 +10,7 @@ local unrelated,ingredient=999999,2840
 local crate,writ=F.catalog.crates[1],F.catalog.writs[1]
 F.char.localPrices={[scope]={}}
 for _,id in ipairs({unrelated,ingredient,crate.id,writ.id,writ.targetId})do
-  F.char.localPrices[scope][id]={price=12345,time=900,source='Forever Waylaid',quantity=10000}
+  F.char.localPrices[scope][id]={price=12345,time=900,source='Waylaid Forever',quantity=10000}
 end
 local callback
 Enum.TooltipDataType={Item=1}
@@ -35,7 +35,7 @@ for _,addon in ipairs(F.auctionAddons)do
   local scanner=addon[1]
   enabled[scanner]=2
   t=tip();callback(t,{id=unrelated});assert(#t.lines==0,'Another enabled scanner owns unrelated tooltips')
-  t=tip();callback(t,{id=ingredient});assert(text(t):find('AH buyout') and text(t):find('Forever Waylaid · 1m ago'),'Waylaid ingredients retain price source and age')
+  t=tip();callback(t,{id=ingredient});assert(text(t):find('AH buyout') and text(t):find('Waylaid Forever · 1m ago'),'Waylaid ingredients retain price source and age')
   t=tip();callback(t,{id=crate.id});assert(text(t):find('Cheapest'),'Crate fill information remains visible')
   t=tip();callback(t,{id=writ.id});assert(text(t):find('reputation'),'Writ delivery information remains visible')
   enabled[scanner]=0

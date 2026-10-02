@@ -1,11 +1,11 @@
 ## Interface: 16001
-## Title: Forever Waylaid
+## Title: Waylaid Forever
 ## Notes: Crate costs, writ deliveries, personal scans and optional peer prices.
 ## Author: Warlune
-## Version: 0.14.0
-## SavedVariables: ForeverWaylaidDB
-## SavedVariablesPerCharacter: ForeverWaylaidCharDB
-## OptionalDeps: Auctionator, Auc-Advanced, TomTom
+## Version: 0.14.1
+## SavedVariables: WaylaidForeverDB
+## SavedVariablesPerCharacter: WaylaidForeverCharDB
+## OptionalDeps: ForeverWaylaid, Auctionator, Auc-Advanced, TomTom
 
 Catalog.lua
 Recipes.lua

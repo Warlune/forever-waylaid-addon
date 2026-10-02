@@ -42,10 +42,10 @@ C_Map={GetBestMapForUnit=function()return 1454 end,
 C_QuestLog={IsOnQuest=function()return false end,IsComplete=function()return false end}
 C_Item={GetItemCount=function()return 0 end}
 Enum={}
-local function load(name) assert(loadfile('ForeverWaylaid/'..name..'.lua'))('ForeverWaylaid',F) end
+local function load(name) assert(loadfile('WaylaidForever/'..name..'.lua'))('WaylaidForever',F) end
 for _,name in ipairs({'Catalog','Recipes','Core','Diagnostics','Pricing','Scanner','Peers','Crafting','Style','Accessibility','AuctionScanUI','Geometry','Routing','TransportData','Travel','Tracking','Tooltips','UI','Journey','Map','Navigator'}) do load(name) end
 assert(F.Roads==nil and F.roadData==nil, "Advanced road engine must not be loaded")
-F.events.scripts.OnEvent(nil,'ADDON_LOADED','ForeverWaylaid')
+F.events.scripts.OnEvent(nil,'ADDON_LOADED','WaylaidForever')
 F.events.scripts.OnEvent(nil,'PLAYER_LOGIN')
 F.window:Show()
 for _,tab in ipairs({'Crates','Writs','Route','Settings'}) do F.tab=tab;F.Render() end
@@ -239,4 +239,5 @@ assert(loadfile('tests/pets.lua'))(companions)
 assert(loadfile('tests/security-memory.lua'))(F,companions)
 
 assert(loadfile('tests/crate-details.lua'))(F)
+assert(loadfile('tests/rename.lua'))(F,companions)
 print("ALL ADDON TESTS PASSED")
