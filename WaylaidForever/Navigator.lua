@@ -159,7 +159,6 @@ function F.BuildNavigator()
   local stripe=c:CreateTexture(nil,"ARTWORK");stripe:SetPoint("TOPLEFT",5,-5);stripe:SetSize(290,19);S.Accent(stripe,0.55)
   F.compassStripe=stripe
   S.Text(c,"COURIER'S COMPASS",11,-9,210,"GameFontNormalSmall",S.gold)
-  c.petToggle=S.Button(c,"Pet",246,-5,44,function()F.OpenCompanions(true)end);c.petToggle:SetHeight(20)
   c.arrow=c:CreateTexture(nil,"ARTWORK");c.arrow:SetTexture("Interface\\Minimap\\MinimapArrow");c.arrow:SetPoint("TOPLEFT",10,-31);c.arrow:SetSize(40,40)
   c.distance=S.Text(c,"",5,-76,52,"GameFontNormalSmall",S.gold);c.distance:SetJustifyH("CENTER")
   c.action=S.Text(c,"",60,-29,230,"GameFontNormalSmall",S.gold);c.action:SetMaxLines(1)
@@ -238,7 +237,6 @@ end
 function F.UpdateNavigator()
   local c=F.compass;if not c then return end
   c:SetShown(F.db.settings.navigator)
-  c.petToggle:SetShown(CompanionsForever and CompanionsForever.ready or false)
   local expanded=F.char.navExpanded
   local guide=F.guidance
   local large=S.MinimumTextSize()>=14

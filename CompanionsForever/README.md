@@ -36,9 +36,9 @@ Tower victories earn pet XP; repeated floors give reduced XP. NPC killing blows 
 Original generated artwork, export details and prompts are documented in `Art/PETS.md` and `Art/PET_SCENES.md`. Text sizing, high contrast and faction previews apply to these panels. Gameplay balance and live layout testing remain ongoing.
 
 
-## Optional Waylaid shortcuts
+## Open independently
 
-With updated Waylaid Forever also enabled, its Pets button and `/wf pets` open this addon; its compass Pet button toggles this addon's compact window. The two windows can be moved and used independently. Neither addon is a required dependency of the other. Pet sharing remains opt-in and uses the existing peer protocol.
+Use `/cf`, `/cf small`, or this addon's minimap button. Waylaid Forever no longer has pet buttons or commands. Both addons can still run side by side, and legacy save import remains available.
 
 ## Beta testing
 

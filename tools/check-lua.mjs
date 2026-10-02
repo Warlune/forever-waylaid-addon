@@ -38,4 +38,12 @@ if (addon === 'CompanionsForever') {
   }
 }
 if (addon === 'WaylaidForever' && shipped.some(file => /Pet|Companion/.test(file))) throw new Error('Pet runtime must not ship with Waylaid');
+if (addon === 'WaylaidForever') {
+  for (const file of shipped.filter(file => file.endsWith('.lua'))) {
+    const source = readFileSync(new URL(file, root), 'utf8');
+    if (/CompanionsForever|OpenCompanions|F\.Pets|petToggle|navPets/.test(source)) {
+      throw new Error(`Pet integration must not return to Waylaid: ${file}`);
+    }
+  }
+}
 }

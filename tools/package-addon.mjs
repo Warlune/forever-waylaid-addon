@@ -35,7 +35,8 @@ export function buildPackage(stage) {
       bytes += statSync(target).size;
     }
     for (const file of ['README.md', 'LICENSE', 'RELEASE_NOTES.md']) {
-      const source = addon === 'CompanionsForever' && file !== 'LICENSE' ? resolve(root, addon, file) : resolve(root, file);
+      const specific = resolve(root, addon, file);
+      const source = file !== 'LICENSE' && existsSync(specific) ? specific : resolve(root, file);
       const target = resolve(stage, addon, file);
       copyFileSync(source, target);bytes += statSync(target).size;
     }

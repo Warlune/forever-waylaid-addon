@@ -56,12 +56,13 @@ local wasExpanded=waylaid.char.navExpanded
 waylaid.char.navExpanded=true
 C.Pets.ToggleCompass(true)
 assert(waylaid.char.navExpanded and C.compass~=waylaid.compass,'Companion display cannot replace the route map')
-waylaid.OpenCompanions(true);assert(not C.char.navPets,'Optional Waylaid shortcut targets standalone compact view')
-waylaid.OpenCompanions();assert(C.Pets.window:IsShown())
+assert(waylaid.OpenCompanions==nil and waylaid.tabButtons.Pets==nil and rawget(waylaid.compass,'petToggle')==nil,'Waylaid must have no pet entry points even with Companions enabled')
+C.Pets.ToggleCompass(false);assert(not C.char.navPets)
+C.Pets.Toggle();assert(C.Pets.window:IsShown())
 C.Pets.window:Hide();waylaid.char.navExpanded=wasExpanded
 local font=waylaid.db.settings.textSize;C.db.settings.textSize=16;C.ApplySettings()
 assert(waylaid.db.settings.textSize==font,'Companion settings are independent')
 C.OpenSettings();assert(C.settings and C.dropdowns.textSize)
 C.settings:Hide();C.db.settings.textSize=0;C.ApplySettings()
-print('PASS: independent companion login, deep-copy legacy migration, reload persistence, backup before replacement, old-build guard and optional launchers')
+print('PASS: independent companion login, deep-copy legacy migration, reload persistence, backup before replacement, old-build guard and fully separate entry points')
 return C

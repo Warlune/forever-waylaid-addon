@@ -11,5 +11,5 @@ function F.ReportMemory()
   if ok and type(kb)=="number" then F.Print(string.format("Lua memory: %.2f MiB (textures are separate).",kb/1024))
   else F.Print("Lua memory reporting is unavailable in this client.")end
   local prices=0;for _,rows in pairs(F.char.localPrices or {})do prices=prices+count(rows)end
-  F.Print("Stored personal prices: "..prices..". Advanced road engine: off. Pets run separately in Companions Forever.")
+  F.Print("Stored personal prices: "..prices..". Advanced road engine: off.")
 end

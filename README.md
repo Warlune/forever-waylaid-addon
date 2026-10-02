@@ -1,10 +1,10 @@
-# Waylaid Forever — v0.14.1 beta
+# Waylaid Forever — v0.14.2 beta
 
-A Classic-style crate and writ companion for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
+A Classic-style crate and writ planner for **WoW Forever beta**, targeting interface `16001` and catalogue build `1.60.1.70009`. It is not a Retail, Season of Discovery, or Classic Era catalogue. The ledger, minimap launcher, and fold-out map have been checked in the Forever `1.60.1.70124` client; live delivery and auction integration testing remains ongoing.
 
 ## Install
 
-1. Download the `WaylaidForever-0.14.1.zip` asset from Releases.
+1. Download the `WaylaidForever-0.14.2.zip` asset from Releases.
 2. Extract **both** folders from the ZIP into your Forever client's `Interface/AddOns` directory. `WaylaidForever` is the addon; `ForeverWaylaid` is a tiny saved-data compatibility loader that replaces the old addon entry point. Allow it to replace the old TOC. The main path is `Interface/AddOns/WaylaidForever/WaylaidForever.toc`.
 3. Restart WoW, enable **Waylaid Forever** and its **saved-data compatibility** entry for the first login on each character, and click the crate bubble beside the minimap or enter `/wf`.
 4. In **Settings**, use your own scans or enable optional peer sharing. Realm and faction are taken from your character automatically.
@@ -27,14 +27,6 @@ The addon has no bundled auction prices or external price service. Until you sca
 - A movable **Courier's Compass** that stays available when the ledger and main map close: direction arrow, distance, current writ, recipient information, and destination coordinates. Its down-arrow button unfolds a small map using the game's actual map artwork.
 - Route lines on the native minimap, clipped to its circular edge and adjusted for zoom and rotating-map settings. The compass automatically guides to the next flight master, boat/zeppelin dock, personal teleport or customer. It keeps the arrival target during a booked flight and recalculates from your current position every five seconds.
 - Flight points and directed routes learned by opening flight masters. Unlearned routes are not invented. Visit order is optimized for up to nine located stops, with a nearest-next estimate for larger sets. The warning icon beside Known flight points lists Eastern Kingdoms and/or Kalimdor when no recorded flight-master departure exists for that continent. Hover it for details; open a flight master's map there without buying a flight. A recorded visit does not mean every route on the continent is known.
-
-## Optional companion game
-
-The pet game is now **Companions Forever**, a separate addon with its own download, settings and saved data. Waylaid Forever works without it and no longer loads pet code or artwork.
-
-Install both addons to keep **Pets** in the ledger and **Pet** in the compass as shortcuts. The compact pet window is now independently movable, so it can stay open alongside the route map. `/wf pets` also opens the standalone game when installed.
-
-**Upgrading an existing pet collection:** install Waylaid Forever 0.14.1 and Companions Forever 0.1.1, then log into each character with both enabled once. The companion addon copies that character's pets, tokens, supplies and tower progress into its own save. The original Waylaid data is left intact. Afterwards either addon can be disabled independently. See the [Companions Forever installation and migration guide](CompanionsForever/README.md).
 
 ## Buy or craft your cargo
 
@@ -154,7 +146,7 @@ When a city trip cannot attach to the mapped streets, the fallback aims through 
 
 **Simple writ navigation:** advanced road routing is disabled, including Orgrimmar. The street graph, road data and safer/fastest controls are not loaded. Walking uses direct dotted bearings to the next transport or delivery; boat, zeppelin, flight and eligible personal-teleport planning remain active. Real faction restrictions on capital destinations and transport are retained. Old safer/fastest settings are cleared on login.
 
-**Memory and installation size:** the runtime package excludes source PNGs, retired scribe textures and archived road files; their source remains in this repository. Existing artwork keeps the same resolution. The closed ledger skips item-list rebuilding, and map pins reuse their event handlers. Run `/wf memory` for the client's current Lua memory report and stored-record counts. This reports Lua memory, not texture/video memory or disk size. It does not force garbage collection or erase saved prices, flight paths or legacy pet saves.
+**Memory and installation size:** the runtime package excludes source PNGs, retired scribe textures and archived road files; their source remains in this repository. Existing artwork keeps the same resolution. The closed ledger skips item-list rebuilding, and map pins reuse their event handlers. Run `/wf memory` for the client's current Lua memory report and stored-record counts. This reports Lua memory, not texture/video memory or disk size. It does not force garbage collection or erase saved prices, flight paths or other saved data.
 
 **Route limits:** direct walking bearings can cross walls, mountains or water on the map; they are directions, not collision-safe routes. Walking uses a base running-speed estimate. Flight, boat and zeppelin timings are approximate and missing flight data can make the route slower. Transport endpoints were checked against published Forever build 1.60.1.70124 data; complete journeys still need in-game testing. Navigation requires your clicks; the addon never moves your character, buys a flight, casts a spell or consumes an item for you.
 

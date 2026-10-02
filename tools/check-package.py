@@ -1,5 +1,6 @@
 """Validate the actual upload ZIP, including CurseForge's root-folder rule."""
 import sys
+import re
 from pathlib import PurePosixPath
 from zipfile import ZipFile
 
@@ -29,6 +30,10 @@ with ZipFile(sys.argv[1]) as archive:
     assert [line.strip() for line in legacy_toc.splitlines() if line.strip() and not line.startswith('#')] == ['Compatibility.lua']
     if addon == 'WaylaidForever':
         assert not any('Pet' in name or 'Companion' in name for name in names), "Bundled pet files in Waylaid ZIP"
+        for name in names:
+            if name.endswith(('.lua', '.md', '.toc')):
+                text = archive.read(name).decode('utf-8-sig')
+                assert not re.search(r'\b(?:pets?|companions?)\b', text, re.I), f"Pet reference in Waylaid package: {name}"
     else:
         assert not any('Catalog' in name or 'Recipes' in name or 'Scanner' in name for name in names), "Bundled delivery files in companion ZIP"
     assert archive.testzip() is None, "ZIP integrity check failed"

@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.14.1"
+F.version = "0.14.2"
 F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, debugAlliance = false, generalAuctionTooltips = true, autoHideAuction = true }
 
 function F.ApplySettings()
@@ -7,13 +7,6 @@ function F.ApplySettings()
   F.ApplyAccessibility()
   if F.ShouldHideNativeScan() then F.CancelNativeScan("Another auction addon is enabled. Previous prices kept.")end
   F.UpdateScanUI();F.Refresh()
-end
-
-function F.OpenCompanions(compact)
-  local addon=CompanionsForever
-  if addon and addon.ready then
-    if compact then addon.Pets.ToggleCompass() else addon.Pets.Toggle() end
-  else F.Print("Install and enable Companions Forever to open the pet game.")end
 end
 
 function F.Now() return GetServerTime and GetServerTime() or time() end
@@ -155,7 +148,6 @@ SlashCmdList.WAYLAIDFOREVER = function(msg)
   local clear = tonumber(msg:match("^unpin%s+(%d+)$"))
   if clear then F.char.pins[clear] = nil; F.Refresh(); return end
   if msg == "accessibility" then F.tab="Settings";F.accessibilityView=true;F.window:Show();F.Render();return end
-  if msg == "pets" then F.OpenCompanions();return end
   if msg == "memory" then F.ReportMemory();return end
   if msg == "prices" then F.ImportPersonal(); F.Refresh(); return end
   if msg == "compass" then F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator();return end
