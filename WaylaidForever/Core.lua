@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.14.8"
+F.version = "0.14.9"
 -- Diagnostic sharing is separate from price sharing and always opt-in.
 F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, generalAuctionTooltips = true, autoHideAuction = true }
 F.defaults.telemetry=false
@@ -92,6 +92,8 @@ events:SetScript("OnEvent", function(_, event, name, success,spellID)
   elseif F.char then
     if event=="ADDON_LOADED" then F.InstallMap();return end
     if F.writsByQuest[name] then
+      if event=="QUEST_TURNED_IN" then F.RecordWritCompletion(name)end
+      if event=="QUEST_ACCEPTED" and type(F.char.writCompletedUntil)=="table" then F.char.writCompletedUntil[name]=nil end
       if event=="QUEST_REMOVED" or event=="QUEST_TURNED_IN" then
         -- The removal event can arrive before IsOnQuest catches up. Exclude
         -- this writ immediately so a queued refresh cannot resurrect it.
@@ -132,7 +134,8 @@ events:SetScript("OnUpdate",function(_,dt)
   end
   if routeElapsed>=5 then
     routeElapsed=0
-    if #(F.active or {})>0 then F.Refresh() end
+    if #(F.active or {})>0 then F.Refresh()
+    elseif F.window and F.window:IsShown() and F.tab=="Writs" then F.Render()end
     F.InstallMap()
   end
 end)

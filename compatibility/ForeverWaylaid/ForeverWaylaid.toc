@@ -2,7 +2,7 @@
 ## Title: Waylaid Forever - saved-data compatibility
 ## Notes: Loads old saves for Waylaid Forever. Saved-data compatibility only.
 ## Author: Warlune
-## Version: 0.14.8
+## Version: 0.14.9
 ## SavedVariables: ForeverWaylaidDB
 ## SavedVariablesPerCharacter: ForeverWaylaidCharDB
 

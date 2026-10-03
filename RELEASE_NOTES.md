@@ -1,4 +1,12 @@
-# Waylaid Forever 0.14.8 — beta
+# Waylaid Forever 0.14.9 — beta
+
+- Writs stay in the selected sort order, including accepted and completed types.
+- Added accepted, ready-to-deliver and completed-today markers, plus Show: Available.
+- Abandon/reaccept updates the marker; turned-in writs become available after the server daily reset. Tracking is per character and preserves existing saves.
+
+See [Waylaid Forever's release notes](WaylaidForever/RELEASE_NOTES.md) for details and testing limitations.
+
+## Previous update: Waylaid Forever 0.14.8
 
 - Improved multi-writ route planning and connecting-flight handling.
 - Reduced temporary allocations during route planning and map updates.

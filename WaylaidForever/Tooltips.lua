@@ -34,6 +34,11 @@ local function append(tooltip, id)
     end
     if best and best.quote then tooltip:AddLine("Source: " .. best.quote.source, 0.65,0.65,0.65) end
   elseif writ then
+    local status=F.WritStatus(writ.questId)
+    if status then
+      tooltip:AddLine(F.writStatusLabels[status],1,1,1)
+      if status=="completed"then tooltip:AddLine("Available again after the daily reset.",0.8,0.8,0.8)end
+    end
     local quote = F.Price(writ.targetId)
     tooltip:AddDoubleLine(writ.qty .. " × " .. writ.targetName, F.Style.Money(quote and quote.price * writ.qty), 1,1,1, 1,1,1)
     tooltip:AddLine(writ.rep .. " reputation · keep the writ for delivery", 0.8,0.8,0.8)

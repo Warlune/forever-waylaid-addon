@@ -1,5 +1,45 @@
 local _, F = ...
 
+-- Daily availability belongs to this character and quest ID, not the account
+-- or reputation tier. Use the server reset, never local midnight.
+function F.WritDailyReset()
+  local modern=C_DateAndTime and C_DateAndTime.GetSecondsUntilDailyReset
+  for _,api in ipairs({modern or false,GetQuestResetTime or false})do
+    if type(api)=="function"then
+      local ok,seconds=pcall(api)
+      if ok and type(seconds)=="number" and seconds>0 and seconds<=90000 then
+        return F.Now()+seconds
+      end
+    end
+  end
+end
+function F.RecordWritCompletion(questID)
+  if not F.char or not F.writsByQuest[questID]then return end
+  if type(F.char.writCompletedUntil)~="table"then F.char.writCompletedUntil={}end
+  -- A short bridge covers a delayed quest flag if reset data is unavailable.
+  -- Do not invent a day-long lockout when the client cannot supply its reset.
+  F.char.writCompletedUntil[questID]=F.WritDailyReset() or F.Now()+60
+end
+function F.WritStatus(questID,stop)
+  if not questID or not F.char then return end
+  local records=F.char.writCompletedUntil
+  local expiry=type(records)=="table" and records[questID]
+  if expiry then
+    if type(expiry)=="number" and expiry>F.Now() and expiry<=F.Now()+90000 then return "completed" end
+    records[questID]=nil
+  end
+  if stop then return stop.ready and "ready" or "accepted" end
+  if not (F.removedWrits and F.removedWrits[questID]) and C_QuestLog.IsOnQuest(questID)then
+    return C_QuestLog.IsComplete(questID) and "ready" or "accepted"
+  end
+  local api=C_QuestLog.IsQuestFlaggedCompleted or IsQuestFlaggedCompleted
+  if api then
+    local ok,done=pcall(api,questID)
+    if ok and done then return "completed" end
+  end
+end
+F.writStatusLabels={accepted="Accepted",ready="Ready to deliver",completed="Completed today"}
+
 function F.DestinationText(point)
   if not point then return "Delivery location not supplied yet" end
   local info=C_Map.GetMapInfo(point.mapID)

@@ -51,8 +51,12 @@ function F.LedgerEntries()
     for _,item in ipairs(F.catalog.writs) do
       local goods,quote=F.GoodsQuote(item.targetId,item.qty)
       local entry={item=item,cost=goods.cost,goods=goods,reward=item.rep,quote=quote,stop=active[item.questId],owned=S.Count(item.id)}
+      entry.writStatus=F.WritStatus(item.questId,entry.stop)
       all[#all+1]=entry
-      if match(item.name.." "..item.targetName,query) and (not F.onlyOwned or active[item.questId] or S.Count(item.id)>0) then
+      local filter=F.writFilter or (F.onlyOwned and "cargo" or "all")
+      local visible=filter=="all" or (filter=="available" and not entry.writStatus)
+        or (filter=="cargo" and (entry.stop or entry.owned>0))
+      if match(item.name.." "..item.targetName,query) and visible then
         entries[#entries+1]=entry
       end
     end
@@ -65,7 +69,6 @@ function F.LedgerEntries()
   F.ScoreEntries(all)
   table.sort(entries,function(a,b)
     if a.fullyPriced~=b.fullyPriced then return a.fullyPriced end
-    if F.tab=="Writs" and (a.stop~=nil)~=(b.stop~=nil) then return a.stop~=nil end
     if F.sortIndex==3 then return a.item.name<b.item.name end
     local av,bv=a.total or math.huge,b.total or math.huge
     if F.sortIndex~=2 then av=av/math.max(1,a.reward or 0);bv=bv/math.max(1,b.reward or 0) end
@@ -134,8 +137,13 @@ function F.BuildUI()
   F.routeModeHint=S.Text(F.routeModeBar,F.routingBetaNotice,0,-7,980,"GameFontHighlightSmall",S.gold)
   F.tierButton=S.Button(F.filters,"Tier: All",308,0,160,function()F.tierIndex=F.tierIndex%#tiers+1;F.offset=0;F.Render()end)
   F.sortButton=S.Button(F.filters,"Sort: Best value",480,0,176,function()F.sortIndex=F.sortIndex%3+1;F.offset=0;F.Render()end)
-  F.ownedButton=S.Button(F.filters,"Show: All",668,0,166,function()F.onlyOwned=not F.onlyOwned;F.offset=0;F.Render()end)
-  S.Button(F.filters,"Clear filters",846,0,140,function()F.searchText="";edit:SetText("");F.onlyOwned=false;F.tierIndex=1;F.offset=0;F.Render()end)
+  F.ownedButton=S.Button(F.filters,"Show: All",668,0,166,function()
+    if F.tab=="Writs"then
+      F.writFilter=({all="available",available="cargo",cargo="all"})[F.writFilter or (F.onlyOwned and "cargo" or "all")]
+    else F.onlyOwned=not F.onlyOwned end
+    F.offset=0;F.Render()
+  end)
+  S.Button(F.filters,"Clear filters",846,0,140,function()F.searchText="";edit:SetText("");F.onlyOwned=false;F.writFilter=nil;F.tierIndex=1;F.offset=0;F.Render()end)
   F.stats={}
   for i=1,4 do
     local box=S.Panel(w,24+(i-1)*249,-159,240,50)
@@ -375,6 +383,8 @@ function F.RenderDetail(entry)
         if not F.char.home or F.char.home.name~=F.Travel.BindName() then add("Hearthstone destination unknown","Bind at an inn or use your Hearthstone once to record its destination.")end
       end
       if not stop.point then add("Set the customer pin","/wf pin "..stop.questID.." MAP_ID X Y")end
+    elseif F.WritStatus(item.questId)=="completed"then
+      add("Completed today","You have already turned in this writ type on this character. Available again after the daily reset.")
     else add("Not accepted","Open the writ in your bags to start its route.")end
   end
   local quote=entry.quote or entry.best and entry.best.quote
@@ -407,7 +417,8 @@ function F.Render()
   if settings then F.trackButton:Hide();F.mapButton:Hide();return end
   F.tierButton:SetShown(F.tab=="Crates");F.tierButton:SetText("Tier: "..(tiers[F.tierIndex or 1] or "All"))
   F.sortButton:SetText("Sort: "..({"Best value","Lowest total","Name"})[F.sortIndex or 1])
-  F.ownedButton:SetText(F.onlyOwned and "Show: My cargo" or "Show: All")
+  local filter=F.tab=="Writs" and F.writFilter or nil
+  F.ownedButton:SetText(filter and ({all="Show: All",available="Show: Available",cargo="Show: My cargo"})[filter] or F.onlyOwned and "Show: My cargo" or "Show: All")
   local entries=F.LedgerEntries();F.entries=entries
   F.lastPage=math.max(0,math.floor((#entries-1)/pageSize)*pageSize);F.offset=math.min(F.offset or 0,F.lastPage)
   F.listTitle:SetText(F.tab=="Route" and "YOUR DELIVERY ITINERARY" or F.tab:upper().."  /  "..#entries.." entries  /  click to inspect")
@@ -424,7 +435,7 @@ function F.Render()
       row.entry=entry;row.itemID=entry.item.id;S.SetIcon(row.icon,entry.item.id)
       local r,g,b=S.RarityColor(entry.item.id)
       S.TextColor(row.text,{r,g,b})
-      local color=entry.band and F.valueColors[entry.band] or neutral
+      local color=entry.writStatus=="completed" and neutral or entry.band and F.valueColors[entry.band] or neutral
       if S.HighContrast() then row.bg:SetColorTexture(1,1,1,entry==selected and 0.2 or 0.025)
       else row.bg:SetColorTexture(color[1],color[2],color[3],entry==selected and 0.27 or 0.11)end
       if S.HighContrast() then row.stripe:SetColorTexture(1,1,1,entry==selected and 1 or 0.3)
@@ -438,9 +449,12 @@ function F.Render()
       else
         row.cost:SetText((entry.item.questId and "Writ " or "Crate ")..S.Money(entry.purchase and entry.purchase.price).."\nGoods "..S.Money(entry.cost).."\nTotal "..S.Money(entry.total))
         row.detail:SetText(entry.best and entry.best.option.qty.." × "..entry.best.option.name or entry.item.questId and entry.item.qty.." × "..entry.item.targetName or "Price missing / short stock")
-        local status=entry.stop and (entry.stop.ready and " • Ready" or " • Accepted") or ""
-        row.reward:SetText((entry.reward or 0)..(F.tab=="Crates" and " favor" or " rep").." • "..(entry.band and F.valueLabels[entry.band] or entry.fullyPriced and "Stock / value unverified" or "Unpriced")..status)
-        S.TextColor(row.reward,entry.band and F.valueColors[entry.band] or neutral)
+        -- Status comes first so larger text cannot truncate the daily marker.
+        local status=entry.writStatus and (F.writStatusLabels[entry.writStatus].." • ") or ""
+        local value=entry.writStatus=="completed" and "" or " • "..
+          (entry.band and F.valueLabels[entry.band] or entry.fullyPriced and "Stock / value unverified" or "Unpriced")
+        row.reward:SetText(status..(entry.reward or 0)..(F.tab=="Crates" and " favor" or " rep")..value)
+        S.TextColor(row.reward,color)
       end
     end
   end

@@ -1,4 +1,14 @@
-# Waylaid Forever 0.14.8 — beta
+# Waylaid Forever 0.14.9 — beta
+
+- The Writs list follows the selected sort. Accepted writs no longer jump above better-value options; the Route tab keeps your active deliveries together.
+- Writ rows and item tooltips show Accepted, Ready to deliver, or Completed today. Completed rows use a neutral background and remain in their price-sorted position.
+- Abandoning a writ removes its accepted mark. Accepting it again restores the mark. Only turning it in counts as a daily completion.
+- Completion is per character and writ type, using the client's completion flags and server daily reset. Saved local turn-ins cover delayed quest updates without changing existing settings or prices.
+- The Writs Show button cycles through All, Available, and My cargo. Available excludes active and completed writs without changing value ratings.
+
+Simulated tests cover sorting, abandon/reaccept/turn-in, reload persistence, character isolation and daily reset. Actual server reset behavior still needs an in-game check. Without readable reset data, the addon relies on the game's completion flags after a short turn-in grace period.
+
+## Previous update: 0.14.8
 
 - Removed the Alliance preview debug setting; appearance follows the character's faction.
 - Ledger dragging now saves its position. Existing compass position, scale, minimap angle, prices and flight data remain intact during updates.

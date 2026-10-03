@@ -1,4 +1,4 @@
-# Waylaid Forever — v0.14.8 beta
+# Waylaid Forever — v0.14.9 beta
 
 **Waylaid Forever helps you compare crate and writ costs, work out what to buy or craft, and plan your deliveries in WoW Forever.**
 
@@ -6,7 +6,9 @@ See the goods you need, what you already have, and the estimated cost alongside 
 
 Use the built-in auction scanner or supported Auctionator/Auctioneer data for prices. The travel compass plans around your known flight paths, connecting flights, boats, zeppelins, Hearthstone, and eligible teleports. No other addons are required.
 
-This is **0.14.8 beta**. Routing and auction compatibility are still being tested with players. Prices are estimates, walking dots are directional guides, and larger delivery rounds can miss a faster order. Optional diagnostic sharing is off by default. See the [changelog](WaylaidForever/RELEASE_NOTES.md) or [report a problem](https://github.com/Warlune/forever-waylaid-addon/issues/new/choose).
+This is **0.14.9 beta**. Routing and auction compatibility are still being tested with players. Prices are estimates, walking dots are directional guides, and larger delivery rounds can miss a faster order. Optional diagnostic sharing is off by default. See the [changelog](WaylaidForever/RELEASE_NOTES.md) or [report a problem](https://github.com/Warlune/forever-waylaid-addon/issues/new/choose).
+
+Writs stay in the selected sort order. Accepted and ready-to-deliver writs are marked without moving to the top, and turned-in types show **Completed today** until the server daily reset. Abandoning a writ removes its mark; accepting it again restores it. Use **Show: Available** to hide active and completed types while choosing another delivery. This status is specific to your character; the Route tab keeps your current deliveries together.
 
 Built for the **WoW Forever beta** client, interface `16001`, with catalogue build `1.60.1.70009`. The UI has been checked in client `1.60.1.70124`. This catalogue is not intended for Retail, Season of Discovery, or Classic Era.
 
