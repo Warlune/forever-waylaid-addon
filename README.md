@@ -1,4 +1,4 @@
-# Waylaid Forever — v0.14.13 beta
+# Waylaid Forever — v0.14.14 beta
 
 **Waylaid Forever helps you compare crate and writ costs, work out what to buy or craft, and plan your deliveries in WoW Forever.**
 
@@ -6,7 +6,7 @@ See the goods you need, what you already have, and the estimated cost alongside 
 
 Use the built-in auction scanner or supported Auctionator/Auctioneer data for prices. The travel compass plans around your known flight paths, connecting flights, boats, zeppelins, Hearthstone, and eligible teleports. No other addons are required.
 
-This is **0.14.13 beta**. Routing and auction compatibility are still being tested with players. Prices are estimates, walking dots are directional guides, and larger delivery rounds can miss a faster order. Optional diagnostic sharing is off by default. See the [changelog](WaylaidForever/RELEASE_NOTES.md) or [report a problem](https://github.com/Warlune/forever-waylaid-addon/issues/new/choose).
+This is **0.14.14 beta**. Routing and auction compatibility are still being tested with players. Prices are estimates, walking dots are directional guides, and larger delivery rounds can miss a faster order. Optional diagnostic sharing is off by default. See the [changelog](WaylaidForever/RELEASE_NOTES.md) or [report a problem](https://github.com/Warlune/forever-waylaid-addon/issues/new/choose).
 
 Writs stay in the selected sort order, with **(In Bag)**, **(On Quest)**, or **(Completed today)** after the name. An accepted writ stays On Quest even when its goods are ready. Abandoning it clears that state; if the writ item remains in your bags, it shows In Bag. Completed today clears at the server daily reset. The **Hide completed today** checkbox beside Sort hides only completed types and remembers your choice. The **Goods: Buy at AH / Craft** button sits beside Sort in the same filter row. This status is specific to your character; the Route tab keeps your current deliveries together. The compass has a **Hide** button; reopen it with Travel compass in the ledger or by right-clicking the minimap button.
 

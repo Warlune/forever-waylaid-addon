@@ -1,4 +1,9 @@
-# Waylaid Forever 0.14.13 — beta
+# Waylaid Forever 0.14.14 — beta
+
+- Neatened the compass header: Hide has more room for its label, an inset right-edge anchor, and a matching-height header background. Shortened the heading to COMPASS • BETA and spaced route text below it.
+- Compass position, visibility and map expansion remain saved as before.
+
+## Previous update: Waylaid Forever 0.14.13 — beta
 
 - Replaced the combined stock/value warning with specific labels: Not enough AH stock, Missing prices, Reward unverified, or Stock unverified when availability cannot be established.
 - Short crafting materials now show the scanned AH quantity against the full craft requirement in the detail panel. Costs remain full-purchase estimates; stock warnings do not change sorting or saved prices.
