@@ -1,4 +1,9 @@
-# Waylaid Forever 0.14.11 — beta
+# Waylaid Forever 0.14.12 — beta
+
+- Evenly spaced Crates, Writs, Route, Settings and Travel compass across the full header width, with matching button sizes and alignment to the filter row.
+- Existing WoW styling, accessibility options and saved data are unchanged.
+
+## Previous update: Waylaid Forever 0.14.11 — beta
 
 - Removed the Show: All / Available / My cargo control and its filtering rules.
 - Moved Goods: Buy at AH / Craft into the filter row beside Sort on Crates and Writs.

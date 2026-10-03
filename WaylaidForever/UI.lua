@@ -113,13 +113,15 @@ function F.BuildUI()
   F.status=S.Text(w,"",660,-37,343,"GameFontHighlightSmall",S.muted);F.status:SetJustifyH("RIGHT")
   F.tab="Crates";F.sortIndex=1;F.tierIndex=1;F.selected={};F.tabButtons={}
   local tabs={"Crates","Writs","Route","Settings"}
-  local spacing=154
+  -- Five equal controls fill the same width as the filter row below.
+  local navWidth,navGap=188,12
+  local spacing=navWidth+navGap
   for i,tab in ipairs(tabs) do
-    F.tabButtons[tab]=S.Button(w,tab,24+(i-1)*spacing,-82,spacing-10,function()
+    F.tabButtons[tab]=S.Button(w,tab,24+(i-1)*spacing,-82,navWidth,function()
       F.tab=tab;F.offset=0;F.Render()
     end)
   end
-  S.Button(w,"Travel compass",844,-82,168,function()F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator()end)
+  S.Button(w,"Travel compass",24+#tabs*spacing,-82,navWidth,function()F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator()end)
   F.filters=CreateFrame("Frame",nil,w);F.filters:SetPoint("TOPLEFT",24,-120);F.filters:SetSize(988,28)
   local edit=CreateFrame("EditBox",nil,F.filters,"InputBoxTemplate");edit:SetPoint("TOPLEFT",8,0);edit:SetSize(278,26);edit:SetAutoFocus(false)
   edit:SetTextInsets(7,7,0,0);edit:SetScript("OnEscapePressed",edit.ClearFocus)
