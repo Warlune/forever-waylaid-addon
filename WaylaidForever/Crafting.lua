@@ -50,7 +50,7 @@ local function single(id,qty,override)
     end
   end
   local reverse={};for i=#steps,1,-1 do reverse[#reverse+1]=steps[i]end
-  return {cost=not missing and cost or nil,enough=enough,materials=materials,steps=reverse,variableYield=variable,
+  return {cost=not missing and cost or nil,enough=enough,shortStock=short,materials=materials,steps=reverse,variableYield=variable,
     reason=missing and "Some raw materials are unpriced" or short and "Some auction materials have short stock" or nil}
 end
 
@@ -159,13 +159,14 @@ function F.GoodsQuote(id,qty)
   local auction=F.Price(id)
   if F.db.settings.craftGoods then return F.CraftQuote(id,qty),auction end
   return {cost=auction and auction.price*qty,enough=auction and (not auction.quantity or auction.quantity>=qty),
+    shortStock=auction and auction.quantity and auction.quantity<qty or false,
     reason=not auction and "No auction price" or auction.quantity and auction.quantity<qty and "Short auction stock" or nil},auction
 end
 function F.LedgerCrateCosts(crate)
   local rows,best={},nil
   for _,option in ipairs(crate.options)do
     local goods,auction=F.GoodsQuote(option.itemId,option.qty)
-    local row={option=option,quote=auction,cost=goods.cost,enough=goods.enough,craft=F.db.settings.craftGoods and goods or nil}
+    local row={option=option,quote=auction,cost=goods.cost,enough=goods.enough,shortStock=goods.shortStock,craft=F.db.settings.craftGoods and goods or nil}
     rows[#rows+1]=row
     if row.cost and row.enough and (not best or row.cost<best.cost)then best=row end
   end

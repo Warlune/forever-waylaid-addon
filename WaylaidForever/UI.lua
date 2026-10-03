@@ -15,6 +15,14 @@ function F.PriceEntry(entry)
   entry.fullyPriced=entry.total~=nil
   local goods=entry.goods or entry.best
   entry.stockReady=goods and goods.enough and entry.purchase and (not entry.purchase.quantity or entry.purchase.quantity>=1) or false
+  entry.shortStock=(goods and goods.shortStock) or (entry.purchase and entry.purchase.quantity and entry.purchase.quantity<1) or false
+end
+function F.ValueLabel(entry)
+  if not entry.fullyPriced then return "Missing prices" end
+  if entry.shortStock then return "Not enough AH stock" end
+  if (entry.reward or entry.item.rep or entry.item.favor or 0)<=0 then return "Reward unverified" end
+  if not entry.stockReady then return "Stock unverified" end
+  return entry.band and F.valueLabels[entry.band] or "Value not rated"
 end
 function F.ScoreEntries(entries)
   local ranked={}
@@ -329,7 +337,7 @@ function F.RenderDetail(entry)
   add(item.questId and "Writ" or "Crate",nil,nil,S.Money(entry.purchase and entry.purchase.price))
   add(craftMode and "Goods (craft)" or "Goods (AH)",nil,nil,S.Money(entry.cost))
   add("Total",nil,nil,S.Money(entry.total))
-  local value=entry.band and F.valueLabels[entry.band] or entry.fullyPriced and "Stock incomplete / value unverified" or "Missing price"
+  local value=F.ValueLabel(entry)
   add(value,entry.total and "Full purchase value • "..S.Money(entry.total/math.max(1,item.rep or item.favor or 1))..(item.questId and " / rep" or " / favor") or "Both the writ/crate and goods need a price.")
   local function craftDetails(quote)
     if not quote then return end
@@ -338,7 +346,8 @@ function F.RenderDetail(entry)
     add("Materials to source",nil)
     for _,mat in ipairs(quote.materials)do
       local count=S.Count(mat.itemId)
-      add(mat.qty.." × "..mat.name,"Bags "..count.." • need "..math.max(0,mat.qty-count).." • "..mat.source,mat.itemId,S.Money(mat.cost))
+      local shortage=mat.quantity and mat.quantity<mat.qty and ("\nAH stock: "..mat.quantity.." / "..mat.qty.." needed in the full craft") or ""
+      add(mat.qty.." × "..mat.name,"Bags "..count.." • need "..math.max(0,mat.qty-count).." • "..mat.source..shortage,mat.itemId,S.Money(mat.cost))
     end
     add("Craft in order","Requires learned recipes"..(quote.variableYield and " • minimum yields used" or ""))
     for n,step in ipairs(quote.steps)do
@@ -356,7 +365,8 @@ function F.RenderDetail(entry)
       for _,row in ipairs(entry.rows)do
         local option=row.option
         local bestValue=hasBest and row.enough and row.cost==entry.best.cost
-        add(option.qty.." × "..option.name,(bestValue and "Best value • " or "").."Bags "..S.Count(option.itemId).." / "..option.qty..(row.enough and "" or " • price / stock incomplete"),option.itemId,S.Money(row.cost),nil,bestValue)
+        local issue=not row.cost and "Missing prices" or row.shortStock and "Not enough AH stock" or not row.enough and "Stock unverified"
+        add(option.qty.." × "..option.name,(bestValue and "Best value • " or "").."Bags "..S.Count(option.itemId).." / "..option.qty..(issue and " • "..issue or ""),option.itemId,S.Money(row.cost),nil,bestValue)
       end
     end
   else
@@ -465,8 +475,7 @@ function F.Render()
       else
         row.cost:SetText((entry.item.questId and "Writ " or "Crate ")..S.Money(entry.purchase and entry.purchase.price).."\nGoods "..S.Money(entry.cost).."\nTotal "..S.Money(entry.total))
         row.detail:SetText(entry.best and entry.best.option.qty.." × "..entry.best.option.name or entry.item.questId and entry.item.qty.." × "..entry.item.targetName or "Price missing / short stock")
-        local value=" • "..
-          (entry.band and F.valueLabels[entry.band] or entry.fullyPriced and "Stock / value unverified" or "Unpriced")
+        local value=" • "..F.ValueLabel(entry)
         row.reward:SetText((entry.reward or 0)..(F.tab=="Crates" and " favor" or " rep")..value)
         S.TextColor(row.reward,color)
       end

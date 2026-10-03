@@ -54,9 +54,14 @@ F.recipeData={recipes={['100']={itemId=100,name='Shared batch',outputMin=1,outpu
 F.Price=function()return {price=20,quantity=1,source='Test'}end
 local batch=F.CraftQuote(100,1)
 assert(batch.cost==30 and batch.enough and batch.variableYield and batch.materials[1].qty==3)
+assert(not batch.shortStock,'Vendor-sourced material must not inherit AH shortages')
 F.recipeData.metadata.leaves['500'].vendorCopper=nil
-batch=F.CraftQuote(100,1);assert(batch.cost==60 and not batch.enough)
+batch=F.CraftQuote(100,1);assert(batch.cost==60 and not batch.enough and batch.shortStock)
 F.Price=function()end;assert(F.CraftQuote(100,1).cost==nil)
 assert(F.CraftQuote(999,1).reason and not F.CraftQuote(999,1).enough)
+F.db.settings.craftGoods=false;F.Price=function()return {price=20,quantity=1,source='Test'}end
+assert(F.GoodsQuote(100,3).shortStock,'AH goods shortage must be explicit')
+local rows,best=F.LedgerCrateCosts({options={{itemId=100,qty=3,name='Test'}}})
+assert(not best and rows[1].shortStock,'Crate options must retain their shortage reason')
 F.recipeData=d;F.Price=originalPrice;F.db.settings.craftGoods=false
 print('PASS: 492 website craft comparisons, factions, nested batches, vendor fallback, missing/short stock and goods tooltips')

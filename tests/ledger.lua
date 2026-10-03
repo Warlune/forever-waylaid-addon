@@ -47,6 +47,15 @@ for _,row in ipairs(F.detailRows)do if row.shown and row.title.text=='Total' the
 assert(totalRow and totalRow.amount.text==F.Style.Money(87),'Detail and list must agree about full cost')
 F.GoodsQuote=function()return {cost=77,enough=false,materials={},steps={}}end
 entries=F.LedgerEntries();assert(entries[1].fullyPriced and not entries[1].band,'Short stock keeps its estimate but cannot win a value band')
+assert(F.ValueLabel(entries[1])=='Stock unverified','Unknown stock must not claim a known shortage')
+F.GoodsQuote=function()return {cost=77,enough=false,shortStock=true,materials={},steps={}}end
+entries=F.LedgerEntries();assert(F.ValueLabel(entries[1])=='Not enough AH stock')
+F.RenderDetail(entries[1]);local shortageTitle=false
+for _,row in ipairs(F.detailRows)do if row.shown and row.title.text=='Not enough AH stock' then shortageTitle=true end end
+assert(shortageTitle,'List and detail must explain the same shortage')
+entries[1].fullyPriced=false;assert(F.ValueLabel(entries[1])=='Missing prices','Missing prices are a separate issue')
+entries[1].fullyPriced=true;entries[1].shortStock=false;entries[1].reward=0
+assert(F.ValueLabel(entries[1])=='Reward unverified','Unknown rewards must not be called short stock')
 local req=F.CraftRequirements({steps={{profession='Tailoring',skill=40},{profession='Tailoring',skill=150},
   {profession='Alchemy',skill=0},{profession='Engineering',skill=200,caveat='Requires Goblin Engineering.'}}})
 assert(req:find('Tailoring • skill 150',1,true) and not req:find('skill 40',1,true))

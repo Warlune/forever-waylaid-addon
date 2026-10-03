@@ -1,4 +1,11 @@
-# Waylaid Forever 0.14.12 — beta
+# Waylaid Forever 0.14.13 — beta
+
+- Replaced the combined stock/value warning with specific labels: Not enough AH stock, Missing prices, Reward unverified, or Stock unverified when availability cannot be established.
+- Short crafting materials now show the scanned AH quantity against the full craft requirement in the detail panel. Costs remain full-purchase estimates; stock warnings do not change sorting or saved prices.
+- Checked the published 1.60.1.70205 item data and current writ quest list on October 3. All 30 crates and 150 writs are already included. No item/quest IDs, names, required character levels, crate bundles, or listed writ reputation rewards differed.
+- Published data can lag the live server. Writ objective quantities and server-side crate rewards were not revalidated. The audit is recorded in data/catalog-audit-2026-10-03.json in the repository; research files are not shipped with the addon.
+
+## Previous update: Waylaid Forever 0.14.12 — beta
 
 - Evenly spaced Crates, Writs, Route, Settings and Travel compass across the full header width, with matching button sizes and alignment to the filter row.
 - Existing WoW styling, accessibility options and saved data are unchanged.

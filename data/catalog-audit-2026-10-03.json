@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-03",
+  "publishedBuild": "1.60.1.70205",
+  "sourceGeneratedAt": "2026-10-03 02:16 UTC",
+  "sources": {
+    "items": "https://daybreakforever.com/static/forever/datamine.json",
+    "quests": "https://www.wowhead.com/forever/quests/eastern-kingdoms/crafting"
+  },
+  "results": {
+    "crates": {
+      "localCount": 30,
+      "publishedCount": 30,
+      "addedIDs": [],
+      "missingIDs": [],
+      "changedNamesOrLevels": [],
+      "changedBundles": []
+    },
+    "writs": {
+      "localCount": 150,
+      "publishedCount": 150,
+      "addedIDs": [],
+      "missingIDs": [],
+      "changedNamesOrLevels": []
+    },
+    "writQuests": {
+      "publishedCount": 150,
+      "addedIDs": [],
+      "missingIDs": [],
+      "changedNamesOrReputation": []
+    }
+  },
+  "limitations": [
+    "Published datasets may lag live server changes.",
+    "Quest objective quantities and server-side crate rewards were not revalidated."
+  ]
+}
