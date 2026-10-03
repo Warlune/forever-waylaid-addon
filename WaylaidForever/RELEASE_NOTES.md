@@ -1,4 +1,10 @@
-# Waylaid Forever 0.14.10 — beta
+# Waylaid Forever 0.14.11 — beta
+
+- Removed the Show: All / Available / My cargo control and its filtering rules.
+- Moved Goods: Buy at AH / Craft into the filter row beside Sort on Crates and Writs.
+- Hide completed today remains the single completion filter. Writ states, value sorting and saved settings are unchanged.
+
+## Previous update: Waylaid Forever 0.14.10 — beta
 
 - Writ names now show one of three states: In Bag, On Quest, or Completed today. Ready-to-deliver writs use On Quest; the detail panel still shows delivery readiness.
 - Status stays beside the name, with space reserved so longer names cannot hide the marker. Value ratings remain on the reward line and sorting is unchanged.

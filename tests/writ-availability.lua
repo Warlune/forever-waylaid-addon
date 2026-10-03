@@ -1,7 +1,7 @@
 local F=...
 local old={char=F.char,active=F.active,catalog=F.catalog,price=F.Price,goods=F.GoodsQuote,
   now=F.Now,quest=C_QuestLog,dates=C_DateAndTime,reset=GetQuestResetTime,removed=F.removedWrits,
-  refresh=F.Refresh,filter=F.writFilter,owned=F.onlyOwned,tab=F.tab,sort=F.sortIndex,query=F.searchText,count=C_Item.GetItemCount,hide=F.db.settings.hideCompletedWrits,navigator=F.db.settings.navigator}
+  refresh=F.Refresh,tab=F.tab,sort=F.sortIndex,query=F.searchText,count=C_Item.GetItemCount,hide=F.db.settings.hideCompletedWrits,navigator=F.db.settings.navigator}
 local stamp,reset=1000,2000
 local flags,on,ready,bags={},{},{},{}
 C_Item.GetItemCount=function(id)return bags[id] or 0 end
@@ -58,7 +58,7 @@ F.Price=function(id)return {price=costs[id] or 1,quantity=999,source='Test',time
 F.GoodsQuote=function()return {cost=1,enough=true}end
 F.active={{questID=a.questId,ready=true}};on[a.questId]=true;ready[a.questId]=true
 flags[c.questId]=true
-F.tab='Writs';F.sortIndex=1;F.searchText='';F.onlyOwned=false;F.writFilter=nil
+F.tab='Writs';F.sortIndex=1;F.searchText=''
 local all=F.LedgerEntries()
 assert(all[1].item==b and all[3].item==a,'Active writ must not override best-value sorting')
 assert(all[3].writStatus=='quest' and all[2].writStatus=='completed')
@@ -66,14 +66,9 @@ F.sortIndex=2;assert(F.LedgerEntries()[1].item==b,'Active writ must not override
 F.sortIndex=3
 local named=F.LedgerEntries()
 for i=2,#named do assert(named[i-1].item.name<named[i].item.name)end
-F.sortIndex=1;F.writFilter='available'
-local available=F.LedgerEntries()
-assert(#available==1 and available[1].item==b,'Available hides accepted/ready and completed writs')
-assert(available[1].band==all[1].band,'Availability filtering must not change value bands')
-F.writFilter='cargo'
-assert(F.LedgerEntries()[1].item==a,'Cargo retains accepted writs')
+F.sortIndex=1
 F.char.realm='Test Realm';F.char.flights={nodes={},edges={}}
-F.writFilter='all';F.Render()
+F.Render()
 assert(F.rows[2].status.text=='(Completed today)','Completed marker must follow the name')
 assert(F.rows[3].status.text=='(On Quest)','Active and ready quests share the On Quest marker')
 assert(not F.rows[3].reward.text:find('On Quest',1,true),'Status must not occupy the reward line')
@@ -81,13 +76,10 @@ F.RenderDetail(all[2])
 local found=false
 for _,row in ipairs(F.detailRows)do if row.shown and row.title.text=='Completed today' then found=true end end
 assert(found,'Detail must explain the daily lockout')
-F.ownedButton.scripts.OnClick()
-assert(F.writFilter=='available' and F.ownedButton.text=='Show: Available')
 
 bags[b.id]=1
 assert(F.WritStatus(b.questId)=='bag')
-assert(#F.LedgerEntries()==1,'In Bag writ is still available to accept')
-F.writFilter='all';F.hideCompleted.GetChecked=function()return true end
+F.hideCompleted.GetChecked=function()return true end
 F.hideCompleted.scripts.OnClick(F.hideCompleted)
 local visible=F.LedgerEntries()
 assert(F.db.settings.hideCompletedWrits and #visible==2 and visible[1].item==b and visible[2].item==a,
@@ -105,6 +97,6 @@ F.db.settings.hideCompletedWrits,F.db.settings.navigator=old.hide,old.navigator
 
 F.char,F.active,F.catalog,F.Price,F.GoodsQuote=old.char,old.active,old.catalog,old.price,old.goods
 F.Now,C_QuestLog,C_DateAndTime,GetQuestResetTime=old.now,old.quest,old.dates,old.reset
-F.removedWrits,F.Refresh,F.writFilter,F.onlyOwned=old.removed,old.refresh,old.filter,old.owned
+F.removedWrits,F.Refresh=old.removed,old.refresh
 F.tab,F.sortIndex,F.searchText=old.tab,old.sort,old.query
 print('PASS: writ sort order, accepted/ready/turned-in distinctions, character isolation, daily reset, missing APIs and availability filter')

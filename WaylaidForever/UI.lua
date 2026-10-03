@@ -42,8 +42,7 @@ function F.LedgerEntries()
       local chosen=best or rows[1]
       local entry={item=item,rows=rows,best=chosen,cost=chosen and chosen.cost,reward=item.favor,owned=S.Count(item.id)}
       all[#all+1]=entry
-      if match(hay,query) and (not F.tierIndex or F.tierIndex==1 or item.tier==tiers[F.tierIndex]) and
-        (not F.onlyOwned or S.Count(item.id)>0) then
+      if match(hay,query) and (not F.tierIndex or F.tierIndex==1 or item.tier==tiers[F.tierIndex]) then
         entries[#entries+1]=entry
       end
     end
@@ -53,10 +52,7 @@ function F.LedgerEntries()
       local entry={item=item,cost=goods.cost,goods=goods,reward=item.rep,quote=quote,stop=active[item.questId],owned=S.Count(item.id)}
       entry.writStatus=F.WritStatus(item.questId,entry.stop)
       all[#all+1]=entry
-      local filter=F.writFilter or (F.onlyOwned and "cargo" or "all")
-      local visible=filter=="all" or (filter=="available" and (not entry.writStatus or entry.writStatus=="bag"))
-        or (filter=="cargo" and (entry.stop or entry.owned>0))
-      if F.db.settings.hideCompletedWrits and entry.writStatus=="completed"then visible=false end
+      local visible=not (F.db.settings.hideCompletedWrits and entry.writStatus=="completed")
       if match(item.name.." "..item.targetName,query) and visible then
         entries[#entries+1]=entry
       end
@@ -124,9 +120,6 @@ function F.BuildUI()
     end)
   end
   S.Button(w,"Travel compass",844,-82,168,function()F.db.settings.navigator=not F.db.settings.navigator;F.UpdateNavigator()end)
-  F.craftButton=S.Button(w,"Goods: Buy at AH",640,-82,194,function()
-    F.db.settings.craftGoods=not F.db.settings.craftGoods;F.offset=0;F.Render()
-  end)
   F.filters=CreateFrame("Frame",nil,w);F.filters:SetPoint("TOPLEFT",24,-120);F.filters:SetSize(988,28)
   local edit=CreateFrame("EditBox",nil,F.filters,"InputBoxTemplate");edit:SetPoint("TOPLEFT",8,0);edit:SetSize(278,26);edit:SetAutoFocus(false)
   edit:SetTextInsets(7,7,0,0);edit:SetScript("OnEscapePressed",edit.ClearFocus)
@@ -146,13 +139,10 @@ function F.BuildUI()
   F.hideCompleted:SetScript("OnClick",function(self)
     F.db.settings.hideCompletedWrits=self:GetChecked()==true;F.offset=0;F.Render()
   end)
-  F.ownedButton=S.Button(F.filters,"Show: All",668,0,166,function()
-    if F.tab=="Writs"then
-      F.writFilter=({all="available",available="cargo",cargo="all"})[F.writFilter or (F.onlyOwned and "cargo" or "all")]
-    else F.onlyOwned=not F.onlyOwned end
-    F.offset=0;F.Render()
+  F.craftButton=S.Button(F.filters,"Goods: Buy at AH",668,0,194,function()
+    F.db.settings.craftGoods=not F.db.settings.craftGoods;F.offset=0;F.Render()
   end)
-  S.Button(F.filters,"Clear filters",846,0,140,function()F.searchText="";edit:SetText("");F.onlyOwned=false;F.writFilter=nil;F.db.settings.hideCompletedWrits=false;F.tierIndex=1;F.offset=0;F.Render()end)
+  S.Button(F.filters,"Clear filters",874,0,112,function()F.searchText="";edit:SetText("");F.db.settings.hideCompletedWrits=false;F.tierIndex=1;F.offset=0;F.Render()end)
   F.stats={}
   for i=1,4 do
     local box=S.Panel(w,24+(i-1)*249,-159,240,50)
@@ -430,8 +420,6 @@ function F.Render()
   F.search:SetWidth(F.tab=="Writs" and 200 or 278)
   F.searchPlaceholder:SetWidth(F.tab=="Writs" and 180 or 250)
   F.sortButton:SetText("Sort: "..({"Best value","Lowest total","Name"})[F.sortIndex or 1])
-  local filter=F.tab=="Writs" and F.writFilter or nil
-  F.ownedButton:SetText(filter and ({all="Show: All",available="Show: Available",cargo="Show: My cargo"})[filter] or F.onlyOwned and "Show: My cargo" or "Show: All")
   local entries=F.LedgerEntries();F.entries=entries
   F.lastPage=math.max(0,math.floor((#entries-1)/pageSize)*pageSize);F.offset=math.min(F.offset or 0,F.lastPage)
   F.listTitle:SetText(F.tab=="Route" and "YOUR DELIVERY ITINERARY" or F.tab:upper().."  /  "..#entries.." entries  /  click to inspect")
