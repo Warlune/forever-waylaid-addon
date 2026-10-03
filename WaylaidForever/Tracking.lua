@@ -28,17 +28,19 @@ function F.WritStatus(questID,stop)
     if type(expiry)=="number" and expiry>F.Now() and expiry<=F.Now()+90000 then return "completed" end
     records[questID]=nil
   end
-  if stop then return stop.ready and "ready" or "accepted" end
+  if stop then return "quest" end
   if not (F.removedWrits and F.removedWrits[questID]) and C_QuestLog.IsOnQuest(questID)then
-    return C_QuestLog.IsComplete(questID) and "ready" or "accepted"
+    return "quest"
   end
   local api=C_QuestLog.IsQuestFlaggedCompleted or IsQuestFlaggedCompleted
   if api then
     local ok,done=pcall(api,questID)
     if ok and done then return "completed" end
   end
+  local writ=F.writsByQuest[questID]
+  if writ and F.Style.Count(writ.id)>0 then return "bag" end
 end
-F.writStatusLabels={accepted="Accepted",ready="Ready to deliver",completed="Completed today"}
+F.writStatusLabels={bag="In Bag",quest="On Quest",completed="Completed today"}
 
 function F.DestinationText(point)
   if not point then return "Delivery location not supplied yet" end

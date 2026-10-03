@@ -1,4 +1,13 @@
-# Waylaid Forever 0.14.9 — beta
+# Waylaid Forever 0.14.10 — beta
+
+- Writ names now show one of three states: In Bag, On Quest, or Completed today. Ready-to-deliver writs use On Quest; the detail panel still shows delivery readiness.
+- Status stays beside the name, with space reserved so longer names cannot hide the marker. Value ratings remain on the reward line and sorting is unchanged.
+- Added a saved Hide completed today checkbox beside Sort. It hides only completed writs and leaves In Bag/On Quest visible. Clear filters restores all entries.
+- Added a Hide button to the compass header. Reopen it through Travel compass in the ledger or by right-clicking the minimap button. Position and map expansion are preserved.
+
+Simulated checks cover item/quest/completion precedence, daily reset, sorting, filtering, saved preferences and compass hide/reopen. Existing user data is preserved; no new scan or reset is required.
+
+## Previous update: Waylaid Forever 0.14.9 — beta
 
 - The Writs list follows the selected sort. Accepted writs no longer jump above better-value options; the Route tab keeps your active deliveries together.
 - Writ rows and item tooltips show Accepted, Ready to deliver, or Completed today. Completed rows use a neutral background and remain in their price-sorted position.

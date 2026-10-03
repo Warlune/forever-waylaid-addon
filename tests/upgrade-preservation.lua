@@ -2,7 +2,7 @@ local F=...
 local oldDB,oldChar,oldLegacy,oldLoader,oldAPI=WaylaidForeverDB,WaylaidForeverCharDB,ForeverWaylaidDB,WaylaidForeverLegacyLoader,C_AddOns
 local oldCommand=SlashCmdList.WAYLAIDFOREVER
 local account={settings={ledgerScale=.85,compassScale=1.3,textSize=16,highContrast=true,reduceMotion=true,
-  personal=false,navigator=false,worldRoute=false,telemetry=false,debugAlliance=true},notifiedUpdateVersion='0.14.9'}
+  personal=false,navigator=false,worldRoute=false,telemetry=false,hideCompletedWrits=true,debugAlliance=true},notifiedUpdateVersion='0.14.9'}
 local character={ledgerPosition={point='TOPLEFT',relativePoint='TOPLEFT',x=120,y=-90},
   navPosition={point='RIGHT',x=-73,y=41},minimapAngle=144,navExpanded=true,
   flights={nodes={[1]={name='My flight'}},edges={[1]={}}},pins={[123]={mapID=1411,x=.3,y=.4}},
@@ -13,6 +13,7 @@ local loaded={};assert(loadfile('WaylaidForever/Core.lua'))('WaylaidForever',loa
 for _=1,2 do loaded.events.scripts.OnEvent(nil,'ADDON_LOADED','WaylaidForever')end
 assert(loaded.db==account and loaded.char==character,'Upgrade replaced save tables')
 assert(account.settings.ledgerScale==.85 and account.settings.compassScale==1.3 and account.settings.textSize==16)
+assert(account.settings.hideCompletedWrits==true,'Saved completed-writ filter must survive upgrades')
 assert(account.settings.highContrast and account.settings.reduceMotion and not account.settings.personal and not account.settings.navigator)
 assert(not account.settings.worldRoute and account.settings.telemetry==false and account.notifiedUpdateVersion=='0.14.9')
 assert(account.settings.debugAlliance==nil,'Retired preview must be removed')

@@ -1,8 +1,9 @@
 local _, F = ...
-F.version = "0.14.9"
+F.version = "0.14.10"
 -- Diagnostic sharing is separate from price sharing and always opt-in.
 F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, generalAuctionTooltips = true, autoHideAuction = true }
 F.defaults.telemetry=false
+F.defaults.hideCompletedWrits=false
 
 function F.ApplySettings()
   F.Style.ApplyTheme()

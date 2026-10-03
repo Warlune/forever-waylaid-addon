@@ -1,9 +1,11 @@
 local F=...
 local old={char=F.char,active=F.active,catalog=F.catalog,price=F.Price,goods=F.GoodsQuote,
   now=F.Now,quest=C_QuestLog,dates=C_DateAndTime,reset=GetQuestResetTime,removed=F.removedWrits,
-  refresh=F.Refresh,filter=F.writFilter,owned=F.onlyOwned,tab=F.tab,sort=F.sortIndex,query=F.searchText}
+  refresh=F.Refresh,filter=F.writFilter,owned=F.onlyOwned,tab=F.tab,sort=F.sortIndex,query=F.searchText,count=C_Item.GetItemCount,hide=F.db.settings.hideCompletedWrits,navigator=F.db.settings.navigator}
 local stamp,reset=1000,2000
-local flags,on,ready={},{},{}
+local flags,on,ready,bags={},{},{},{}
+C_Item.GetItemCount=function(id)return bags[id] or 0 end
+F.db.settings.hideCompletedWrits=false
 local a,b,c=F.catalog.writs[1],F.catalog.writs[2],F.catalog.writs[3]
 F.Now=function()return stamp end
 C_DateAndTime={GetSecondsUntilDailyReset=function()return reset-stamp end}
@@ -12,12 +14,14 @@ C_QuestLog={IsOnQuest=function(id)return on[id]end,IsComplete=function(id)return
   IsQuestFlaggedCompleted=function(id)return flags[id]end}
 F.char={};F.removedWrits={};F.Refresh=function()end
 assert(F.WritStatus(a.questId)==nil)
+bags[a.id]=1;assert(F.WritStatus(a.questId)=='bag','Carried writ must show In Bag')
 on[a.questId]=true
-assert(F.WritStatus(a.questId)=='accepted')
+assert(F.WritStatus(a.questId)=='quest')
 ready[a.questId]=true
-assert(F.WritStatus(a.questId)=='ready','Ready objectives are not a daily completion')
+assert(F.WritStatus(a.questId)=='quest','Ready objectives are not a daily completion')
 F.events.scripts.OnEvent(nil,'QUEST_REMOVED',a.questId)
-assert(F.WritStatus(a.questId)==nil and not F.char.writCompletedUntil,'Abandon must not consume the daily')
+assert(F.WritStatus(a.questId)=='bag' and not F.char.writCompletedUntil,'Abandoned writ still in bags must show In Bag')
+bags[a.id]=nil;assert(F.WritStatus(a.questId)==nil,'No quest or item means no mark')
 F.events.scripts.OnEvent(nil,'QUEST_ACCEPTED',a.questId)
 F.events.scripts.OnEvent(nil,'QUEST_TURNED_IN',a.questId)
 assert(F.WritStatus(a.questId)=='completed','Turn-in must win over a stale quest log')
@@ -37,7 +41,7 @@ assert(F.WritStatus(b.questId)==nil,'Do not retain a cleared server flag')
 F.RecordWritCompletion(a.questId)
 on[a.questId]=true;ready[a.questId]=false
 F.events.scripts.OnEvent(nil,'QUEST_ACCEPTED',a.questId)
-assert(F.WritStatus(a.questId)=='accepted','A new acceptance must clear an old local lockout')
+assert(F.WritStatus(a.questId)=='quest','A new acceptance must clear an old local lockout')
 on[a.questId]=nil
 C_DateAndTime=nil;GetQuestResetTime=function()return 300 end
 assert(F.WritDailyReset()==stamp+300,'Legacy reset API fallback')
@@ -57,7 +61,7 @@ flags[c.questId]=true
 F.tab='Writs';F.sortIndex=1;F.searchText='';F.onlyOwned=false;F.writFilter=nil
 local all=F.LedgerEntries()
 assert(all[1].item==b and all[3].item==a,'Active writ must not override best-value sorting')
-assert(all[3].writStatus=='ready' and all[2].writStatus=='completed')
+assert(all[3].writStatus=='quest' and all[2].writStatus=='completed')
 F.sortIndex=2;assert(F.LedgerEntries()[1].item==b,'Active writ must not override total sorting')
 F.sortIndex=3
 local named=F.LedgerEntries()
@@ -70,13 +74,34 @@ F.writFilter='cargo'
 assert(F.LedgerEntries()[1].item==a,'Cargo retains accepted writs')
 F.char.realm='Test Realm';F.char.flights={nodes={},edges={}}
 F.writFilter='all';F.Render()
-assert(F.rows[2].reward.text:find('Completed today',1,true),'Completed row needs a written status')
+assert(F.rows[2].status.text=='(Completed today)','Completed marker must follow the name')
+assert(F.rows[3].status.text=='(On Quest)','Active and ready quests share the On Quest marker')
+assert(not F.rows[3].reward.text:find('On Quest',1,true),'Status must not occupy the reward line')
 F.RenderDetail(all[2])
 local found=false
 for _,row in ipairs(F.detailRows)do if row.shown and row.title.text=='Completed today' then found=true end end
 assert(found,'Detail must explain the daily lockout')
 F.ownedButton.scripts.OnClick()
 assert(F.writFilter=='available' and F.ownedButton.text=='Show: Available')
+
+bags[b.id]=1
+assert(F.WritStatus(b.questId)=='bag')
+assert(#F.LedgerEntries()==1,'In Bag writ is still available to accept')
+F.writFilter='all';F.hideCompleted.GetChecked=function()return true end
+F.hideCompleted.scripts.OnClick(F.hideCompleted)
+local visible=F.LedgerEntries()
+assert(F.db.settings.hideCompletedWrits and #visible==2 and visible[1].item==b and visible[2].item==a,
+  'Hide completed must retain In Bag and On Quest in value order')
+assert(visible[1].band==all[1].band,'Checkbox must not recalculate value ratings')
+F.Render();assert(F.rows[1].status.text=='(In Bag)')
+F.tab='Crates';F.Render();assert(not F.hideCompleted.shown,'Writ-only filter must hide on crates')
+F.db.settings.navigator=true;F.UpdateNavigator()
+F.compass.hide.scripts.OnClick()
+assert(F.db.settings.navigator==false and not F.compass.shown,'Hide button must persist compass visibility')
+F.UpdateNavigator();assert(not F.compass.shown,'A refresh must not reopen the compass')
+F.db.settings.navigator=true;F.UpdateNavigator();assert(F.compass.shown,'Existing toggle can restore the compass')
+C_Item.GetItemCount=old.count
+F.db.settings.hideCompletedWrits,F.db.settings.navigator=old.hide,old.navigator
 
 F.char,F.active,F.catalog,F.Price,F.GoodsQuote=old.char,old.active,old.catalog,old.price,old.goods
 F.Now,C_QuestLog,C_DateAndTime,GetQuestResetTime=old.now,old.quest,old.dates,old.reset

@@ -54,8 +54,9 @@ function F.LedgerEntries()
       entry.writStatus=F.WritStatus(item.questId,entry.stop)
       all[#all+1]=entry
       local filter=F.writFilter or (F.onlyOwned and "cargo" or "all")
-      local visible=filter=="all" or (filter=="available" and not entry.writStatus)
+      local visible=filter=="all" or (filter=="available" and (not entry.writStatus or entry.writStatus=="bag"))
         or (filter=="cargo" and (entry.stop or entry.owned>0))
+      if F.db.settings.hideCompletedWrits and entry.writStatus=="completed"then visible=false end
       if match(item.name.." "..item.targetName,query) and visible then
         entries[#entries+1]=entry
       end
@@ -132,18 +133,26 @@ function F.BuildUI()
   edit:SetScript("OnTextChanged",function(self)F.searchText=self:GetText();F.offset=0;F.Render()end)
   local placeholder=S.Text(edit,"Search names or materials…",8,-7,250,"GameFontDisableSmall")
   edit:HookScript("OnTextChanged",function(self)placeholder:SetShown(self:GetText()=="")end)
-  F.search=edit
+  F.search=edit;F.searchPlaceholder=placeholder
   F.routeModeBar=CreateFrame("Frame",nil,w);F.routeModeBar:SetPoint("TOPLEFT",24,-120);F.routeModeBar:SetSize(988,28)
   F.routeModeHint=S.Text(F.routeModeBar,F.routingBetaNotice,0,-7,980,"GameFontHighlightSmall",S.gold)
   F.tierButton=S.Button(F.filters,"Tier: All",308,0,160,function()F.tierIndex=F.tierIndex%#tiers+1;F.offset=0;F.Render()end)
   F.sortButton=S.Button(F.filters,"Sort: Best value",480,0,176,function()F.sortIndex=F.sortIndex%3+1;F.offset=0;F.Render()end)
+  F.hideCompleted=CreateFrame("CheckButton",nil,F.filters,"UICheckButtonTemplate")
+  F.hideCompleted:SetPoint("TOPLEFT",222,0);F.hideCompleted:SetSize(26,26)
+  F.hideCompleted:SetHitRectInsets(0,-218,0,0)
+  local hideLabel=S.Text(F.hideCompleted,"Hide completed today",32,-6,214,"GameFontHighlightSmall",S.gold)
+  hideLabel:SetMaxLines(1)
+  F.hideCompleted:SetScript("OnClick",function(self)
+    F.db.settings.hideCompletedWrits=self:GetChecked()==true;F.offset=0;F.Render()
+  end)
   F.ownedButton=S.Button(F.filters,"Show: All",668,0,166,function()
     if F.tab=="Writs"then
       F.writFilter=({all="available",available="cargo",cargo="all"})[F.writFilter or (F.onlyOwned and "cargo" or "all")]
     else F.onlyOwned=not F.onlyOwned end
     F.offset=0;F.Render()
   end)
-  S.Button(F.filters,"Clear filters",846,0,140,function()F.searchText="";edit:SetText("");F.onlyOwned=false;F.writFilter=nil;F.tierIndex=1;F.offset=0;F.Render()end)
+  S.Button(F.filters,"Clear filters",846,0,140,function()F.searchText="";edit:SetText("");F.onlyOwned=false;F.writFilter=nil;F.db.settings.hideCompletedWrits=false;F.tierIndex=1;F.offset=0;F.Render()end)
   F.stats={}
   for i=1,4 do
     local box=S.Panel(w,24+(i-1)*249,-159,240,50)
@@ -171,6 +180,7 @@ function F.BuildUI()
     row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight","ADD")
     row.icon=S.Icon(row,5,-5,48)
     row.text=S.Text(row,"",64,-8,295,"GameFontNormal",S.gold)
+    row.status=S.Text(row,"",64,-8,0,"GameFontNormal",S.gold);row.status:SetMaxLines(1)
     row.detail=S.Text(row,"",64,-26,295,"GameFontHighlightSmall",S.muted)
     row.text:SetMaxLines(1);row.detail:SetMaxLines(1)
     row.reward=S.Text(row,"",64,-43,295,"GameFontHighlightSmall",S.muted);row.reward:SetMaxLines(1)
@@ -416,6 +426,9 @@ function F.Render()
   S.TextColor(F.stats[3].caption,F.NeedsFlightScan() and S.gold or S.muted)
   if settings then F.trackButton:Hide();F.mapButton:Hide();return end
   F.tierButton:SetShown(F.tab=="Crates");F.tierButton:SetText("Tier: "..(tiers[F.tierIndex or 1] or "All"))
+  F.hideCompleted:SetShown(F.tab=="Writs");F.hideCompleted:SetChecked(F.db.settings.hideCompletedWrits==true)
+  F.search:SetWidth(F.tab=="Writs" and 200 or 278)
+  F.searchPlaceholder:SetWidth(F.tab=="Writs" and 180 or 250)
   F.sortButton:SetText("Sort: "..({"Best value","Lowest total","Name"})[F.sortIndex or 1])
   local filter=F.tab=="Writs" and F.writFilter or nil
   F.ownedButton:SetText(filter and ({all="Show: All",available="Show: Available",cargo="Show: My cargo"})[filter] or F.onlyOwned and "Show: My cargo" or "Show: All")
@@ -441,6 +454,19 @@ function F.Render()
       if S.HighContrast() then row.stripe:SetColorTexture(1,1,1,entry==selected and 1 or 0.3)
       else row.stripe:SetColorTexture(color[1],color[2],color[3],1)end
       row.text:SetText((entry.index and entry.index..". " or "")..short(entry.item.name))
+      local status=entry.writStatus and F.writStatusLabels[entry.writStatus]
+      row.status:SetShown(status~=nil)
+      row.text:SetWidth(295)
+      if status then
+        row.status:SetText("("..status..")")
+        row.status:SetWidth(295)
+        local statusWidth=row.status:GetStringWidth() or (#status+2)*math.max(7,S.MinimumTextSize()*0.55)
+        row.status:SetWidth(statusWidth+2)
+        local nameWidth=row.text:GetStringWidth() or 295
+        row.text:SetWidth(math.max(1,math.min(nameWidth,295-statusWidth-8)))
+        row.status:ClearAllPoints();row.status:SetPoint("LEFT",row.text,"RIGHT",5,0)
+        S.TextColor(row.status,entry.writStatus=="completed" and neutral or S.gold)
+      end
       if F.tab=="Route" then
         S.TextColor(row.reward,S.muted)
         row.cost:SetText(entry.leg and "~"..math.ceil(entry.leg.seconds/60).." min" or "Needs location")
@@ -449,11 +475,9 @@ function F.Render()
       else
         row.cost:SetText((entry.item.questId and "Writ " or "Crate ")..S.Money(entry.purchase and entry.purchase.price).."\nGoods "..S.Money(entry.cost).."\nTotal "..S.Money(entry.total))
         row.detail:SetText(entry.best and entry.best.option.qty.." × "..entry.best.option.name or entry.item.questId and entry.item.qty.." × "..entry.item.targetName or "Price missing / short stock")
-        -- Status comes first so larger text cannot truncate the daily marker.
-        local status=entry.writStatus and (F.writStatusLabels[entry.writStatus].." • ") or ""
-        local value=entry.writStatus=="completed" and "" or " • "..
+        local value=" • "..
           (entry.band and F.valueLabels[entry.band] or entry.fullyPriced and "Stock / value unverified" or "Unpriced")
-        row.reward:SetText(status..(entry.reward or 0)..(F.tab=="Crates" and " favor" or " rep")..value)
+        row.reward:SetText((entry.reward or 0)..(F.tab=="Crates" and " favor" or " rep")..value)
         S.TextColor(row.reward,color)
       end
     end
