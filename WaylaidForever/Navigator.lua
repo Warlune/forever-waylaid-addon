@@ -348,16 +348,23 @@ function F.UpdateCompassPose()
   else c.distance:SetText("—")end
   if F.char.navExpanded then F.DrawTravelRoute(c.map)end
 end
+local outdoorRadius={466.6667,400,333.3333,266.6667,200,133.3333}
+local indoorRadius={300,240,180,120,80,50}
 function F.DrawMinimap()
   local overlay=F.minimapOverlay;if not overlay then return end
-  overlay:SetShown(F.db.settings.minimapRoute)
-  if not F.db.settings.minimapRoute then return end
+  local visible=F.db.settings.minimapRoute and (not Minimap.IsVisible or Minimap:IsVisible())
+  overlay:SetShown(not not visible)
+  if not visible then
+    if overlay.routeSuppressed~=true then F.ClearRouteOverlay(overlay)end
+    overlay.routeSuppressed=true
+    return
+  end
+  overlay.routeSuppressed=nil
   local player=F.Route.Player();if not player then F.ClearRouteOverlay(overlay);return end
   local radius=C_Minimap and C_Minimap.GetViewRadius and C_Minimap.GetViewRadius()
   if not radius or radius<=0 then
-    local outdoor={466.6667,400,333.3333,266.6667,200,133.3333};local indoor={300,240,180,120,80,50}
     local zoom=Minimap:GetZoom();local inside=GetCVar and tonumber(GetCVar("minimapZoom"))~=zoom
-    radius=(inside and indoor or outdoor)[zoom+1] or 200;radius=radius/2
+    radius=(inside and indoorRadius or outdoorRadius)[zoom+1] or 200;radius=radius/2
   end
   local w,h=Minimap:GetWidth(),Minimap:GetHeight();local facing=GetCVar and GetCVar("rotateMinimap")=="1" and GetPlayerFacing() or 0
   local function project(point)

@@ -1,4 +1,11 @@
-# Waylaid Forever 0.14.15 — beta
+# Waylaid Forever 0.14.16 — beta
+
+- Skip route rendering and position queries while the minimap is hidden or route drawing is disabled; release old route references and reuse zoom-radius tables.
+- Avoid repeated tooltip price lookups and duplicate hook registration. Tooltip bookkeeping now uses private weak-key tables instead of fields on shared tooltip frames.
+- Fixed a potential nil-value error when reading profession requirements during an in-progress skill scan.
+- Simulated regression checks passed. Live memory/FPS improvement is not measured; the intermittent food-item blocked-action issue remains unconfirmed. Saved settings, prices and positions are preserved.
+
+## Previous update: Waylaid Forever 0.14.15 — beta
 
 - Opt-in diagnostics now identifies the blocked function and combat-lockdown state instead of reporting only “blocked.” Function arguments and raw error text are excluded.
 - Enabled diagnostics starts before login UI setup. Clarified that errors from before opt-in cannot be recovered.

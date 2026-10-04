@@ -110,6 +110,7 @@ function F.ReadProfessions()
 end
 function F.ProfessionRank(name)
   if not F.professionRanks then F.ReadProfessions()end
+  if not F.professionRanks then return end -- A skill scan can already be in progress.
   if F.professionRanks[name]~=nil then return F.professionRanks[name] end
   if F.professionsComplete and professionIDs[name] then return 0 end
 end

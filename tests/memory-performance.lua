@@ -34,3 +34,18 @@ F.ClearRouteOverlay(overlay)
 assert(#overlay.routeSegments==0 and #overlay.routeStops==0,'Hidden/disabled overlay releases route references')
 F.route,F.guidance=oldRoute,oldGuidance
 print('PASS: reusable route buffers, snapshot isolation, stale-field clearing, removal and disabled-overlay cleanup')
+
+-- Hidden minimaps must not query position or rebuild routes, and must release references.
+do
+  local oldMap,oldOverlay,oldPlayer,oldSetting=Minimap,F.minimapOverlay,F.Route.Player,F.db.settings.minimapRoute
+  local visible=false
+  Minimap={IsVisible=function()return visible end}
+  F.minimapOverlay=overlay;F.db.settings.minimapRoute=true
+  overlay.routeSegments[1]={from=a,to=b};overlay.routeStops[1]={stop=stop}
+  local queries=0;F.Route.Player=function()queries=queries+1;return nil end
+  for i=1,100 do F.DrawMinimap()end
+  assert(queries==0 and #overlay.routeSegments==0 and #overlay.routeStops==0,'Hidden minimap should skip work and release route references')
+  visible=true;F.DrawMinimap();assert(queries==1,'Showing minimap must resume refresh')
+  F.db.settings.minimapRoute=false;F.DrawMinimap();assert(queries==1,'Disabled minimap must skip position queries')
+  Minimap,F.minimapOverlay,F.Route.Player,F.db.settings.minimapRoute=oldMap,oldOverlay,oldPlayer,oldSetting
+end

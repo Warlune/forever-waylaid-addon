@@ -1,12 +1,24 @@
 local _, F = ...
+-- Private weak keys avoid leaving our bookkeeping on Blizzard/other-addon frames.
+local items=setmetatable({},{__mode="k"})
+local clearHooks=setmetatable({},{__mode="k"})
+local itemHooks=setmetatable({},{__mode="k"})
+local processors=setmetatable({},{__mode="k"})
+local function watchClear(tooltip)
+  if not clearHooks[tooltip] and tooltip.HookScript then
+    tooltip:HookScript("OnTooltipCleared",function(self)items[self]=nil end)
+    clearHooks[tooltip]=true
+  end
+end
 local function append(tooltip, id)
   if not F.db or not F.char then return end
+  watchClear(tooltip)
+  if items[tooltip]==id then return end
   local crate, writ = F.cratesByID[id], F.writsByID[id]
   if not F.catalogIDs[id] and (F.db.settings.generalAuctionTooltips==false or F.ShouldHideAuctionExtras()) then return end
   local market=F.Price(id)
   if not crate and not writ and not market then return end
-  if tooltip.fwlItem == id then return end
-  tooltip.fwlItem = id
+  items[tooltip] = id
   local related=F.catalogIDs[id]
   if related then
     tooltip:AddLine(" ")
@@ -49,19 +61,24 @@ local function append(tooltip, id)
 end
 function F.InstallTooltips()
   for _, tooltip in ipairs({GameTooltip, ItemRefTooltip}) do
-    tooltip:HookScript("OnTooltipCleared", function(self) self.fwlItem = nil end)
+    watchClear(tooltip)
   end
-  if TooltipDataProcessor and Enum.TooltipDataType then
+  if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and Enum and Enum.TooltipDataType then
+    if processors[TooltipDataProcessor]then return end
+    processors[TooltipDataProcessor]=true
     TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tooltip, data)
       if data and data.id then append(tooltip, data.id) end
     end)
   else
     for _, tooltip in ipairs({GameTooltip, ItemRefTooltip}) do
+      if not itemHooks[tooltip]then
+      itemHooks[tooltip]=true
       tooltip:HookScript("OnTooltipSetItem", function(self)
         local _, link = self:GetItem()
         local id = link and tonumber(link:match("item:(%d+)"))
         if id then append(self, id) end
       end)
+      end
     end
   end
 end

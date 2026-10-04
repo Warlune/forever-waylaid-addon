@@ -12,9 +12,9 @@ F.char.localPrices={[scope]={}}
 for _,id in ipairs({unrelated,ingredient,crate.id,writ.id,writ.targetId})do
   F.char.localPrices[scope][id]={price=12345,time=900,source='Waylaid Forever',quantity=10000}
 end
-local callback
+local callback,registrations=nil,0
 Enum.TooltipDataType={Item=1}
-TooltipDataProcessor={AddTooltipPostCall=function(_,fn)callback=fn end}
+TooltipDataProcessor={AddTooltipPostCall=function(_,fn)callback=fn;registrations=registrations+1 end}
 F.InstallTooltips()
 local function tip()
   return {lines={},AddLine=function(self,text)self.lines[#self.lines+1]=text end,
@@ -29,7 +29,13 @@ local t=tip();callback(t,{id=unrelated})
 assert(#t.lines==1 and t.lines[1]=='AH buyout (each)='..F.Style.Money(12345),'Unrelated items show only the buyout line with coin icons')
 assert(t.amountColor[1]==1 and t.amountColor[2]==1 and t.amountColor[3]==1,'Tooltip amounts use white numbers')
 assert(text(t):find('UI%-GoldIcon') and text(t):find('UI%-SilverIcon') and text(t):find('UI%-CopperIcon'),'Amounts use all three native coin textures')
-local count=#t.lines;callback(t,{id=unrelated});assert(#t.lines==count,'Repeated processing must not duplicate the price')
+assert(t.fwlItem==nil,'Do not store addon state on shared tooltips')
+local originalPrice=F.Price;local lookups=0
+F.Price=function(...)lookups=lookups+1;return originalPrice(...)end
+local count=#t.lines;callback(t,{id=unrelated});
+assert(lookups==0,'Duplicate callbacks must skip price lookups');F.Price=originalPrice
+F.InstallTooltips();assert(registrations==1,'Repeated install must not duplicate hooks')
+assert(#t.lines==count,'Repeated processing must not duplicate the price')
 GameTooltip.scripts.OnTooltipCleared(t);t.lines={};callback(t,{id=unrelated});assert(#t.lines==count,'Clearing allows the same item to render again')
 for _,addon in ipairs(F.auctionAddons)do
   local scanner=addon[1]

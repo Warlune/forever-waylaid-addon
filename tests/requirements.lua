@@ -16,6 +16,10 @@ C_SkillInfo={
   ExpandSkillHeader=function(i)assert(i==1);open=true end,
   CollapseSkillHeader=function(i)assert(i==1);open=false end,
 }
+local oldReading=F.readingProfessions
+F.readingProfessions=true;F.professionRanks=nil
+assert(F.ProfessionRank('Engineering')==nil,'Concurrent scan must return unknown, not index nil')
+F.readingProfessions=oldReading
 F.ReadProfessions()
 assert(not open,'Profession reading must restore collapsed headers')
 assert(F.ProfessionRank('Engineering')==90 and F.ProfessionRank('Mining')==65)
