@@ -30,6 +30,7 @@ local function receive(msg,sender,channel)
   T.frame.scripts.OnEvent(nil,'CHAT_MSG_ADDON','WFDiag1',msg,channel or 'WHISPER',sender)
 end
 T.Initialize();T.Record('R','unresolved');tick()
+T.frame.scripts.OnEvent(nil,'ADDON_ACTION_BLOCKED','WaylaidForever','UseContainerItem()')
 assert(#sent==0 and not F.db.telemetryOutbox and handler==original,'Default must neither collect nor send')
 T.SetEnabled(true)
 assert(#F.db.telemetryOutbox==1 and handler~=original)
@@ -43,6 +44,7 @@ assert(#errors==2 and #F.db.telemetryOutbox==2,'Forward all errors, collect ours
 assert(not F.db.telemetryOutbox[2].body:find('PRIVATE',1,true),'Never record raw error data')
 T.frame.scripts.OnEvent(nil,'ADDON_ACTION_BLOCKED','WaylaidForever','ProtectedCall')
 assert(#F.db.telemetryOutbox==3)
+assert(T.Parse(F.db.telemetryOutbox[3].body)[18]=='blocked:ProtectedCall:N','Record blocked function and combat state')
 T.Record('S','stopped');assert(#F.db.telemetryOutbox==4)
 tick();local hello=sent[#sent].msg;local token=assert(hello:match('^H|(%d+)$'))
 assert(sent[#sent].target=='Collector One-TestRealm')
@@ -74,6 +76,20 @@ assert(#client.telemetryOutbox==before-1,'ACK did not remove report')
 
 restricted=true;local messages=#sent;tick(3);assert(#sent==messages,'Must respect realm messaging restrictions')
 restricted=false
+local oldCombat=InCombatLockdown
+InCombatLockdown=function()return true end
+T.frame.scripts.OnEvent(nil,'ADDON_ACTION_BLOCKED','WaylaidForever','C_Container.UseContainerItem(0, 4, PRIVATE)')
+assert(T.Parse(client.telemetryOutbox[#client.telemetryOutbox].body)[18]=='blocked:C_Container.UseContainerItem:C')
+assert(not client.telemetryOutbox[#client.telemetryOutbox].body:find('PRIVATE',1,true),'Never send action arguments')
+local pending=#client.telemetryOutbox
+T.frame.scripts.OnEvent(nil,'ADDON_ACTION_BLOCKED','OtherAddon','UseContainerItem()')
+assert(#client.telemetryOutbox==pending,'Only record our blocked actions')
+InCombatLockdown=function()return false end
+T.frame.scripts.OnEvent(nil,'ADDON_ACTION_FORBIDDEN','WaylaidForever','bad | private data')
+assert(T.Parse(client.telemetryOutbox[#client.telemetryOutbox].body)[18]=='forbidden:unknown:N')
+T.frame.scripts.OnEvent(nil,'ADDON_ACTION_BLOCKED','WaylaidForever',nil)
+assert(T.Parse(client.telemetryOutbox[#client.telemetryOutbox].body)[18]=='blocked:unknown:N')
+InCombatLockdown=oldCombat
 T.SetEnabled(false);assert(not client.telemetryOutbox and handler==original)
 receive(ready,'Collector One-TestRealm');tick(600);assert(#sent==messages,'Opt-out must stop sending immediately')
 T.SetEnabled(true)

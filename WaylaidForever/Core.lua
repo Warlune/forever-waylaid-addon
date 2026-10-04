@@ -1,5 +1,5 @@
 local _, F = ...
-F.version = "0.14.14"
+F.version = "0.14.15"
 -- Diagnostic sharing is separate from price sharing and always opt-in.
 F.defaults = { ledgerScale=1, compassScale=1, textSize=0, highContrast=false, reduceMotion=false, cheapest = true, includeCrate = false, allCosts = false, personal = true, flights = true, navigator = true, worldRoute = true, minimapRoute = true, craftGoods = false, peerSharing = false, generalAuctionTooltips = true, autoHideAuction = true }
 F.defaults.telemetry=false
@@ -83,10 +83,10 @@ events:SetScript("OnEvent", function(_, event, name, success,spellID)
     end
     F.char.recipients = F.char.recipients or {}
     F.char.realm = GetRealmName()
+    if F.Telemetry then F.Telemetry.Initialize()end -- Capture before login UI setup.
   elseif event == "PLAYER_LOGIN" then
     F.ReadProfessions(); F.BuildUI(); F.InstallTooltips(); F.InstallMap(); F.BuildNavigator(); F.RegisterAuctionator(); F.Style.ApplyTheme(); F.ApplyAccessibility(); F.Refresh()
     F.InitializePeers()
-    F.Telemetry.Initialize()
     F.VersionCheck.Initialize()
     F.Print("v" .. F.version .. " — /wf to open. Scan AH prices or opt into peer sharing in Settings.")
     if F.NeedsFlightScan()then F.Print("Flight paths not scanned: open a flight master's map to learn your routes. No flight purchase needed; until then, routing uses walking estimates.")end

@@ -1,4 +1,10 @@
-# Waylaid Forever 0.14.14 — beta
+# Waylaid Forever 0.14.15 — beta
+
+- Opt-in diagnostics now identifies the blocked function and combat-lockdown state instead of reporting only “blocked.” Function arguments and raw error text are excluded.
+- Enabled diagnostics starts before login UI setup. Clarified that errors from before opt-in cannot be recovered.
+- Improves investigation of an intermittent blocked action when using food from a bag; the original cause has not yet been reproduced or confirmed fixed.
+
+## Previous update: Waylaid Forever 0.14.14 — beta
 
 - Neatened the compass header: Hide has more room for its label, an inset right-edge anchor, and a matching-height header background. Shortened the heading to COMPASS • BETA and spaced route text below it.
 - Compass position, visibility and map expansion remain saved as before.

@@ -139,7 +139,16 @@ frame:RegisterEvent("CHAT_MSG_ADDON")
 frame:RegisterEvent("ADDON_ACTION_BLOCKED");frame:RegisterEvent("ADDON_ACTION_FORBIDDEN")
 frame:SetScript("OnEvent",function(_,event,p,message,channel,sender)
   if event~="CHAT_MSG_ADDON"then
-    if p=="WaylaidForever" then T.Record("B",event=="ADDON_ACTION_BLOCKED" and "blocked" or "forbidden")end
+    if p=="WaylaidForever" and enabled() then
+      -- Keep only a bounded function identifier, never its arguments or raw text.
+      local action
+      if type(message)=="string" and #message<=256 then
+        action=message:match("^([%a_][%w_.:]*)%(") or message:match("^([%a_][%w_.:]*)$")
+      end
+      if not action or #action>28 then action="unknown"end
+      local combat=InCombatLockdown and InCombatLockdown() and "C" or "N"
+      T.Record("B",(event=="ADDON_ACTION_BLOCKED" and "blocked:" or "forbidden:")..action..":"..combat)
+    end
     return
   end
   if not registered or p~=prefix or channel~="WHISPER" or type(message)~="string" or #message>254
@@ -210,8 +219,8 @@ function F.ShowTelemetry()
     local check=S.Check(panel,"Automatically share diagnostics",22,-60,"telemetry");T.check=check
     check:SetScript("OnClick",function(self)T.SetEnabled(not not self:GetChecked());F.ShowTelemetry()end)
     S.Text(panel,"Help find bugs without writing a report each time. Small reports wait locally and use addon messages to reach the developer.",24,-100,565,"GameFontHighlight")
-    S.Text(panel,"Shares version, faction/class/level, map position, up to 12 writ IDs, route/flight counts, scan outcomes and error file/line. No chat or raw error text. Your character name is visible in transit, but not saved in reports.",24,-154,565,"GameFontHighlight")
-    S.Text(panel,"Off by default. Disable to clear unsent reports. Queue: 40 / 7 days. Inbox: 300 / 14 days. Delivery is not guaranteed.",24,-244,565,"GameFontHighlightSmall",S.muted)
+    S.Text(panel,"Shares version, faction/class/level, map position, up to 12 writ IDs, route/flight counts, scan outcomes, error file/line and blocked function/combat state. No chat or raw error text. Your character name is visible in transit, but not saved in reports.",24,-154,565,"GameFontHighlight")
+    S.Text(panel,"Off by default; earlier errors cannot be recovered. Disable to clear unsent reports. Queue: 40 / 7 days. Inbox: 300 / 14 days. Delivery is not guaranteed.",24,-244,565,"GameFontHighlightSmall",S.muted)
     T.status=S.Text(panel,"",24,-300,565,"GameFontHighlightSmall",S.gold)
     panel:SetHeight(425)
     local edit=CreateFrame("EditBox",nil,panel,"InputBoxTemplate");T.feedbackURL=edit

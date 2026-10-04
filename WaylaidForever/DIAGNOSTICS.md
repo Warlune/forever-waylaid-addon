@@ -1,7 +1,11 @@
 # Optional diagnostics
 
 Settings > Diagnostics (or `/wf diagnostics`) controls this feature. It is off
-by default and independent of price sharing. Enabling it allows small automatic
+by default and independent of price sharing. Errors from before it was enabled cannot be recovered. A reload clears the
+current UI state; an intermittent issue may need the same preceding actions to
+recur. Leave diagnostics enabled while testing to capture the next occurrence.
+
+Enabling it allows small automatic
 reports without writing a chat message or filing a ticket each time.
 
 Version notifications are separate: the addon exchanges its version number
@@ -19,7 +23,10 @@ level, map ID and coordinates, up to 12 active writ quest IDs, route duration,
 whether the planner used a bounded estimate, unresolved-stop count, and counts
 of known flight points and scanned departures. Event types are route summaries,
 scanner completion/stopping, Waylaid blocked actions, and Waylaid Lua error
-file/line references. Stopping a scan is not necessarily an error. Estimated
+file/line references. Blocked-action reports include a bounded function name
+(without arguments) and whether combat lockdown was active (C = combat, N = no
+combat lockdown). The blocked function identifies where the restriction occurred,
+not necessarily where taint began. Stopping a scan is not necessarily an error. Estimated
 routing does not prove that a route was inefficient.
 
 No raw Lua error text, chat, account identifiers, inventory, guild rosters or
