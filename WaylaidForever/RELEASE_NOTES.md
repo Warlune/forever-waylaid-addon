@@ -1,4 +1,10 @@
-# Waylaid Forever 0.14.16 — beta
+# Waylaid Forever 0.14.17 — beta
+
+- Added an Item tooltips dropdown: Show both, Only crates / writs, Only materials, or None. Hide duplicate material prices when another auction addon already shows them.
+- None hides all Waylaid tooltip additions without disabling ledger prices or scanning. Unrelated-item AH prices require Show both and the existing checkbox; auction-addon auto-hide still applies.
+- Existing users default to Show both, preserving their previous tooltip preferences. Settings, saved prices and window positions are preserved.
+
+## Previous update: Waylaid Forever 0.14.16 — beta
 
 - Skip route rendering and position queries while the minimap is hidden or route drawing is disabled; release old route references and reuse zoom-radius tables.
 - Avoid repeated tooltip price lookups and duplicate hook registration. Tooltip bookkeeping now uses private weak-key tables instead of fields on shared tooltip frames.

@@ -33,3 +33,15 @@ C_AddOns,Auctionator,AucAdvanced=oldAddons,oldScanner,oldAuc
 UnitGUID,F.char.localPrices=oldGUID,oldPrices
 F.db.settings.debugAlliance,F.db.settings.autoHideAuction=oldDebug,oldHide
 print('PASS: auction addon registry, disabled installs, helper exclusions, auto-hide and retired Alliance preview')
+
+local oldMode,oldApply=F.db.settings.tooltipMode,F.ApplySettings
+local applies=0;F.ApplySettings=function()applies=applies+1 end
+for i,option in ipairs(F.tooltipModeOptions)do
+ F.tooltipModeButton.scripts.OnClick();assert(F.tooltipMenu.shown)
+ F.tooltipMenu.choices[i].scripts.OnClick()
+ assert(F.db.settings.tooltipMode==option[1] and not F.tooltipMenu.shown,'Selection saves the mode and closes the menu')
+end
+assert(applies==4)
+F.tooltipModeButton.scripts.OnClick();F.tooltipMenu.scripts.OnMouseDown(F.tooltipMenu)
+assert(not F.tooltipMenu.shown,'Outside click closes the menu')
+F.db.settings.tooltipMode,F.ApplySettings=oldMode,oldApply

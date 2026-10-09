@@ -25,6 +25,19 @@ local function tip()
     Show=function()end}
 end
 local function text(t)return table.concat(t.lines,'\n')end
+local oldMode=F.db.settings.tooltipMode
+F.db.settings.tooltipMode="both"
+for _,case in ipairs({{"both",true,true,true,true},{"crates",true,true,false,false},{"materials",false,false,true,false},{"none",false,false,false,false}})do
+  F.db.settings.tooltipMode=case[1]
+  for i,id in ipairs({crate.id,writ.id,ingredient,unrelated})do
+    local sample=tip();callback(sample,{id=id})
+    assert((#sample.lines>0)==case[i+1],case[1]..": wrong tooltip category for "..id)
+  end
+end
+F.db.settings.tooltipMode=nil;assert(F.TooltipMode()=="both",'Existing saves retain both categories')
+F.db.settings.tooltipMode="invalid";assert(F.TooltipMode()=="both",'Unknown saved mode has a safe default')
+F.db.settings.tooltipMode="both"
+
 local t=tip();callback(t,{id=unrelated})
 assert(#t.lines==1 and t.lines[1]=='AH buyout (each)='..F.Style.Money(12345),'Unrelated items show only the buyout line with coin icons')
 assert(t.amountColor[1]==1 and t.amountColor[2]==1 and t.amountColor[3]==1,'Tooltip amounts use white numbers')
@@ -63,6 +76,7 @@ UnitFactionGroup=oldFaction
 TooltipDataProcessor=nil;F.InstallTooltips()
 t=tip();t.GetItem=function()return 'Item','item:'..unrelated end
 GameTooltip.scripts.OnTooltipSetItem(t);assert(text(t):find('AH buyout'))
+F.db.settings.tooltipMode=oldMode
 F.char.localPrices,C_AddOns,F.db.settings.personal=oldPrices,oldAddons,oldPersonal
 F.db.settings.generalAuctionTooltips,F.db.settings.autoHideAuction=oldGeneral,oldHide
 TooltipDataProcessor,Enum.TooltipDataType=oldProcessor,oldType

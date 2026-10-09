@@ -238,6 +238,25 @@ function F.BuildUI()
   S.Check(F.settings,"Consider my learned flight routes",513,-170,"flights")
   S.Check(F.settings,"AH tooltips on unrelated items",23,-200,"generalAuctionTooltips")
   S.Check(F.settings,"Auto-hide extras with another AH addon",23,-230,"autoHideAuction")
+  S.Text(F.settings,"Item tooltips",515,-205,130,"GameFontNormalSmall",S.gold)
+  local tooltipPopup=CreateFrame("Frame","WaylaidForeverTooltipMenu",F.settings)
+  F.tooltipMenu=tooltipPopup;tooltipPopup:SetAllPoints(w);tooltipPopup:SetFrameStrata("DIALOG");tooltipPopup:EnableMouse(true)
+  tooltipPopup:SetScript("OnMouseDown",function(self)self:Hide()end)
+  UISpecialFrames[#UISpecialFrames+1]="WaylaidForeverTooltipMenu"
+  F.settings:HookScript("OnHide",function()tooltipPopup:Hide()end)
+  local tooltipMenu=S.Panel(tooltipPopup,0,0,310,128);tooltipMenu:EnableMouse(true)
+  F.tooltipModeButton=S.Button(F.settings,"",650,-198,308,function()
+    tooltipPopup:SetShown(not tooltipPopup:IsShown())
+  end)
+  tooltipMenu:ClearAllPoints();tooltipMenu:SetPoint("TOPLEFT",F.tooltipModeButton,"BOTTOMLEFT",0,-2)
+  tooltipPopup.choices={}
+  for i,option in ipairs(F.tooltipModeOptions)do
+    local value,label=option[1],option[2]
+    tooltipPopup.choices[i]=S.Button(tooltipMenu,label,6,-6-(i-1)*29,298,function()
+      F.db.settings.tooltipMode=value;tooltipPopup:Hide();F.ApplySettings()
+    end)
+  end
+  tooltipPopup:Hide()
   F.auctionCompatibility=S.Text(F.settings,"",515,-239,440,"GameFontHighlightSmall",S.muted)
   S.Rule(F.settings,25,-268,934)
   local peerToggle=S.Check(F.settings,"Opt in: share scan prices with guild / party / raid",23,-279,"peerSharing")
@@ -256,7 +275,7 @@ function F.BuildUI()
   footer.scribe.art:ClearAllPoints();footer.scribe.art:SetPoint("BOTTOMRIGHT",0,0)
   footer:SetScript("OnUpdate",footer.scribe.animate)
   F.UpdateScanUI()
-  S.Text(F.settings,"Auto-hide affects our Scan tab and unrelated AH tooltips; Waylaid details remain.\nPeer prices are unverified and expire after 24 hours. Sharing sends observed prices, stock and scan times.",25,-354,920,"GameFontHighlightSmall",S.muted)
+  S.Text(F.settings,"Item tooltips controls crates/writs and their materials. Unrelated AH prices require Show both.\nAuto-hide affects our Scan tab and unrelated prices. Peer prices are unverified and expire after 24 hours. Sharing sends observed prices, stock and scan times.",25,-354,920,"GameFontHighlightSmall",S.muted)
   w:EnableMouseWheel(true);w:SetScript("OnMouseWheel",function(_,delta)
     if F.detailPanel:IsMouseOver() and F.tab~="Settings" then F.ScrollDetails(delta);return end
     if F.tab~="Settings" then F.offset=math.max(0,math.min(F.lastPage or 0,(F.offset or 0)-delta*pageSize));F.Render()end
@@ -411,6 +430,8 @@ function F.Render()
   F.craftButton:SetText(F.db.settings.craftGoods and "Goods: Craft" or "Goods: Buy at AH")
   F.status:SetText(F.char.realm.." • "..UnitFactionGroup("player").."\nPersonal scans"..(F.db.settings.peerSharing and " + unverified peer prices" or " • peer sharing off"))
   F.factionTitle:SetText(S.Faction()=="Horde" and "DUROTAR SUPPLY & LOGISTICS  /  FIELD LEDGER" or "AZEROTH COMMERCE AUTHORITY  /  FIELD LEDGER")
+  local _,tooltipLabel=F.TooltipMode()
+  F.tooltipModeButton:SetText(tooltipLabel.."  |TInterface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up:16:16|t")
   local settings=F.tab=="Settings"
   F.settings:SetShown(settings and not F.accessibilityView);F.accessibility:SetShown(settings and F.accessibilityView);F.body:SetShown(not settings);F.detailPanel:SetShown(not settings)
   F.filters:SetShown(F.tab=="Crates" or F.tab=="Writs")

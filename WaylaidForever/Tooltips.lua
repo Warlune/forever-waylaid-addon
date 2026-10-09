@@ -1,4 +1,10 @@
 local _, F = ...
+F.tooltipModeOptions={{"both","Show both"},{"crates","Only crates / writs"},{"materials","Only materials"},{"none","None"}}
+function F.TooltipMode()
+  local mode=F.db.settings.tooltipMode
+  for _,option in ipairs(F.tooltipModeOptions)do if mode==option[1]then return option[1],option[2]end end
+  return "both","Show both"
+end
 -- Private weak keys avoid leaving our bookkeeping on Blizzard/other-addon frames.
 local items=setmetatable({},{__mode="k"})
 local clearHooks=setmetatable({},{__mode="k"})
@@ -12,9 +18,13 @@ local function watchClear(tooltip)
 end
 local function append(tooltip, id)
   if not F.db or not F.char then return end
+  local mode=F.TooltipMode()
+  if mode=="none"then return end
+  local crate, writ = F.cratesByID[id], F.writsByID[id]
+  if mode=="crates" and not (crate or writ)then return end
+  if mode=="materials" and (crate or writ or not F.catalogIDs[id])then return end
   watchClear(tooltip)
   if items[tooltip]==id then return end
-  local crate, writ = F.cratesByID[id], F.writsByID[id]
   if not F.catalogIDs[id] and (F.db.settings.generalAuctionTooltips==false or F.ShouldHideAuctionExtras()) then return end
   local market=F.Price(id)
   if not crate and not writ and not market then return end
