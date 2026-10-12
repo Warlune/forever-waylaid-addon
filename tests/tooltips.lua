@@ -1,6 +1,8 @@
 local F=...
 local oldPrices,oldAddons,oldPersonal=F.char.localPrices,C_AddOns,F.db.settings.personal
 local oldProcessor,oldType=TooltipDataProcessor,Enum.TooltipDataType
+local oldReminder=F.db.settings.crateUseTooltips
+F.db.settings.crateUseTooltips=false
 local oldGeneral,oldHide=F.db.settings.generalAuctionTooltips,F.db.settings.autoHideAuction
 local enabled={Auctionator=0,['Auc-Advanced']=0}
 C_AddOns={GetAddOnEnableState=function(name)return enabled[name]end}
@@ -72,10 +74,31 @@ F.db.settings.personal=true
 local oldFaction=UnitFactionGroup;UnitFactionGroup=function()return 'Alliance'end
 t=tip();callback(t,{id=unrelated});assert(#t.lines==0,'Other-faction prices cannot leak into tooltips')
 UnitFactionGroup=oldFaction
+-- Direct crate uses must work without scans, independently of price visibility.
+F.db.settings.crateUseTooltips=true;F.db.settings.tooltipMode="none"
+local fill=crate.options[1]
+local reminder=tip();callback(reminder,{id=fill.itemId})
+assert(text(reminder):find('Used to fill a Waylaid supply crate',1,true))
+assert(text(reminder):find(fill.qty..' needed',1,true) and text(reminder):find(crate.name:gsub("^Waylaid Crate: ",""),1,true))
+assert(not text(reminder):find('AH buyout',1,true),'None hides prices, not the independent reminder')
+local n=#reminder.lines;callback(reminder,{id=fill.itemId});assert(#reminder.lines==n)
+local prices=F.char.localPrices;F.char.localPrices={}
+reminder=tip();callback(reminder,{id=fill.itemId});assert(#reminder.lines>0,'Reminders need no auction scan')
+reminder=tip();callback(reminder,{id=unrelated});assert(#reminder.lines==0,'Unrelated items are never crate goods')
+for _,candidate in ipairs(F.catalog.crates)do
+ for _,option in ipairs(candidate.options)do
+  reminder=tip();callback(reminder,{id=option.itemId})
+  assert(text(reminder):find(candidate.name:gsub("^Waylaid Crate: ",""),1,true) and text(reminder):find(option.qty..' needed',1,true))
+ end
+end
+F.db.settings.crateUseTooltips=false
+reminder=tip();callback(reminder,{id=fill.itemId});assert(#reminder.lines==0,'Both controls off must hide everything')
+F.char.localPrices=prices;F.db.settings.tooltipMode="both"
 -- Also exercise the legacy item-link hook used on clients without the processor.
 TooltipDataProcessor=nil;F.InstallTooltips()
 t=tip();t.GetItem=function()return 'Item','item:'..unrelated end
 GameTooltip.scripts.OnTooltipSetItem(t);assert(text(t):find('AH buyout'))
+F.db.settings.crateUseTooltips=oldReminder
 F.db.settings.tooltipMode=oldMode
 F.char.localPrices,C_AddOns,F.db.settings.personal=oldPrices,oldAddons,oldPersonal
 F.db.settings.generalAuctionTooltips,F.db.settings.autoHideAuction=oldGeneral,oldHide

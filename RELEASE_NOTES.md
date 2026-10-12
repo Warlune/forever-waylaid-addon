@@ -1,4 +1,10 @@
-# Waylaid Forever 0.14.17 — beta
+# Waylaid Forever 0.14.18 — beta
+
+- Items accepted as crate fill now show a reminder listing each accepting crate and the quantity needed, even without auction prices. Only direct fill items are marked.
+- Added Show crate-use reminders on items in Settings, enabled by default. It works independently of the Item tooltips dropdown, including None. Disable the checkbox too to hide all Waylaid tooltip additions.
+- Existing prices, settings and window positions are preserved. Crates still require only one accepted bundle.
+
+## Previous update: Waylaid Forever 0.14.17 — beta
 
 - Added an Item tooltips dropdown: Show both, Only crates / writs, Only materials, or None. Hide duplicate material prices when another auction addon already shows them.
 - None hides all Waylaid tooltip additions without disabling ledger prices or scanning. Unrelated-item AH prices require Show both and the existing checkbox; auction-addon auto-hide still applies.

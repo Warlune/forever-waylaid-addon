@@ -5,6 +5,14 @@ function F.TooltipMode()
   for _,option in ipairs(F.tooltipModeOptions)do if mode==option[1]then return option[1],option[2]end end
   return "both","Show both"
 end
+-- Index direct fill bundles once; crafting ingredients are not automatically crate goods.
+local crateUses={}
+for _,crate in ipairs(F.catalog.crates)do
+  for _,option in ipairs(crate.options)do
+    local uses=crateUses[option.itemId] or {};crateUses[option.itemId]=uses
+    uses[#uses+1]={name=crate.name,qty=option.qty}
+  end
+end
 -- Private weak keys avoid leaving our bookkeeping on Blizzard/other-addon frames.
 local items=setmetatable({},{__mode="k"})
 local clearHooks=setmetatable({},{__mode="k"})
@@ -18,22 +26,31 @@ local function watchClear(tooltip)
 end
 local function append(tooltip, id)
   if not F.db or not F.char then return end
-  local mode=F.TooltipMode()
-  if mode=="none"then return end
-  local crate, writ = F.cratesByID[id], F.writsByID[id]
-  if mode=="crates" and not (crate or writ)then return end
-  if mode=="materials" and (crate or writ or not F.catalogIDs[id])then return end
   watchClear(tooltip)
   if items[tooltip]==id then return end
-  if not F.catalogIDs[id] and (F.db.settings.generalAuctionTooltips==false or F.ShouldHideAuctionExtras()) then return end
-  local market=F.Price(id)
-  if not crate and not writ and not market then return end
-  items[tooltip] = id
+  local uses=F.db.settings.crateUseTooltips~=false and crateUses[id]
+  local mode=F.TooltipMode()
+  local crate,writ=F.cratesByID[id],F.writsByID[id]
   local related=F.catalogIDs[id]
-  if related then
+  local details=mode~="none"
+    and (mode~="crates" or crate or writ)
+    and (mode~="materials" or (not crate and not writ and related))
+    and (related or (F.db.settings.generalAuctionTooltips~=false and not F.ShouldHideAuctionExtras()))
+  local market=details and F.Price(id)
+  if not uses and not (details and (crate or writ or market))then return end
+  items[tooltip]=id
+  if related or uses then
     tooltip:AddLine(" ")
-    tooltip:AddLine("Waylaid Forever", 0.87, 0.74, 0.39)
+    tooltip:AddLine("Waylaid Forever",0.87,0.74,0.39)
   end
+  if uses then
+    tooltip:AddLine("Used to fill a Waylaid supply crate",0.45,1,0.6)
+    for _,use in ipairs(uses)do
+      tooltip:AddDoubleLine(use.name:gsub("^Waylaid Crate: ",""),use.qty.." needed",1,1,1,1,1,1)
+    end
+    tooltip:AddLine("One accepted bundle fills a crate.",0.8,0.8,0.8)
+  end
+  if not details or (not crate and not writ and not market)then tooltip:Show();return end
   if market then
     tooltip:AddDoubleLine("AH buyout (each)",F.Style.Money(market.price),1,1,1,1,1,1)
     if related then tooltip:AddLine(market.source.." · "..F.Style.Age(market.time),0.65,0.65,0.65)end
