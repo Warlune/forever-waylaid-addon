@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-11-04",
+  "publishedBuild": "1.60.1.70755",
+  "sourceGeneratedAt": "2026-11-03 18:52 UTC",
+  "source": "https://daybreakforever.com/static/forever/datamine.json",
+  "results": {
+    "crates": {
+      "localCount": 30,
+      "publishedCount": 30,
+      "added": [],
+      "missing": [],
+      "changes": []
+    },
+    "writs": {
+      "localCount": 150,
+      "publishedCount": 150,
+      "added": [],
+      "missing": [],
+      "changes": []
+    }
+  },
+  "limitations": [
+    "Wowhead quest list returned HTTP 403; quest IDs, quantities and reputation rewards could not be revalidated against a fresh quest source.",
+    "Server-side crate rewards and live transport behavior still need in-game verification."
+  ]
+}

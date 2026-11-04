@@ -1,8 +1,9 @@
+local savedLegacyCharacter=ForeverWaylaidCharDB
 local F=...
 local oldDB,oldChar,oldLegacy,oldLoader,oldAPI=WaylaidForeverDB,WaylaidForeverCharDB,ForeverWaylaidDB,WaylaidForeverLegacyLoader,C_AddOns
 local oldCommand=SlashCmdList.WAYLAIDFOREVER
 local account={settings={ledgerScale=.85,compassScale=1.3,textSize=16,highContrast=true,reduceMotion=true,
-  personal=false,navigator=false,worldRoute=false,telemetry=false,hideCompletedWrits=true,debugAlliance=true},notifiedUpdateVersion='0.14.9'}
+  personal=false,navigator=false,worldRoute=false,telemetry=false,hideCompletedWrits=true,tooltipMode="none",crateUseTooltips=false,debugAlliance=true},notifiedUpdateVersion='0.14.9'}
 local character={ledgerPosition={point='TOPLEFT',relativePoint='TOPLEFT',x=120,y=-90},
   navPosition={point='RIGHT',x=-73,y=41},minimapAngle=144,navExpanded=true,
   flights={nodes={[1]={name='My flight'}},edges={[1]={}}},pins={[123]={mapID=1411,x=.3,y=.4}},
@@ -16,6 +17,7 @@ assert(account.settings.ledgerScale==.85 and account.settings.compassScale==1.3 
 assert(account.settings.hideCompletedWrits==true,'Saved completed-writ filter must survive upgrades')
 assert(account.settings.highContrast and account.settings.reduceMotion and not account.settings.personal and not account.settings.navigator)
 assert(not account.settings.worldRoute and account.settings.telemetry==false and account.notifiedUpdateVersion=='0.14.9')
+assert(account.settings.tooltipMode=='none' and account.settings.crateUseTooltips==false,'Preserve independent tooltip choices')
 assert(account.settings.debugAlliance==nil,'Retired preview must be removed')
 assert(character.navPosition.x==-73 and character.minimapAngle==144 and character.navExpanded)
 assert(character.flights.nodes[1].name=='My flight' and character.pins[123].x==.3 and character.localPrices.market[2840].price==13)
@@ -28,6 +30,17 @@ F.RestoreLedgerPosition(frame);assert(got[1]=='TOPLEFT' and got[4]==120 and got[
 F.SaveLedgerPosition(frame);F.RestoreLedgerPosition(frame)
 assert(got[1]=='BOTTOMRIGHT' and got[4]==-65 and got[5]==82,'Ledger position not saved/restored')
 F.char=oldFChar
+-- Fresh install starts empty and repeated loads preserve the initialized tables.
+WaylaidForeverDB=nil;WaylaidForeverCharDB=nil;ForeverWaylaidDB=nil;ForeverWaylaidCharDB=nil
+local fresh={};assert(loadfile('WaylaidForever/Core.lua'))('WaylaidForever',fresh)
+fresh.events.scripts.OnEvent(nil,'ADDON_LOADED','WaylaidForever')
+assert(fresh.db.settings.telemetry==false and fresh.db.settings.tooltipMode=='both' and fresh.db.settings.crateUseTooltips==true)
+assert(next(fresh.char.flights.nodes)==nil and next(fresh.char.localPrices)==nil)
+local freshAccount,freshChar=fresh.db,fresh.char
+fresh.events.scripts.OnEvent(nil,'ADDON_LOADED','WaylaidForever')
+assert(fresh.db==freshAccount and fresh.char==freshChar)
 WaylaidForeverDB,WaylaidForeverCharDB,ForeverWaylaidDB,WaylaidForeverLegacyLoader,C_AddOns=oldDB,oldChar,oldLegacy,oldLoader,oldAPI
 SlashCmdList.WAYLAIDFOREVER=oldCommand
 print('PASS: upgrades preserve saved data, explicit false settings, accessibility, compass/minimap positions and ledger drag position')
+
+ForeverWaylaidCharDB=savedLegacyCharacter

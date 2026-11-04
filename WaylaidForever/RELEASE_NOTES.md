@@ -1,4 +1,11 @@
-# Waylaid Forever 0.14.18 — beta
+# Waylaid Forever 0.14.19 — launch preparation (beta)
+
+- Rechecked published item data: all 30 crates and 150 writs still match, including crate bundle quantities. No catalogue or routing changes.
+- Removed the retired Horde beta diagnostic receiver. Launch receiver will be War Lune on Alliance; automatic reporting is paused until the exact launch realm/ruleset is confirmed. Opt-in preferences remain saved.
+- Added fresh-install and tooltip-setting preservation checks. Saved prices, flight paths and window positions are preserved.
+- Routing remains beta. Live launch compatibility, quest rewards, transport timings and the intermittent bag-item warning remain unverified.
+
+## Previous update: Waylaid Forever 0.14.18 — beta
 
 - Items accepted as crate fill now show a reminder listing each accepting crate and the quantity needed, even without auction prices. Only direct fill items are marked.
 - Added Show crate-use reminders on items in Settings, enabled by default. It works independently of the Item tooltips dropdown, including None. Disable the checkbox too to hide all Waylaid tooltip additions.

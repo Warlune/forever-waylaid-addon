@@ -14,9 +14,11 @@ The last notified version is saved across reloads. This does not enable telemetr
 or send diagnostics. A version seen on another player is not proof that a file
 is published on CurseForge; the notice asks you to check for an update.
 
-The current receiver is **War Lune, Horde, Classic Beta PvP 2**. The receiver
-list is in Telemetry.lua and must be reviewed before launch. There is currently
-no Alliance or other-realm receiver; those characters collect no reports.
+The intended launch receiver is **War Lune, Alliance**. The exact launch
+realm/ruleset identifier has not been confirmed, so the receiver list is empty
+and automatic collection/delivery is paused. The retired Horde beta destination
+has been removed. Existing diagnostic preferences are preserved. Once the exact
+identifier is confirmed, the receiver list in Telemetry.lua can be updated.
 
 Reports include the addon version, game build, report time, faction, class,
 level, map ID and coordinates, up to 12 active writ quest IDs, route duration,

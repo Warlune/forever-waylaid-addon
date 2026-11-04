@@ -1,8 +1,9 @@
 local _,F=...
 local T={};F.Telemetry=T
 -- Explicit developer destinations, never discovered from another player's packet.
--- Beta destination confirmed by the developer; review before launch.
-T.collectors={{name="War Lune",realm="Classic Beta PvP 2",faction="Horde"}}
+-- Launch receiver: War Lune, Alliance. Exact launch realm/ruleset is pending.
+-- Do not keep sending to the retired Horde beta destination or guess a realm.
+T.collectors={}
 local prefix="WFDiag1"
 local frame=CreateFrame("Frame");T.frame=frame
 local registered,previousHandler,errorHandler
